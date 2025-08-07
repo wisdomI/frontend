@@ -2,33 +2,14 @@
 
 A comprehensive platform connecting clients with event vendors for seamless event planning and booking.
 
-## Features
-
-- **Vendor Discovery**: Browse and search for event vendors by category, location, and price
-- **User Authentication**: Secure login/registration with Google OAuth and email/password
-- **Role-based Dashboards**: Separate interfaces for clients, vendors, and administrators
-- **Booking System**: Complete booking flow with calendar integration and payment tracking
-- **Real-time Chat**: In-app messaging between clients and vendors
-- **Service Requests**: Clients can post service requirements for vendors to respond to
-- **Portfolio Management**: Vendors can showcase their work with image galleries
-- **Review System**: Client feedback and rating system for vendors
-
-## Tech Stack
-
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS
-- **Authentication**: Firebase Auth
-- **State Management**: React Hooks
-- **API Integration**: Axios
-- **Development**: ESLint, Prettier
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ 
-- npm or yarn
-- Firebase project (for authentication)
+- npm 
+
 
 ### Installation
 
