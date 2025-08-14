@@ -36,6 +36,7 @@ module.exports = {
         'event-blue': '#032D71',
         'event-blue-hover': 'rgba(3, 45, 113, 0.8)',
         'event-blue-light': 'rgba(3, 45, 113, 0.1)',
+        'light-gray': '#4C4C4C',
       },
       fontFamily: {
         sans: ['Raleway', 'sans-serif'],
