@@ -6,9 +6,9 @@ import VendorCard from "../ui/modal/VendorsCard";
 import { services } from "@/data/services";
 
 const RecentlyViewed = () => {
-  const allServices = services; // Using mock data for demo
-  const [visibleCount, setVisibleCount] = useState(4); // Start with 4 items
-  const maxLoadPerClick = 10; // Maximum items to load per "See more" click
+  const allServices = services; 
+  const [visibleCount, setVisibleCount] = useState(4); 
+  const maxLoadPerClick = 10; 
 
   const handleSeeMore = () => {
     const newCount = visibleCount + maxLoadPerClick;
@@ -16,7 +16,7 @@ const RecentlyViewed = () => {
   };
 
   const handleSeeLess = () => {
-    setVisibleCount(4); // Collapse back to initial 4 items
+    setVisibleCount(4);
   };
 
   const recentServices = allServices.slice(0, visibleCount);
