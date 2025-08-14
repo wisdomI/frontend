@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import Link from 'next/link'
-import VendorCard from '@/components/ui/modals/VendorsCard'
+import VendorCard from '@/components/ui/modal/VendorsCard'
 import NotificationContainer from '@/components/ui/NotificationContainer'
 import NotificationBreadcrumbWrapper from '@/components/ui/NotificationBreadcrumbWrapper'
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext'
@@ -62,6 +62,17 @@ const mockVendors = [
     reviews: 20,
     location: 'Victoria Island, Lagos',
   },
+  {
+    verified: true,
+    image: 'https://via.placeholder.com/300x200?text=Cakes+3',
+    title: 'Book us for all types of Event Cakes',
+    vendorName: 'UK Cakes & Cream',
+    rating: 4,
+    reviews: 20,
+    location: 'Victoria Island, Lagos',
+  },
+  
+
 ]
 
 export default function VendorsPage() {
