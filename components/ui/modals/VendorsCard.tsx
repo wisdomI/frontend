@@ -1,29 +1,33 @@
+'use client'
+import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import React from 'react'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 import { BsHeart } from 'react-icons/bs'
 import { HiShare } from 'react-icons/hi2'
 import { HiOutlineLocationMarker } from 'react-icons/hi'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
-
+import vendorImage from '../../../../frontend/public/images/vendor-img1.jpg'
+import vendorImage2 from '../../../../frontend/public/images/vendor-img2.jpg'
 
 type VendorCardProps = {
   verified: boolean
-  image: string
   title: string
   vendorName: string
   rating: number
   reviews: number
   location: string
+  view?: string
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({
   verified,
-  image,
   title,
   vendorName,
   rating,
   reviews,
   location,
+  view
 }) => {
   const renderStars = () => {
     return Array.from({ length: 5 }, (_, i) =>
@@ -35,10 +39,45 @@ const VendorCard: React.FC<VendorCardProps> = ({
     )
   }
 
+  const [current, setCurrent] = useState(0)
+  const images = [vendorImage, vendorImage2, vendorImage] 
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent(prev => (prev + 1) % images.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [images.length])
+
   return (
-    <div className="bg-white shadow-md rounded-xl overflow-hidden w-72">
-      <div className="relative">
-        <img src={image} alt={title} className="w-full h-48 object-cover" />
+    <div
+      className={`bg-white shadow-md rounded-2xl ${view === 'grid' ? 'w-72' : 'w-full flex justify-start p-6 pr-2'}`}
+    >
+      <div
+        className={`relative ${view === 'grid' ? 'w-full' : 'w-[35%]'}`}
+      >
+        <div
+          className={`relative h-48 ${view === 'grid' ? 'w-full' : 'w-[100%]'}`}
+        >
+          <Image
+            src={images[current]}
+            alt={title}
+            fill
+            className={`object-cover ${view === 'grid' ? 'rounded-t-2xl' : 'rounded-t-2xl'}`}
+            priority
+          />
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+            {images.map((_, index) => (
+              <span
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  current === index ? 'bg-event-blue' : 'bg-white'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
         {verified && (
           <div className="absolute top-2 left-2 flex items-center gap-1 bg-event-blue text-white text-xs px-6 py-1 rounded-md">
             <svg
@@ -69,13 +108,13 @@ const VendorCard: React.FC<VendorCardProps> = ({
                 stroke-linejoin="round"
               />
             </svg>
-            Verified ID
+            Verified
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-2 p-4">
-        <div className="flex gap-2 items-center justify-between">
+      <div className="flex flex-col gap-3 p-4 w-full">
+        <div className={`flex gap-2 items-center ${view === "grid" ? "justify-between" : "justify-start"}`}>
           <h3 className="text-lg font-bold">{title}</h3>
           <svg
             width="24"
