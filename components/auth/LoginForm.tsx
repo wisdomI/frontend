@@ -3,11 +3,12 @@
 import React, { useState } from 'react'
 import { signInWithEmail } from '@/lib/auth'
 import { useApp } from '@/contexts/AppContext'
-
+import ForgetPasswordModal from './ForgetPasswordModal'
 export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const { addNotification } = useApp()
   
+  const [openForgetPasswordModal, setOpenForgetPasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -101,7 +102,13 @@ export default function LoginForm() {
         </div>
 
         <div className="text-sm">
-          <a href="#" className="font-medium text-event-blue hover:opacity-80 transition-all">
+          <a href="#" className="font-medium text-event-blue hover:opacity-80 transition-all"
+          
+          onClick={(e) => {
+            e.preventDefault();
+            setOpenForgetPasswordModal(true);
+          }}
+          >
             Forgot your password?
           </a>
         </div>
@@ -120,6 +127,10 @@ export default function LoginForm() {
           )}
         </button>
       </div>
+      <ForgetPasswordModal
+          open={openForgetPasswordModal}
+          onClose={() => setOpenForgetPasswordModal(false)}
+        />
     </form>
   )
 }

@@ -1,6 +1,12 @@
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
+
+"use client"
+import React, { useState } from "react";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import ForgetPasswordModal from "@/components/auth/ForgetPasswordModal";
 
 export default function RegisterPage() {
+ 
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8">
@@ -9,10 +15,10 @@ export default function RegisterPage() {
             Create your account
           </h2>
         </div>
-        
+
         <div className="mt-8 space-y-6">
           <GoogleSignInButton />
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -21,7 +27,7 @@ export default function RegisterPage() {
               <span className="px-2 bg-gray-50 text-gray-500">Or register with</span>
             </div>
           </div>
-          
+
           <form className="space-y-6">
             <div>
               <label htmlFor="name" className="sr-only">Full Name</label>
@@ -78,14 +84,20 @@ export default function RegisterPage() {
               </button>
             </div>
           </form>
-          
+
           <div className="text-center">
-            <a href="/auth/login" className="text-event-blue hover:opacity-80 transition-all">
+            <a
+              href="#"
+             
+              className="text-event-blue hover:opacity-80 transition-all"
+            >
               Already have an account? Sign in
             </a>
           </div>
         </div>
+
+       
       </div>
     </div>
-  )
+  );
 }

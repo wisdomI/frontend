@@ -165,7 +165,7 @@ const Sidebar: React.FC = () => {
       style={{ minHeight: 'calc(100vh - 2rem)' }}
     >
       <nav className="flex-1">
-        <h2 className="text-lg font-semibold mb-4 text-center text-yellow-400">Category</h2>
+        <h2 className="text-lg font-semibold mb-4 text-center text-white ">Category</h2>
         <ul>
           {menuItems.map((item) => (
             <li key={item.label} className="mb-1">
