@@ -12,13 +12,13 @@ const ForgetPasswordModal: React.FC<{ open: boolean; onClose: () => void }> = ({
   useEffect(() => {
     if (open) {
       setEmail("");
-      setShowOtpModal(false); // Reset SuccessModal state when modal opens
+      setShowOtpModal(false); 
     }
   }, [open]);
 
   const handleSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
-    setShowOtpModal(true); // Open the OTP verification modal
+    setShowOtpModal(true);
     onClose(); // Close the current modal
   };
 
@@ -26,7 +26,7 @@ const ForgetPasswordModal: React.FC<{ open: boolean; onClose: () => void }> = ({
     <>
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
           onClick={onClose}
         >
           <div

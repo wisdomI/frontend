@@ -146,7 +146,7 @@ export default function PostServiceModal() {
                      onChange={(e) => handleInputChange("eventType", e.target.value)}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                    >
-                     <option value="">Select ▼</option>
+                     <option value="">Select </option>
                      <option value="wedding">Wedding</option>
                      <option value="birthday">Birthday</option>
                      <option value="corporate">Corporate</option>
@@ -195,7 +195,7 @@ export default function PostServiceModal() {
                     onChange={(e) => handleInputChange("eventLocation", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
-                    <option value="">Select State ▼</option>
+                    <option value="">Select State </option>
                     <option value="lagos">Lagos</option>
                     <option value="abuja">Abuja</option>
                     <option value="rivers">Rivers</option>
@@ -215,7 +215,7 @@ export default function PostServiceModal() {
                     onChange={(e) => handleInputChange("eventCity", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
-                    <option value="">Select City ▼</option>
+                    <option value="">Select City </option>
                     <option value="lagos-island">Lagos Island</option>
                     <option value="victoria-island">Victoria Island</option>
                     <option value="ikeja">Ikeja</option>
@@ -232,7 +232,7 @@ export default function PostServiceModal() {
                     onChange={(e) => handleInputChange("servicesNeeded", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
-                    <option value="">Select Services ▼</option>
+                    <option value="">Select Services </option>
                     <option value="catering">Catering</option>
                     <option value="photography">Photography</option>
                     <option value="venue">Venue</option>
@@ -338,7 +338,7 @@ export default function PostServiceModal() {
                     onChange={(e) => handleInputChange("eventPlanner", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
-                    <option value="no">No ▼</option>
+                    <option value="no">No </option>
                     <option value="yes">Yes</option>
                   </select>
                 </div>
@@ -353,7 +353,7 @@ export default function PostServiceModal() {
                     onChange={(e) => handleInputChange("selectedPlanner", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
-                    <option value="">Select Event Planner ▼</option>
+                    <option value="">Select Event Planner </option>
                     <option value="habeeb">Habeeb Event Planner</option>
                     <option value="other">Other Planner</option>
                   </select>

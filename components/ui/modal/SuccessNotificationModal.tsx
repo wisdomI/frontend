@@ -21,9 +21,9 @@ export default function SuccessModal({ isOpen, onClose }: { isOpen: boolean; onC
                <FaCheck className="text-white text-4xl sm:text-6xl font-bold" />
              </div>
                          {/* Success icons */}
-             <FaStar className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 text-yellow-400 text-lg sm:text-xl" />
-             <FaHeart className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 text-yellow-400 text-lg sm:text-xl" />
-             <FaGift className="absolute top-1/2 -right-4 sm:-right-6 transform -translate-y-1/2 text-yellow-400 text-lg sm:text-xl" />
+             {/* <FaStar className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 text-yellow-400 text-lg sm:text-xl" />
+             <FaHeart className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 text-yellow-400 text-lg sm:text-xl" /> */}
+             <FaGift className="absolute top-1/2 -right-4 sm:-right-6 transform -translate-y-1/2 text-yellow-400 text-sm sm:text-xl" />
           </div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-700">Service Post Successful</h2>
           <p className="text-sm sm:text-base text-gray-500">Your Service Request has been posted successfully</p>

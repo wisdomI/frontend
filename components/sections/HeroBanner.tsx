@@ -14,7 +14,7 @@ const HeroBanner = () => {
     autoplay: true,
     autoplaySpeed: 3000,
     
-    customPaging: (i) => (
+    customPaging: (i: number) => (
       <div className="w-2 h-2 rounded-full bg-blue-900 transition-all duration-300"></div>
     ),
     responsive: [
