@@ -39,6 +39,7 @@ module.exports = {
         'light-gray': '#4C4C4C',
       },
       fontFamily: {
+        asul: ['Asul', 'serif'],
         sans: ['Raleway', 'sans-serif'],
       },
       animation: {
