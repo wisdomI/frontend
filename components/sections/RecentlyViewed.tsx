@@ -7,7 +7,7 @@ import { services } from "@/data/services";
 
 const RecentlyViewed = () => {
   const allServices = services; 
-  const [visibleCount, setVisibleCount] = useState(4); 
+  const [visibleCount, setVisibleCount] = useState(3); 
   const maxLoadPerClick = 10; 
 
   const handleSeeMore = () => {
@@ -43,13 +43,13 @@ const RecentlyViewed = () => {
   */
 
   return (
-    <section className="mb-8 mt-8 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Recently Viewed</h3>
+    <section className="mb-8 mt-8   bg-gradient-bl from-white to-blue-300">
+      <div className="flex justify-between w-full  mb-4  transition-shadow duration-300">
+        <h3 className="text-[32px] font-semibold font-heading  text-gray-600 ">Recently Viewed</h3>
         {visibleCount < allServices.length && (
           <button
             onClick={handleSeeMore}
-            className="text-sm text-blue-900 hover:underline focus:outline-none"
+            className=" md:ml-12 md:text-md text-gray-600 font-heading font-semibold  hover:underline focus:outline-none "
           >
             See more
           </button>
@@ -57,13 +57,13 @@ const RecentlyViewed = () => {
         {visibleCount > 4 && (
           <button
             onClick={handleSeeLess}
-            className="text-sm text-blue-900 hover:underline focus:outline-none ml-4"
+            className="md:text-md text-gray-600 hover:underline focus:outline-none ml-4 font-bold"
           >
             See less
           </button>
         )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-16">
         {recentServices.map((service, index) => (
           <VendorCard
             key={index}
@@ -72,7 +72,7 @@ const RecentlyViewed = () => {
             title={service.title || "Vendor Title"}
             vendorName={service.vendorName || "Vendor Name"}
             rating={service.rating || 4.5}
-            reviews={service.reviews || []}
+            reviews={typeof service.reviews === "number" ? service.reviews : 0}
             location={service.location || "Location"}
           />
         ))}

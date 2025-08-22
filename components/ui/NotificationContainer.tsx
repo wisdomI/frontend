@@ -8,7 +8,7 @@ export default function NotificationContainer() {
   if (state.notifications.length === 0) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className=" containeer fixed top-4 right-4 z-50 space-y-5">
       {state.notifications.map((notification) => (
         <div
           key={notification.id}
@@ -37,12 +37,12 @@ export default function NotificationContainer() {
                   </svg>
                 )}
                 {notification.type === 'info' && (
-                  <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-[#d3e7ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 )}
               </div>
-              <div className="ml-3 w-0 flex-1 pt-0.5">
+              <div className="ml-4 w-0 flex-1 pt-0.5">
                 <p className="text-sm font-medium text-gray-900">
                   {notification.message}
                 </p>

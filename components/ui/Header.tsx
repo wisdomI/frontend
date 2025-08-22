@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-
+import Image from 'next/image'
+import Logo from '@/public/images/primary-logo.png'
 const locations = [
   'New York, NY',
   'Los Angeles, CA',
@@ -17,6 +18,9 @@ const locations = [
   'Jacksonville, FL',
   'Fort Worth, TX',
   'Columbus, OH',
+'Nigeria , Lagos',
+  'Charlotte, NC',
+  'Detroit, MI',
   'Charlotte, NC',
   'San Francisco, CA',
   'Indianapolis, IN',
@@ -25,10 +29,12 @@ const locations = [
   'Washington, DC'
 ]
 
+
+
 export default function Header() {
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState('Location')
+  const [selectedLocation, setSelectedLocation] = useState('Select Location')
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleLocationSelect = (location: string) => {
@@ -42,28 +48,32 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-[#fff] shadow-sm border-b">
       <div className="container mx-auto px-4">
         {/* Desktop Header */}
-        <div className="hidden lg:flex items-center justify-between h-20">
+        <div className="hidden lg:flex items-center justify-between h-20 bg-white">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
             <a href="/" className="text-2xl font-bold text-event-blue">
-              EventHub
+              <Image src={Logo}
+              alt="logo image "
+              width={200}
+              height={200}
+              />
             </a>
           </div>
           
           {/* Center Section - Location Dropdown and Search */}
-          <div className="flex items-center space-x-0 flex-1 max-w-3xl mx-12">
+          <div className="flex items-center font-sans  space-x-0 flex-1 max-w-3xl mx-12">
             {/* Location Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
                 className="bg-event-blue text-white px-6 py-3 rounded-l-lg hover:bg-event-blue-hover transition-colors flex items-center space-x-3 h-12 min-w-[140px] justify-between"
               >
-                <span className="text-sm font-medium truncate">{selectedLocation}</span>
+                <span className="text-sm font-medium truncate font-sans ">{selectedLocation}</span>
                 <svg 
-                  className={`w-4 h-4 transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`w-4 h-4  transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -87,7 +97,7 @@ export default function Header() {
                       <button
                         key={location}
                         onClick={() => handleLocationSelect(location)}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-event-blue transition-colors"
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-100 hover:text-event-blue transition-colors"
                       >
                         {location}
                       </button>
@@ -98,13 +108,13 @@ export default function Header() {
             </div>
             
             {/* Search Form */}
-            <form onSubmit={handleSearch} className="flex flex-1">
+            <form onSubmit={handleSearch} className="flex flex-1 font-sans ">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for Services, Providers"
-                className="flex-1 px-5 py-3 border-t border-b border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-event-blue h-12"
+                placeholder="Search for Services, Vendors"
+                className="flex-1 px-5 py-3 border-t border-b  font-sans font-medium   border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-event-blue h-12"
               />
               <button
                 type="submit"
@@ -113,7 +123,7 @@ export default function Header() {
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="text-sm font-medium">Search</span>
+                <span className="text-md font-semibold font-sans  ">Search</span>
               </button>
             </form>
           </div>
@@ -122,13 +132,13 @@ export default function Header() {
           <div className="flex items-center space-x-6 min-w-[200px] justify-end">
             <a 
               href="/auth/login" 
-              className="text-gray-700 hover:text-event-blue transition-colors text-sm font-medium px-2"
+              className="text-gray-700 font-sans  hover:text-event-blue transition-colors text-md font-semibold px-2"
             >
               Login
             </a>
             <a 
               href="/auth/register" 
-              className="bg-event-blue text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-sm font-medium"
+              className="bg-event-blue font-sans text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-md font-semibold"
             >
               Get Started
             </a>
@@ -138,9 +148,13 @@ export default function Header() {
         {/* Tablet Header */}
         <div className="hidden md:flex lg:hidden items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
+           <div className="flex items-center min-w-[100px]">
             <a href="/" className="text-xl font-bold text-event-blue">
-              EventHub
+              <Image src={Logo}
+              alt="logo image "
+              width={100}
+              height={100}
+              />
             </a>
           </div>
           

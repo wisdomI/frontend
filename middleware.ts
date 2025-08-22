@@ -25,12 +25,12 @@ export function middleware(request: NextRequest) {
   const authToken = request.cookies.get('authToken')?.value || 
                    request.headers.get('authorization')?.replace('Bearer ', '')
 
-  // Redirect to login if accessing protected route without auth
-  if (isProtectedRoute && !authToken) {
-    const loginUrl = new URL('/auth/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
+  // // Redirect to login if accessing protected route without auth
+  // if (isProtectedRoute && !authToken) {
+  //   const loginUrl = new URL('/auth/login', request.url)
+  //   loginUrl.searchParams.set('redirect', pathname)
+  //   return NextResponse.redirect(loginUrl)
+  // }
 
   // For authenticated users, check role-based access
   if (authToken) {

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import SuccessModal from "./SuccessNotificationModal";
+import {  DeleteOutlined,  PlusOutlined } from "@ant-design/icons";
+
 
 export default function PostServiceModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,30 +90,32 @@ export default function PostServiceModal() {
 
   return (
     <>
+       
       <button
         onClick={() => setIsOpen(true)}
-        className="block w-full bg-yellow-400 text-blue-900 font-semibold text-center py-3 rounded-lg hover:bg-yellow-500 transition-colors"
+        className="block w-full  text-blue-900 bg-yellow font-sans font-semibold text-center py-3 rounded-lg  hover:bg-yellow transition-colors"
       >
-        + Post Service Request
+        <PlusOutlined className="mr-2" />
+      Post Service Request
       </button>
-
+         
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-xs sm:max-w-lg md:max-w-3xl lg:max-w-3xl max-h-[95vh] overflow-y-auto relative mx-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+          <div className="  bg-[#f8f8f8] rounded-lg shadow-xl  w-[900px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
             
             {/* Header */}
-            <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
-              <div className="flex-1 pr-2">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">
+            <div className="flex items-start justify-between p-4 sm:p-6 ">
+              <div className="flex-1 pr-2 mt-4">
+                <h1 className=  "  text-[32px] sm:text-md  text-[#4c4c4c] font-bold  font-heading">
                   Post a Service Request
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                <p className="text-[24px] font-heading sm:text-md text-[#4c4c4c] mt-4">
                   Kindly fill in your Event details
                 </p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
+                className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0 mt-2"
               >
                 ✕
               </button>
@@ -124,7 +128,7 @@ export default function PostServiceModal() {
               <div className="space-y-4">
                 {/* Event Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Title
                   </label>
                                      <input
@@ -132,54 +136,57 @@ export default function PostServiceModal() {
                      placeholder="Enter Event Title"
                      value={formData.eventTitle}
                      onChange={(e) => handleInputChange("eventTitle", e.target.value)}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                     className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                    />
                 </div>
 
                 {/* Event Type */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Type
                   </label>
                                      <select 
                      value={formData.eventType}
+                     
                      onChange={(e) => handleInputChange("eventType", e.target.value)}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                     className="w-full px-3 py-2 shadow-sm nded-md bg-[#fff] focus:outline-none focus:ring-1 font-thin placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                    >
-                     <option value="">Select </option>
+                    <div className="px-2 bg-white rounded-md hover:text-light-blue">
+                     <option value=" " >Select </option>
                      <option value="wedding">Wedding</option>
                      <option value="birthday">Birthday</option>
                      <option value="corporate">Corporate</option>
                      <option value="other">Other</option>
+                     </div>
                    </select>
                 </div>
 
                 {/* Event Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Date
                   </label>
                   <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                     <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">
+                      <label className="block text-md font-normal   text-gray-500   font-sans  ">
                         Start Date
                       </label>
                       <input
                         type="date"
                         value={formData.startDate}
                         onChange={(e) => handleInputChange("startDate", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                        className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-gray-500"
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">
+                      <label className="block text-md font-normal text-gray-500 mb-1  font-sans ">
                         End Date
                       </label>
                       <input
                         type="date"
                         value={formData.endDate}
                         onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                        className="w-full px-3 py-2 shadow-sm  rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal  placeholder:text-[#a5a0a0] text-gray-500"
                       />
                     </div>
                   </div>
@@ -187,13 +194,13 @@ export default function PostServiceModal() {
 
                 {/* Event Location */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Location
                   </label>
                   <select 
                     value={formData.eventLocation}
                     onChange={(e) => handleInputChange("eventLocation", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2  shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   >
                     <option value="">Select State </option>
                     <option value="lagos">Lagos</option>
@@ -204,16 +211,17 @@ export default function PostServiceModal() {
 
                 {/* Event City */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event City
-                  </label>
-                  <p className="text-xs text-gray-500 mb-1">
+                    <span className="text-[16px] font-normal  text-gray-500 mb-1 font-sans ">
                     (Select the City you will like to Host your event)
-                  </p>
+                  </span>
+                  </label>
+                  
                   <select 
                     value={formData.eventCity}
                     onChange={(e) => handleInputChange("eventCity", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  placeholder:font-sans placeholder:font-normal rounded-md bg-[#fff] focus:outline-none focus:ring-1 placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   >
                     <option value="">Select City </option>
                     <option value="lagos-island">Lagos Island</option>
@@ -224,13 +232,13 @@ export default function PostServiceModal() {
 
                 {/* Services Needed */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Services Needed
                   </label>
                   <select 
                     value={formData.servicesNeeded}
                     onChange={(e) => handleInputChange("servicesNeeded", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  placeholder:font-sans placeholder:font-normal rounded-md bg-[#fff] focus:outline-none focus:ring-1 placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   >
                     <option value="">Select Services </option>
                     <option value="catering">Catering</option>
@@ -241,7 +249,7 @@ export default function PostServiceModal() {
 
                 {/* Number of Guests */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Number of Guests
                   </label>
                   <input
@@ -249,36 +257,40 @@ export default function PostServiceModal() {
                     placeholder="Enter no. of Guests"
                     value={formData.numberOfGuests}
                     onChange={(e) => handleInputChange("numberOfGuests", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2 shadow-sm rounded-md  bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
+                 <div>
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                    Budget Range
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g N100,000 - N200,000" 
+                    value={formData.budgetRange}
+                    onChange={(e) => handleInputChange("budgetRange", e.target.value)}
+                    className="w-full px-3 py-2  shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-thin  placeholder:font-normal placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                  />
+                </div>
+
               </div>
 
               {/* Right Column */}
               <div className="space-y-4">
                 {/* Budget Range */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Budget Range
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g N100,000 - N200,000"
-                    value={formData.budgetRange}
-                    onChange={(e) => handleInputChange("budgetRange", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  />
-                </div>
-
+               
                 {/* File Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  
+                  <div className="border-1 border-dashed border-gray-300 bg-[#fff]   rounded-md p-6 text-center">
+                    
+                    <label className="block text-[16px] font-normal font-sans text-[#4c4c4c] mb-1">
                     Choose a file or drag & drop it here
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="text-xs font-normal  text-gray-200 mb-3 font-sans">
                     JPEG, PNG, PDF, and MP4 formats, up to 50MB
                   </p>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                    
                     <input
                       type="file"
                       multiple
@@ -289,7 +301,7 @@ export default function PostServiceModal() {
                     />
                     <label
                       htmlFor="file-upload"
-                      className="bg-event-blue text-white px-4 py-2 rounded-md hover:bg-event-blue-hover transition-colors cursor-pointer"
+                      className="bg-event-blue font-normal font-sans mt-4 text-white px-4 py-2 rounded-md hover:bg-event-blue-hover transition-colors cursor-pointer"
                     >
                       Browse File
                     </label>
@@ -297,16 +309,17 @@ export default function PostServiceModal() {
                   {selectedFiles.length > 0 && (
                     <div className="mt-2 space-y-2">
                       {selectedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                        <div key={index} className="flex items-center   font-sans font-normal justify-between p-2 bg-gray-50 rounded-md">
                           <div className="text-sm text-gray-700">
                             {file.name}{" "}
-                            <span className="text-gray-500">Size: {(file.size / 1024).toFixed(1)}KB</span>
+                           
                           </div>
                           <button
                             onClick={() => handleFileDelete(index)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
-                            <Icon icon="mdi:delete" className="w-5 h-5" />
+                             <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
+                            <DeleteOutlined  className="w-5 h-5" />
                           </button>
                         </div>
                       ))}
@@ -316,27 +329,27 @@ export default function PostServiceModal() {
 
                 {/* Additional Information */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Additional Information
                   </label>
                   <textarea
                     placeholder="Enter here"
                     value={formData.additionalInfo}
                     onChange={(e) => handleInputChange("additionalInfo", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                    rows={3}
+                    className="w-full px-3 py-2  rounded-md bg-[#fff] focus:outline-none focus:ring-1  font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                    rows={5}
                   ></textarea>
                 </div>
 
                 {/* Event Planner */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Would you like an Event planner to organize your event?
                   </label>
                   <select 
                     value={formData.eventPlanner}
                     onChange={(e) => handleInputChange("eventPlanner", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
                   >
                     <option value="no">No </option>
                     <option value="yes">Yes</option>
@@ -345,17 +358,17 @@ export default function PostServiceModal() {
 
                 {/* Select Planner */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select an Event Planner
+                  <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                    Would you like AI to suggest Event Planners that can organize your event?
                   </label>
                   <select 
                     value={formData.selectedPlanner}
                     onChange={(e) => handleInputChange("selectedPlanner", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    className="w-full px-3 py-2   shadow-sm rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700 font-normal font-sans  placeholder:font-sans placeholder:font-normal"
                   >
-                    <option value="">Select Event Planner </option>
-                    <option value="habeeb">Habeeb Event Planner</option>
-                    <option value="other">Other Planner</option>
+                    <option value="">Yes</option>
+                    <option value="No">No</option>
+                    
                   </select>
                 </div>
 
@@ -368,10 +381,10 @@ export default function PostServiceModal() {
                    <button 
                      onClick={handleSubmit}
                      disabled={!isFormValid()}
-                     className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                     className={`w-full py-2  font-sans font-semibold rounded-lg  transition-colors mb-4 ${
                        isFormValid() 
                          ? 'bg-event-blue text-white hover:bg-blue-900' 
-                         : 'bg-blue-900 text-gray-100 cursor-not-allowed'
+                         : 'bg-event-blue text-gray-100 cursor-not-allowed'
                      }`}
                    >
                      Request Service
@@ -386,3 +399,7 @@ export default function PostServiceModal() {
     </>
   );
 }
+
+
+
+// w-[890px] max-w-lg 

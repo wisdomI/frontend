@@ -1,97 +1,81 @@
-import QuickActions from '@/components/layouts/QuickActions'; 
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Button from '../ui/button';
+import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled } from '@ant-design/icons';
 
-const HeroBanner = () => {
-  // Slider settings for responsiveness
+const HeroWithActions = () => {
+  // Slider settings
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 500,
+    speed: 1000,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
-    
-    customPaging: (i: number) => (
+    autoplaySpeed: 5000,
+    customPaging: () => (
       <div className="w-2 h-2 rounded-full bg-blue-900 transition-all duration-300"></div>
     ),
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          initialSlide: 1,
-        },
-      },
-    ],
   };
 
-  // Array of slide data 
+  // Slides
   const slides = [
-    {
-      title: 'Photographer Workshop',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      dateLocation: 'October 28th - Studio Name',
-      address: '1230 Main Street, New York City, NY 10001',
-      discount: '10%',
-      image: '/images/image.png', 
-    },
-    {
-      title: 'Event Planning Seminar',
-      description: 'Join us for an exciting seminar on event planning.',
-      dateLocation: 'November 5th - Event Hall',
-      address: '456 Event Lane, Los Angeles, CA 90001',
-      discount: '15%',
-      image: '/images/image.png',
-    },
-    {
-      title: 'Catering Masterclass',
-      description: 'Learn the art of catering with top chefs.',
-      dateLocation: 'December 10th - Culinary Institute',
-      address: '789 Chef Road, Chicago, IL 60601',
-      discount: '20%',
-      image: '/images/image.png', 
-    },
+    { image: '/images/image.png', title: 'Photographer Workshop' },
+    { image: '/images/place1.jpg', title: 'Event Place' },
+    { image: '/images/cake2.jpg', title: 'Cake Showcase' },
+  ];
+
+  // Quick actions
+  const actions = [
+    { icon: <EyeFilled />, label: 'View client request' },
+    { icon: <PlusOutlined />, label: 'Post a Service Request' },
+    { icon: <FileSearchOutlined />, label: 'Manage all Posts' },
+    { icon: <CalendarOutlined />, label: 'Manage all Bookings' },
   ];
 
   return (
-    <>
-      <style jsx global>{`
-        .slick-dots-custom .slick-active div {
-          background-color: #4169e1; /* Royal blue for active dot */
-        }
-        .slick-dots-custom div:hover {
-          background-color: #1e90ff; /* Lighter blue for hover */
-        }
-      `}</style>
-      <section className="mb-4 grid md:grid-cols-4 grid-cols-1 gap-4">
-        <Slider {...sliderSettings} className='col-span-3'>
+    <section className="grid grid-cols-1 md:grid-cols-4 gap-6  mb-6">
+      {/* Hero Banner */}
+      <div className="md:col-span-3 mt-2 ">
+        <Slider {...sliderSettings} className="mt-4">
           {slides.map((slide, index) => (
-            <div key={index} className="relative rounded-lg overflow-hidden h-56 md:h-72   col-span-2">
-              <img 
+            <div
+              key={index}
+              className="relative rounded-xl overflow-hidden h-56 md:h-68 w-full"
+            >
+              <img
                 src={slide.image}
-                alt={slide.title} 
-                className="w-full h-full object-fit "
+                alt={slide.title}
+                className="w-full h-full object-cover"
               />
             </div>
           ))}
         </Slider>
-        <QuickActions />
-      </section>
-    </>
+      </div>
+
+      {/* Quick Actions */}
+      <>
+     
+      <div className="md:col-span-1 flex flex-col w-full h-auto gap-4">
+         <h2 className="text-2xl font-bold font-heading text-gray-700 ">Quick Actions</h2>
+        <div className="grid grid-cols-2 gap-4 ">
+          {actions.map((action, idx) => (
+            <Button
+              key={idx}
+              className="bg-dark-blue text-white p-6 rounded-xl flex flex-col items-center justify-center hover:bg-event-blue-hover "
+            >
+              <span className="bg-white text-dark-blue p-3 rounded-xl mb-2 text-lg">
+                {action.icon}
+              </span>
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      </>
+    </section>
   );
 };
 
-export default HeroBanner;
+export default HeroWithActions;

@@ -1,7 +1,6 @@
 'use client'
-
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { onAuthStateChange, User } from '@/lib/auth-simple'
+import React, { createContext, useContext, useState, ReactNode } from 'react'
+import { User } from '@/lib/auth-simple'
 
 interface AuthContextType {
   user: User | null
@@ -16,22 +15,20 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      setUser(user)
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [])
+  // Pretend user is always logged in
+  const [user] = useState<User | null>({
+    id: '1',
+    uid: '1',
+    name: 'Demo User',
+    email: 'demo@example.com',
+    displayName: 'Demo User'
+  } as User)
+  const [loading] = useState(false)
 
   const value: AuthContextType = {
     user,
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: true, // always true
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

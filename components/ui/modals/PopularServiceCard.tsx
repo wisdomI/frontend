@@ -5,7 +5,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from "@mui/icons-material/Share";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-
+import { MessageCircleMore } from "lucide-react";
 type PopularServiceCardProps = {
   image: string;
   title: string;
@@ -33,9 +33,9 @@ const PopularServiceCard: React.FC<PopularServiceCardProps> = ({
 
   return (
     <div
-      className={`bg-white ${
+      className={` ${
         isHorizontal
-          ? "flex items-start gap-4 border-b border-gray-200 py-4"
+          ? "flex items-start gap-4 border-b border-gray-200 py-4 shadow-md rounded-xl"
           : "shadow-md rounded-xl overflow-hidden max-w-sm w-full mx-auto"
       }`}
     >
@@ -84,9 +84,74 @@ const PopularServiceCard: React.FC<PopularServiceCardProps> = ({
       <div className={`flex-1 ${isHorizontal ? "flex flex-col justify-between" : "p-4"}`}>
         <div className={`flex ${isHorizontal ? "justify-between items-start" : "flex-col gap-2"}`}>
           <div>
-            <h3 className="text-lg font-bold text-gray-800 line-clamp-2">{title}</h3>
-            <p className="text-gray-600 text-sm mt-1 line-clamp-2">{description}</p>
-            {vendorName && <p className="text-event-blue font-semibold text-sm mt-1">{vendorName}</p>}
+            <div className="flex justify-between">
+            <h3 className="text-[20px] font-bold text-gray-800 line-clamp-2 font-sans">{title}
+              
+            </h3>
+            <span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M16.0346 9.85713H22.2506C22.2739 9.78807 22.286 9.71573 22.2866 9.64284L22.2849 9.69855L22.2866 9.61284L22.278 9.53741L22.2634 9.47141L22.254 9.43884L22.2172 9.35141L18.7826 2.9117L18.7363 2.83713C18.6765 2.75466 18.5981 2.68756 18.5073 2.64136C18.4166 2.59517 18.3161 2.57119 18.2143 2.57141H13.7143C13.856 2.57136 13.9938 2.61815 14.1062 2.70449C14.2186 2.79083 14.2993 2.91189 14.3357 3.04884L16.05 9.47741C16.0833 9.60265 16.0779 9.735 16.0346 9.85713Z" fill="#616161"/>
+<path d="M16.0346 9.85713H22.2506C22.2739 9.78807 22.286 9.71573 22.2866 9.64284L22.2849 9.69855L22.2866 9.61284L22.278 9.53741L22.2634 9.47141L22.254 9.43884L22.2172 9.35141L18.7826 2.9117L18.7363 2.83713C18.6765 2.75466 18.5981 2.68756 18.5073 2.64136C18.4166 2.59517 18.3161 2.57119 18.2143 2.57141H13.7143C13.856 2.57136 13.9938 2.61815 14.1062 2.70449C14.2186 2.79083 14.2993 2.91189 14.3357 3.04884L16.05 9.47741C16.0833 9.60265 16.0779 9.735 16.0346 9.85713Z" fill="url(#paint0_linear_395_28315)"/>
+<path d="M7.96543 9.85713C7.92214 9.735 7.91676 9.60265 7.95 9.47741L9.66428 3.04884C9.70075 2.91189 9.78146 2.79083 9.89384 2.70449C10.0062 2.61815 10.144 2.57136 10.2857 2.57141H5.78657L5.69914 2.57741C5.5984 2.5912 5.50236 2.62869 5.41892 2.6868C5.33548 2.74491 5.26701 2.82199 5.21914 2.9117L1.79057 9.34027L1.76743 9.38913L1.73828 9.47141L1.72971 9.5057L1.71771 9.5897V9.69855L1.73743 9.81084L1.75457 9.85713H7.96543Z" fill="#9F9F9F"/>
+<path d="M7.96543 9.85713C7.92214 9.735 7.91676 9.60265 7.95 9.47741L9.66428 3.04884C9.70075 2.91189 9.78146 2.79083 9.89384 2.70449C10.0062 2.61815 10.144 2.57136 10.2857 2.57141H5.78657L5.69914 2.57741C5.5984 2.5912 5.50236 2.62869 5.41892 2.6868C5.33548 2.74491 5.26701 2.82199 5.21914 2.9117L1.79057 9.34027L1.76743 9.38913L1.73828 9.47141L1.72971 9.5057L1.71771 9.5897V9.69855L1.73743 9.81084L1.75457 9.85713H7.96543Z" fill="url(#paint1_linear_395_28315)"/>
+<path d="M16.8917 9.85713C16.935 9.735 16.9404 9.60265 16.9072 9.47741L15.1929 3.04884C15.1564 2.91189 15.0757 2.79083 14.9633 2.70449C14.8509 2.61815 14.7132 2.57136 14.5714 2.57141H9.42858C9.28686 2.57136 9.14909 2.61815 9.03671 2.70449C8.92432 2.79083 8.84362 2.91189 8.80715 3.04884L7.09287 9.47741C7.05962 9.60265 7.065 9.735 7.10829 9.85713H16.8917Z" fill="#D9D9D9"/>
+<path d="M16.8917 9.85713C16.935 9.735 16.9404 9.60265 16.9072 9.47741L15.1929 3.04884C15.1564 2.91189 15.0757 2.79083 14.9633 2.70449C14.8509 2.61815 14.7132 2.57136 14.5714 2.57141H9.42858C9.28686 2.57136 9.14909 2.61815 9.03671 2.70449C8.92432 2.79083 8.84362 2.91189 8.80715 3.04884L7.09287 9.47741C7.05962 9.60265 7.065 9.735 7.10829 9.85713H16.8917Z" fill="url(#paint2_linear_395_28315)"/>
+<path d="M11.5714 21.2657C11.6475 21.1977 11.7062 21.1125 11.7428 21.0172L16.0286 9.8743C16.0774 9.7476 16.0849 9.60867 16.05 9.47745L16.0371 9.42859H22.2497L22.254 9.43887L22.2634 9.47145L22.278 9.53745L22.2866 9.61287L22.2848 9.69859L22.2874 9.64287C22.2863 9.73 22.2685 9.81611 22.2351 9.89659L22.2094 9.94802L22.1751 10.0046L22.1306 10.0637L12.5143 21.1757C12.4319 21.2857 12.3156 21.3655 12.1834 21.4029L12.1337 21.4149L12.0506 21.4269L12 21.4286L11.9143 21.4226L11.8414 21.4089L11.7523 21.3797L11.7308 21.3694C11.6722 21.3437 11.6181 21.3086 11.5706 21.2657" fill="url(#paint3_linear_395_28315)"/>
+<path d="M7.96286 9.42859H1.75371L1.73828 9.47145L1.72971 9.50573L1.71771 9.58973V9.69859L1.73743 9.81087L1.76743 9.89659L1.80857 9.9763L1.86171 10.0509L11.5234 21.2169C11.584 21.2843 11.6531 21.3352 11.7309 21.3694L11.7531 21.3797L11.8414 21.4089L11.9143 21.4226L12.0009 21.4286L12.0514 21.4269L12.1346 21.4149L12.1843 21.4029C12.2761 21.378 12.3608 21.3315 12.4311 21.2674C12.3538 21.1989 12.2941 21.1128 12.2571 21.0163L7.97143 9.87345C7.92273 9.747 7.91523 9.60841 7.95 9.47745L7.96286 9.42859Z" fill="#626262"/>
+<path d="M7.96286 9.42859H1.75371L1.73828 9.47145L1.72971 9.50573L1.71771 9.58973V9.69859L1.73743 9.81087L1.76743 9.89659L1.80857 9.9763L1.86171 10.0509L11.5234 21.2169C11.584 21.2843 11.6531 21.3352 11.7309 21.3694L11.7531 21.3797L11.8414 21.4089L11.9143 21.4226L12.0009 21.4286L12.0514 21.4269L12.1346 21.4149L12.1843 21.4029C12.2761 21.378 12.3608 21.3315 12.4311 21.2674C12.3538 21.1989 12.2941 21.1128 12.2571 21.0163L7.97143 9.87345C7.92273 9.747 7.91523 9.60841 7.95 9.47745L7.96286 9.42859Z" fill="url(#paint4_linear_395_28315)"/>
+<path d="M16.8943 9.42859H7.1057L7.09284 9.47745C7.05808 9.60841 7.06558 9.747 7.11427 9.87345L11.4 21.0163C11.4466 21.1376 11.5289 21.2419 11.6361 21.3154C11.7432 21.389 11.87 21.4284 12 21.4284C12.1299 21.4284 12.2568 21.389 12.3639 21.3154C12.471 21.2419 12.5533 21.1376 12.6 21.0163L16.8857 9.87345C16.9344 9.747 16.9419 9.60841 16.9071 9.47745L16.8943 9.42859Z" fill="#AEAEAE"/>
+<path d="M16.8943 9.42859H7.1057L7.09284 9.47745C7.05808 9.60841 7.06558 9.747 7.11427 9.87345L11.4 21.0163C11.4466 21.1376 11.5289 21.2419 11.6361 21.3154C11.7432 21.389 11.87 21.4284 12 21.4284C12.1299 21.4284 12.2568 21.389 12.3639 21.3154C12.471 21.2419 12.5533 21.1376 12.6 21.0163L16.8857 9.87345C16.9344 9.747 16.9419 9.60841 16.9071 9.47745L16.8943 9.42859Z" fill="url(#paint5_linear_395_28315)"/>
+<path d="M18.2151 2.57141C18.3168 2.57133 18.4171 2.59537 18.5077 2.64156C18.5983 2.68775 18.6766 2.75477 18.7363 2.83713L18.7826 2.9117L22.2171 9.35141L22.254 9.43884L22.2634 9.47141L22.278 9.53741L22.2866 9.61284L22.2849 9.69855L22.2866 9.64284C22.2857 9.72991 22.2682 9.81601 22.2351 9.89655L22.2094 9.94798L22.1751 10.0046L22.1306 10.0637L12.5143 21.1757C12.4319 21.2857 12.3157 21.3655 12.1834 21.4028L12.1337 21.4148L12.0506 21.4268L12 21.4286L11.9143 21.4226L11.8406 21.4088L11.7523 21.3797L11.73 21.3694C11.6506 21.3342 11.5799 21.2821 11.5226 21.2168L1.86171 10.0517L1.80857 9.97713L1.76743 9.89741L1.73743 9.8117L1.71771 9.70027V9.59055L1.73057 9.5057L1.73914 9.47141L1.76743 9.38998L1.79143 9.34113L5.22 2.91255C5.26778 2.82295 5.33612 2.74594 5.4194 2.68784C5.50268 2.62973 5.59855 2.59218 5.69914 2.57827L5.78571 2.57141H18.2151Z" fill="url(#paint6_linear_395_28315)" fill-opacity="0.7"/>
+<defs>
+<linearGradient id="paint0_linear_395_28315" x1="16.776" y1="2.57141" x2="21.6052" y2="13.5308" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0FAFFF"/>
+<stop offset="1" stop-color="#102784"/>
+</linearGradient>
+<linearGradient id="paint1_linear_395_28315" x1="9.06171" y1="-0.464589" x2="4.83343" y2="8.66913" gradientUnits="userSpaceOnUse">
+<stop stop-color="#9FF0F9"/>
+<stop offset="1" stop-color="#29C3FF"/>
+</linearGradient>
+<linearGradient id="paint2_linear_395_28315" x1="12" y1="2.57141" x2="12" y2="11.6786" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3BD5FF"/>
+<stop offset="1" stop-color="#367AF2"/>
+</linearGradient>
+<linearGradient id="paint3_linear_395_28315" x1="24.8083" y1="3.42859" x2="14.238" y2="20.7034" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1B44B1"/>
+<stop offset="1" stop-color="#2052CB"/>
+</linearGradient>
+<linearGradient id="paint4_linear_395_28315" x1="3.60857" y1="7.02859" x2="10.5934" y2="21.7029" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0094F0"/>
+<stop offset="1" stop-color="#6CE0FF"/>
+</linearGradient>
+<linearGradient id="paint5_linear_395_28315" x1="11.9931" y1="5.22859" x2="11.9931" y2="21.4286" gradientUnits="userSpaceOnUse">
+<stop stop-color="#2052CB"/>
+<stop offset="1" stop-color="#0FAFFF"/>
+</linearGradient>
+<linearGradient id="paint6_linear_395_28315" x1="-0.371145" y1="-15.186" x2="15.7106" y2="23.1043" gradientUnits="userSpaceOnUse">
+<stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0"/>
+<stop offset="1" stop-color="#FF6CE8"/>
+</linearGradient>
+</defs>
+</svg>
+              </span>
+            </div>
+            {/* <p className="text-gray-600 text-sm mt-1 line-clamp-2">{description}</p> */}
+            <div className="flex items-center gap-2 mt-2 justify-between">
+            {vendorName && <p className="text-event-blue font-bold text-[16px] mt-1  font-sans">{vendorName}</p>}
+             <div className={`flex  ${isHorizontal ? "flex-row gap-2 ml-auto items-end" : "flex-row gap-2 items-end"}`}>
+       
+       <div  className='bg-event-blue py-2   px-2 rounded-xl cursor-pointer'>
+           <MessageCircleMore className='text-white' />
+       </div>
+       <div className='bg-event-blue py-2   px-2 rounded-xl cursor-pointer'>
+           <FavoriteBorderIcon className='text-white' />
+       </div>
+       <div  className='bg-event-blue py-2 px-2  rounded-xl cursor-pointer'>  
+           <ShareIcon className='text-white' />
+       </div>
+                    
+        </div>
+      </div>
           </div>
           {!isHorizontal && <hr className="border-gray-200 my-2" />}
           {rating > 0 && (
@@ -96,24 +161,14 @@ const PopularServiceCard: React.FC<PopularServiceCardProps> = ({
             </div>
           )}
           {location && (
-            <p className="flex items-center gap-1 text-gray-500 text-sm mt-1">
+            <p className="flex items-center gap-1 text-gray-500 text-sm mt-1 mx-4">
               <LocationOnOutlinedIcon fontSize="small" />
               {location}
             </p>
           )}
         </div>
       </div>
-      <div className={`flex ${isHorizontal ? "flex-row gap-2 ml-auto" : "flex-col gap-2 items-end"}`}>
-        <IconButton aria-label="chat" className="text-event-blue hover:text-event-blue-dark p-1">
-          <ChatBubbleOutlineIcon />
-        </IconButton>
-        <IconButton aria-label="favorite" className="text-event-blue hover:text-event-blue-dark p-1">
-          <FavoriteBorderIcon />
-        </IconButton>
-        <IconButton aria-label="share" className="text-event-blue hover:text-event-blue-dark p-1">
-          <ShareIcon />
-        </IconButton>
-      </div>
+     
     </div>
   );
 };
