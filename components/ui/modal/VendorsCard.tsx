@@ -27,7 +27,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
   location,
 }) => {
   return (
-    <div className=" shadow-md rounded-xl overflow-hidden max-w-sm md:w-[330px] mx-auto mb-6  hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white shadow-md rounded-xl overflow-hidden w-full hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
         <img src={image} alt={title} className="w-full h-48 object-cover" />
         {verified && (

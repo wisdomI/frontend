@@ -57,7 +57,7 @@ export default function PostsPage() {
       </div>
 
       {mockPosts.length === 0 && (
-        <p className="mt-6 text-center text-gray-600">You have no posts yet. Click "New Post" to create one.</p>
+        <p className="mt-6 text-center text-gray-600">You have no posts yet. Click &quot;New Post&quot; to create one.</p>
       )}
     </div>
   )

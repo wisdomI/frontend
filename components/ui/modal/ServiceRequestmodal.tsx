@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import SuccessModal from "./SuccessNotificationModal";
-import {  DeleteOutlined,  PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import EventTypeSelect from "../select/EventTypeSelect";
+import ServiceTypeSelect from "../select/ServiceTypeSelect";
 
 
 export default function PostServiceModal() {
@@ -16,7 +18,7 @@ export default function PostServiceModal() {
     endDate: "",
     eventLocation: "",
     eventCity: "",
-    servicesNeeded: "",
+    servicesNeeded: [] as string[],
     numberOfGuests: "",
     budgetRange: "",
     additionalInfo: "",
@@ -34,7 +36,7 @@ export default function PostServiceModal() {
       formData.endDate !== "" &&
       formData.eventLocation !== "" &&
       formData.eventCity !== "" &&
-      formData.servicesNeeded !== "" &&
+      formData.servicesNeeded.length > 0 &&
       formData.numberOfGuests !== "" &&
       formData.budgetRange.trim() !== "" &&
       formData.additionalInfo.trim() !== ""
@@ -42,7 +44,7 @@ export default function PostServiceModal() {
   };
 
   // Handle input changes
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -72,7 +74,7 @@ export default function PostServiceModal() {
         endDate: "",
         eventLocation: "",
         eventCity: "",
-        servicesNeeded: "",
+        servicesNeeded: [],
         numberOfGuests: "",
         budgetRange: "",
         additionalInfo: "",
@@ -145,20 +147,11 @@ export default function PostServiceModal() {
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Type
                   </label>
-                                     <select 
-                     value={formData.eventType}
-                     
-                     onChange={(e) => handleInputChange("eventType", e.target.value)}
-                     className="w-full px-3 py-2 shadow-sm nded-md bg-[#fff] focus:outline-none focus:ring-1 font-thin placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                   >
-                    <div className="px-2 bg-white rounded-md hover:text-light-blue">
-                     <option value=" " >Select </option>
-                     <option value="wedding">Wedding</option>
-                     <option value="birthday">Birthday</option>
-                     <option value="corporate">Corporate</option>
-                     <option value="other">Other</option>
-                     </div>
-                   </select>
+                  <EventTypeSelect
+                    value={formData.eventType}
+                    onChange={(value) => handleInputChange("eventType", value)}
+                    placeholder="Select Event Type"
+                  />
                 </div>
 
                 {/* Event Date */}
@@ -235,16 +228,11 @@ export default function PostServiceModal() {
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Services Needed
                   </label>
-                  <select 
-                    value={formData.servicesNeeded}
-                    onChange={(e) => handleInputChange("servicesNeeded", e.target.value)}
-                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  placeholder:font-sans placeholder:font-normal rounded-md bg-[#fff] focus:outline-none focus:ring-1 placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                  >
-                    <option value="">Select Services </option>
-                    <option value="catering">Catering</option>
-                    <option value="photography">Photography</option>
-                    <option value="venue">Venue</option>
-                  </select>
+                  <ServiceTypeSelect
+                    selectedServices={formData.servicesNeeded}
+                    onChange={(services) => handleInputChange("servicesNeeded", services)}
+                    placeholder="Select Services"
+                  />
                 </div>
 
                 {/* Number of Guests */}

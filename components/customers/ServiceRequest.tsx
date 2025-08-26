@@ -6,10 +6,12 @@ import { EventRequestProps } from "@/types/directrequesttypes"; // <-- from your
 
 
 
-interface DirectRequestCardProps extends EventRequestProps {
+interface ServiceRequestCardProps extends EventRequestProps {
   onEdit: () => void;
+  onServiceDelete?: (serviceIndex: number) => void;
 }
-const ServiceRequestCard: React.FC<EventRequestProps> = ({
+
+const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
   id,
   title,
   postedTime,
@@ -27,7 +29,9 @@ const ServiceRequestCard: React.FC<EventRequestProps> = ({
   services,
   budget,
   additionalInfo,
-  }, { onEdit, ...props }  )   => {
+  onEdit,
+  onServiceDelete
+}) => {
 
 
   return (
@@ -162,9 +166,17 @@ const ServiceRequestCard: React.FC<EventRequestProps> = ({
               {services.map((service, i) => (
                 <span
                   key={i}
-                  className="bg-event-blue text-white text-sm px-4 py-4 rounded-lg"
+                  className="bg-event-blue text-white text-sm px-4 py-4 rounded-lg flex items-center gap-2"
                 >
                   {service}
+                  {onServiceDelete && (
+                    <button
+                      onClick={() => onServiceDelete(i)}
+                      className="text-white hover:text-red-200 ml-1"
+                    >
+                      ×
+                    </button>
+                  )}
                 </span>
               ))}
             </div>

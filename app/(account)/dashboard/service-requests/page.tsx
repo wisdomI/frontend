@@ -1,21 +1,21 @@
 // app/(account)/dashboard/direct-request/DirectRequestClient.tsx
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { selectMenuItem } from '@/store/dashboardSlice';
 import Navbar from '@/components/customers/Headerswitch';
 import { mockRequests } from '@/data/directrequest';
 import { EventRequestProps } from '@/types/directrequesttypes';
-import { useState } from 'react';
+
 import EditDirectRequestModal from '@/components/customers/DirectRequestEditForm';
 import ServiceRequestCard from '@/components/customers/ServiceRequest';
-export default function DirectRequestClient() {
-
-const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
+export default function ServiceRequestClient() {
+  const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
   const [selectedRequest, setSelectedRequest] = useState<EventRequestProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const dispatch = useDispatch();
 
   const handleEditClick = (request: EventRequestProps) => {
     setSelectedRequest(request);
@@ -26,44 +26,57 @@ const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
     setRequests((prev) =>
       prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
     );
+  };
 
-  }
-  const dispatch = useDispatch();
+  const handleServiceDelete = (requestId: string, serviceIndex: number) => {
+    setRequests((prev) =>
+      prev.map((request) => {
+        if (request.id === requestId) {
+          const updatedServices = request.services.filter((_, index) => index !== serviceIndex);
+          return { ...request, services: updatedServices };
+        }
+        return request;
+      })
+    );
+  };
 
   useEffect(() => {
     // Sync Redux state with current page
     dispatch(
       selectMenuItem({
-        view: 'direct-request',
-        breadcrumb: { label: ' Service Request', path: '/dashboard/service-request' },
+        view: 'service-requests',
+        breadcrumb: { label: 'Service Requests', path: '/dashboard/service-requests' },
       })
     );
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-[#fff]">
-      <section className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">
-            <Navbar activePage="/direct-request" onPageChange={() => {}} />
-        </h1>
-        <div className=" bg-gray-50 p-4 space-y-6 ">
-         {
-         requests.map((event) => (
-        <ServiceRequestCard
-         key={event.id} 
-         {...event}
-          // onEdit={() => handleEditClick(event)}
-         
-         />
-      ))}
-      <EditDirectRequestModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        requestData={selectedRequest}
-        onSave={handleSave}
-      />
-        </div>
-      </section>
+    <div className="bg-white rounded-lg p-6">
+      {/* Page Header */}
+      <h1 className="text-[20px] font-semibold font-heading text-gray-900 mb-4">Manage all Posts</h1>
+      
+      {/* Header Switch Navigation */}
+      <Navbar activePage="/service-requests" onPageChange={() => {}} />
+      
+      {/* Content Area */}
+      <div className="space-y-6">
+        {requests.map((event) => (
+          <ServiceRequestCard
+            key={event.id} 
+            {...event}
+            onEdit={() => handleEditClick(event)}
+            onServiceDelete={(serviceIndex) => handleServiceDelete(event.id, serviceIndex)}
+          />
+        ))}
+        
+        <EditDirectRequestModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          requestData={selectedRequest}
+          onSave={handleSave}
+          modalTitle="Edit Service Request Post"
+        />
+      </div>
     </div>
   );
 }

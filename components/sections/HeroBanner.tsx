@@ -1,7 +1,7 @@
+import Link from 'next/link';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import Button from '../ui/button';
 import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled } from '@ant-design/icons';
 
 const HeroWithActions = () => {
@@ -28,21 +28,21 @@ const HeroWithActions = () => {
 
   // Quick actions
   const actions = [
-    { icon: <EyeFilled />, label: 'View client request' },
-    { icon: <PlusOutlined />, label: 'Post a Service Request' },
-    { icon: <FileSearchOutlined />, label: 'Manage all Posts' },
-    { icon: <CalendarOutlined />, label: 'Manage all Bookings' },
+    { icon: <EyeFilled />, label: 'View all Favourites', href: '/favorites' },
+    { icon: <PlusOutlined />, label: 'Post a Service Request', href: '/post-service' },
+    { icon: <FileSearchOutlined />, label: 'Manage all Posts', href: '/manage-posts' },
+    { icon: <CalendarOutlined />, label: 'Manage all Bookings', href: '/manage-bookings' },
   ];
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-4 gap-6  mb-6">
-      {/* Hero Banner */}
-      <div className="md:col-span-3 mt-2 ">
-        <Slider {...sliderSettings} className="mt-4">
+    <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      {/* Hero Banner - aligned with sidebar menu options */}
+      <div className="md:col-span-3 mt-16">
+        <Slider {...sliderSettings}>
           {slides.map((slide, index) => (
             <div
               key={index}
-              className="relative rounded-xl overflow-hidden h-56 md:h-68 w-full"
+              className="relative rounded-xl overflow-hidden h-56 md:h-64 w-full"
             >
               <img
                 src={slide.image}
@@ -54,26 +54,22 @@ const HeroWithActions = () => {
         </Slider>
       </div>
 
-      {/* Quick Actions */}
-      <>
-     
-      <div className="md:col-span-1 flex flex-col w-full h-auto gap-4">
-         <h2 className="text-2xl font-bold font-heading text-gray-700 ">Quick Actions</h2>
-        <div className="grid grid-cols-2 gap-4 ">
+      {/* Quick Actions - header aligned with sidebar header */}
+      <div className="md:col-span-1 flex flex-col">
+        <h2 className="text-[32px] font-semibold font-heading text-gray-700 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 gap-4">
           {actions.map((action, idx) => (
-            <Button
-              key={idx}
-              className="bg-dark-blue text-white p-6 rounded-xl flex flex-col items-center justify-center hover:bg-event-blue-hover "
-            >
-              <span className="bg-white text-dark-blue p-3 rounded-xl mb-2 text-lg">
-                {action.icon}
-              </span>
-              {action.label}
-            </Button>
+            <Link key={idx} href={action.href} className="block">
+              <div className="bg-event-blue text-white p-4 rounded-xl flex flex-col items-center justify-center hover:bg-blue-700 transition-colors min-h-[120px] text-sm w-full cursor-pointer group">
+                <span className="bg-white text-event-blue p-3 rounded-xl mb-3 text-lg group-hover:scale-105 transition-transform">
+                  {action.icon}
+                </span>
+                <span className="text-center leading-tight font-medium">{action.label}</span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
-      </>
     </section>
   );
 };

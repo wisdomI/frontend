@@ -21,10 +21,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${raleway.variable} ${asul.variable} bg-gradient-conic`} >
         <Providers>
           <Provider store={store}>
-            <Header />
-            <NotificationBreadcrumbWrapper />
-            <main className="container mx-auto px-4 py-8">{children}</main>
-            <Footer />
+            <div className="container mx-auto px-8 md:px-12 lg:px-16">
+              <Header />
+              <NotificationBreadcrumbWrapper />
+            </div>
+            <main>{children}</main>
+            <div className="container mx-auto px-8 md:px-12 lg:px-16">
+              <Footer />
+            </div>
             <NotificationContainer />
           </Provider>
         </Providers>

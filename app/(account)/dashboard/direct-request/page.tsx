@@ -25,8 +25,19 @@ const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
     setRequests((prev) =>
       prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
     );
+  };
 
-  }
+  const handleServiceDelete = (requestId: string, serviceIndex: number) => {
+    setRequests((prev) =>
+      prev.map((request) => {
+        if (request.id === requestId) {
+          const updatedServices = request.services.filter((_, index) => index !== serviceIndex);
+          return { ...request, services: updatedServices };
+        }
+        return request;
+      })
+    );
+  };
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,19 +51,19 @@ const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-[#fff]">
+    <div className=" container min-h-screen bg-[#fff]">
       <section className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">
             <Navbar activePage="/direct-request" onPageChange={() => {}} />
         </h1>
-        <div className=" bg-gray-50 p-4 space-y-6 ">
+        <div className=" p-4 space-y-6 ">
          {
          requests.map((event) => (
         <DirectRequestCard
          key={event.id} 
          {...event}
-          // onEdit={() => handleEditClick(event)}
-         
+         onEdit={() => handleEditClick(event)}
+         onServiceDelete={(serviceIndex) => handleServiceDelete(event.id, serviceIndex)}
          />
       ))}
       <EditDirectRequestModal

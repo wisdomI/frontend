@@ -21,7 +21,7 @@ const OtpVerificationSuccessModal: React.FC<{ open: boolean; onClose: () => void
       startResendTimer();
       console.log("OtpVerificationSuccessModal opened, email:", email, "otp reset to:", otp);
     }
-  }, [open, email]);
+  }, [open, email, otp]);
 
   const startResendTimer = () => {
     setCanResend(false);
@@ -153,7 +153,7 @@ const OtpVerificationSuccessModal: React.FC<{ open: boolean; onClose: () => void
                   )}
                 </button>
                 <p className="text-center text-sm text-gray-600">
-                  Didn't get code?{" "}
+                  Didn&apos;t get code?{" "}
                   {canResend ? (
                     <button onClick={handleResend} className="text-event-blue hover:underline font-bold text-lg">
                       Resend

@@ -18,8 +18,9 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onPageChange }) => {
     <nav
       style={{
         backgroundColor: '#032d71',
-        padding: '16px',
+        padding: '12px',
         borderRadius: '16px',
+         marginTop:"50px"
       }}
     >
       {navItems.map((item) => (

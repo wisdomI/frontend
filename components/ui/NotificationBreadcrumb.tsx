@@ -79,20 +79,18 @@ export default function NotificationBreadcrumb({
   }
 
   return (
-  <div  className='flex container mx-auto '>
-    
-    <div className= { `container   rounded-xl md:mt-6 mt-4  mx-4   ${typeStyles[type]} ${className}`}>
-      <div className=" flex  px-4 ">
-        <div className="flex items-center justify-between py-3 mx-4 ">
+    <div className="container mx-auto px-8 md:px-12 lg:px-16 mt-4">
+      <div className={`rounded-xl mb-4 ${typeStyles[type]} ${className}`}>
+        <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center">
             {renderIcon()}
-            <span className=" mx-4 md:text-[18px]   text-auto  tracking-wide font-semibold font-heading text-center text-[#4c4c4c] ">
-              <span className='font-sans text-[18px] '> Security Reminder: </span>
+            <span className="text-base font-semibold font-heading text-[#4c4c4c]">
+              <span className='font-sans'>Security Reminder: </span>
               {message}
             </span>
           </div>
           
-          {/* {dismissible && (
+          {dismissible && (
             <button
               onClick={handleDismiss}
               className="ml-4 flex-shrink-0 p-1 rounded-md hover:bg-black hover:bg-opacity-10 transition-colors"
@@ -102,11 +100,9 @@ export default function NotificationBreadcrumb({
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
-          )} */}
+          )}
         </div>
       </div>
-    </div>
-
     </div>
   )
 }

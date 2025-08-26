@@ -43,27 +43,29 @@ const RecentlyViewed = () => {
   */
 
   return (
-    <section className="mb-8 mt-8   bg-gradient-bl from-white to-blue-300">
-      <div className="flex justify-between w-full  mb-4  transition-shadow duration-300">
-        <h3 className="text-[32px] font-semibold font-heading  text-gray-600 ">Recently Viewed</h3>
-        {visibleCount < allServices.length && (
-          <button
-            onClick={handleSeeMore}
-            className=" md:ml-12 md:text-md text-gray-600 font-heading font-semibold  hover:underline focus:outline-none "
-          >
-            See more
-          </button>
-        )}
-        {visibleCount > 4 && (
-          <button
-            onClick={handleSeeLess}
-            className="md:text-md text-gray-600 hover:underline focus:outline-none ml-4 font-bold"
-          >
-            See less
-          </button>
-        )}
+    <section className="mb-8 mt-8">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-semibold font-heading text-gray-700">Recently Viewed</h3>
+        <div className="flex gap-2">
+          {visibleCount < allServices.length && (
+            <button
+              onClick={handleSeeMore}
+              className="text-sm text-blue-600 font-semibold hover:underline focus:outline-none"
+            >
+              See more
+            </button>
+          )}
+          {visibleCount > 4 && (
+            <button
+              onClick={handleSeeLess}
+              className="text-sm text-gray-600 hover:underline focus:outline-none"
+            >
+              See less
+            </button>
+          )}
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {recentServices.map((service, index) => (
           <VendorCard
             key={index}

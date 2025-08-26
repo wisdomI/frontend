@@ -12,7 +12,7 @@ const ForgetPasswordModal: React.FC<{ open: boolean; onClose: () => void }> = ({
   useEffect(() => {
     if (open) {
       setEmail("");
-      setShowOtpModal(false); 
+      setShowOtpModal(false);
     }
   }, [open]);
 
@@ -30,42 +30,56 @@ const ForgetPasswordModal: React.FC<{ open: boolean; onClose: () => void }> = ({
           onClick={onClose}
         >
           <div
-            className="relative bg-white rounded-lg pt-20 pb-20 pl-8 pr-8 max-w-md w-full mx-4 shadow-lg"
+            className="relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              className="absolute top-4 right-4 text-white text-lg hover:text-gray-100 bg-event-blue h-8 w-8 rounded-lg"
+              className="absolute top-4 right-4 text-white text-xl hover:text-gray-100 bg-event-blue h-10 w-10 rounded-lg flex items-center justify-center font-bold"
               onClick={onClose}
             >
-              &times;
+              ×
             </button>
 
-            <h2 className="text-xl font-bold text-gray-900 text-start mb-2">
-              Forgot Password?
-            </h2>
-            <p className="text-sm text-gray-600 text-start mb-4">
-              Enter your email address below, and we’ll send you a link to reset your
-              password.
-            </p>
-            <div className="space-y-6 pt-6">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email Address"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900"
-                autoFocus
-              />
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-event-blue mb-4">
+                Forgot Your Password?
+              </h2>
+              <h3 className="text-xl font-bold text-event-blue mb-6">
+                Let&apos;s Get You Back In
+              </h3>
+              <p className="text-gray-600 text-base leading-relaxed">
+                No worries! Enter your registered email, and we&apos;ll send you a secure link to reset your password.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter Email"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent text-base"
+                  autoFocus
+                />
+              </div>
+
               <button
                 onClick={handleSubmit}
-                className="w-full bg-event-blue text-white py-1 rounded-full hover:bg-blue-900 transition-colors"
+                className="w-full bg-event-blue text-white py-3 rounded-full hover:bg-blue-700 transition-colors text-lg font-medium"
               >
                 Submit
               </button>
-              <p>
-                Remember your Login details?{" "}
-                <Link href="/auth/login">Login</Link>
+
+              <p className="text-center text-gray-600">
+                Remembered your Login details?{" "}
+                <Link href="/auth/login" className="text-event-blue hover:underline font-medium">
+                  Login
+                </Link>
               </p>
             </div>
           </div>

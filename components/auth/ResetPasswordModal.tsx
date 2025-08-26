@@ -80,7 +80,7 @@ const ResetPasswordModal: React.FC<{ open: boolean; onClose: () => void; email: 
               Forgot Your Password?
             </h2>
             <h3 className="text-xl font-bold text-event-blue text-start mb-4">
-              Let's Get You Back In
+              Let&apos;s Get You Back In
             </h3>
             <div className="space-y-4">
               <div className="relative">

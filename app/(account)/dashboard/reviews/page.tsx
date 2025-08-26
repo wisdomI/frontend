@@ -103,7 +103,7 @@ const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
         <ReviewsCard
          key={event.id} 
          {...event}
-          // onEdit={() => handleEditClick(event)}
+          onEdit={() => handleEditClick(event)}
          
          />
       ))}

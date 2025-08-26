@@ -1,15 +1,13 @@
 'use client'
 
-
 import React, { useEffect } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import Sidebar from '@/components/layouts/Sidebar';
-import HeroBanner from '@/components/sections/HeroBanner';
 import RecentlyViewed from '@/components/sections/RecentlyViewed';
 import WhyChooseEventHub from '@/components/sections/WhyChooseUs';
 import PopularServices from '@/components/sections/PopularServices';
-import QuickActions from '@/components/layouts/QuickActions';
 import HeroWithActions from '@/components/sections/HeroBanner';
+
 export default function HomePage() {
   const { showNotification } = useNotificationBreadcrumb()
 

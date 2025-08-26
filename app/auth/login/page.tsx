@@ -28,7 +28,7 @@ export default function LoginPage() {
           
           <div className="text-center">
             <a href="/auth/register" className="text-event-blue hover:opacity-80 transition-all">
-              Don't have an account? Sign up
+              Don&apos;t have an account? Sign up
             </a>
           </div>
         </div>

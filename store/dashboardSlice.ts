@@ -1,6 +1,6 @@
 // store/dashboardSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DashboardState, BreadcrumbItem } from '../types/dashbaord';
+import { DashboardState, BreadcrumbItem } from '../types/dashboard';
 
 const initialState: DashboardState = {
   currentView: 'home',

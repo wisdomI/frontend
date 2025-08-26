@@ -1,110 +1,82 @@
 
 import React, { useState } from "react";
-import PopularServiceCard from "../ui/modals/PopularServiceCard";
-import { ArrowRight } from "lucide-react";
-import { ToggleButton, ToggleButtonGroup, Box } from "@mui/material";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewModuleIcon from "@mui/icons-material/ViewModule";
-
-const services = [
-  {
-    image: "./images/image.png",
-    title: "Haircut & Styling",
-    description: "Professional haircut and beard grooming services.",
-  },
-  {
-    image: "./images/image.png",
-    title: "Spa & Massage",
-    description: "Relaxing spa treatment for body and mind.",
-  },
-  {
-    image: "./images/image.png",
-    title: "Premium Car Wash",
-    description: "Full service interior & exterior cleaning.",
-  },
-];
+import ServiceCard from "@/components/ui/ServiceCard";
+import { ArrowRight, Grid3X3, List } from "lucide-react";
+import { mockPopularServices } from "@/data/mockServices";
 
 const PopularServices: React.FC = () => {
-  const [viewMode, setViewMode] = useState<"horizontal" | "vertical">("horizontal");
-
-  const handleViewModeChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newViewMode: "horizontal" | "vertical" | null
-  ) => {
-    if (newViewMode !== null) {
-      setViewMode(newViewMode);
-    }
-  };
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   return (
-    <div className="p-4  rounded-xl shadow-sm">
+    <div className="mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-4">
-          <div className="flex items-center min-w-[160px]">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
-          <path d="M6.66745 8.13686C6.56057 9.27686 6.48557 11.2944 7.1587 12.1531C7.1587 12.1531 6.84182 9.93686 9.68245 7.15623C10.8262 6.03686 11.0906 4.51436 10.6912 3.37248C10.4643 2.72561 10.0499 2.19123 9.68995 1.81811C9.47995 1.59873 9.6412 1.23686 9.94682 1.24998C11.7956 1.33248 14.7918 1.84623 16.0649 5.04123C16.6237 6.44373 16.6649 7.89311 16.3987 9.36686C16.2299 10.3081 15.6299 12.4006 16.9987 12.6575C17.9756 12.8412 18.4481 12.065 18.6599 11.5062C18.7481 11.2737 19.0537 11.2156 19.2187 11.4012C20.8687 13.2781 21.0093 15.4887 20.6681 17.3919C20.0081 21.0706 16.2824 23.7481 12.5812 23.7481C7.95745 23.7481 4.27682 21.1025 3.32245 16.3137C2.93807 14.3806 3.13307 10.5556 6.11432 7.85561C6.33557 7.65311 6.69745 7.83311 6.66745 8.13686Z" fill="url(#paint0_radial_395_28464)"/>
-          <path d="M14.2706 15.0162C12.5663 12.8225 13.3294 10.3193 13.7475 9.32184C13.8038 9.19059 13.6538 9.06683 13.5356 9.14746C12.8025 9.64621 11.3006 10.82 10.6013 12.4718C9.65438 14.705 9.72188 15.7981 10.2825 17.1331C10.62 17.9375 10.2281 18.1081 10.0313 18.1381C9.84001 18.1681 9.66376 18.0406 9.52313 17.9075C9.11866 17.519 8.83038 17.0256 8.69063 16.4825C8.66063 16.3662 8.50876 16.3343 8.43938 16.43C7.91438 17.1556 7.64251 18.32 7.62938 19.1431C7.58813 21.6875 9.69001 23.75 12.2325 23.75C15.4369 23.75 17.7713 20.2062 15.93 17.2437C15.3956 16.3812 14.8931 15.8168 14.2706 15.0162Z" fill="url(#paint1_radial_395_28464)"/>
-          <defs>
-          <radialGradient id="paint0_radial_395_28464" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11.6654 23.8064) rotate(-179.751) scale(13.2352 21.7163)">
-          <stop offset="0.314" stop-color="#FF9800"/>
-          <stop offset="0.662" stop-color="#FF6D00"/>
-          <stop offset="0.972" stop-color="#F44336"/>
-          </radialGradient>
-          <radialGradient id="paint1_radial_395_28464" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12.4087 10.6359) rotate(90.5787) scale(13.8481 10.4217)">
-          <stop offset="0.214" stop-color="#FFF176"/>
-          <stop offset="0.328" stop-color="#FFF27D"/>
-          <stop offset="0.487" stop-color="#FFF48F"/>
-          <stop offset="0.672" stop-color="#FFF7AD"/>
-          <stop offset="0.793" stop-color="#FFF9C4"/>
-          <stop offset="0.822" stop-color="#FFF8BD" stop-opacity="0.804"/>
-          <stop offset="0.863" stop-color="#FFF6AB" stop-opacity="0.529"/>
-          <stop offset="0.91" stop-color="#FFF38D" stop-opacity="0.209"/>
-          <stop offset="0.941" stop-color="#FFF176" stop-opacity="0"/>
-          </radialGradient>
-          </defs>
+            <path d="M6.66745 8.13686C6.56057 9.27686 6.48557 11.2944 7.1587 12.1531C7.1587 12.1531 6.84182 9.93686 9.68245 7.15623C10.8262 6.03686 11.0906 4.51436 10.6912 3.37248C10.4643 2.72561 10.0499 2.19123 9.68995 1.81811C9.47995 1.59873 9.6412 1.23686 9.94682 1.24998C11.7956 1.33248 14.7918 1.84623 16.0649 5.04123C16.6237 6.44373 16.6649 7.89311 16.3987 9.36686C16.2299 10.3081 15.6299 12.4006 16.9987 12.6575C17.9756 12.8412 18.4481 12.065 18.6599 11.5062C18.7481 11.2737 19.0537 11.2156 19.2187 11.4012C20.8687 13.2781 21.0093 15.4887 20.6681 17.3919C20.0081 21.0706 16.2824 23.7481 12.5812 23.7481C7.95745 23.7481 4.27682 21.1025 3.32245 16.3137C2.93807 14.3806 3.13307 10.5556 6.11432 7.85561C6.33557 7.65311 6.69745 7.83311 6.66745 8.13686Z" fill="url(#paint0_radial_395_28464)"/>
+            <path d="M14.2706 15.0162C12.5663 12.8225 13.3294 10.3193 13.7475 9.32184C13.8038 9.19059 13.6538 9.06683 13.5356 9.14746C12.8025 9.64621 11.3006 10.82 10.6013 12.4718C9.65438 14.705 9.72188 15.7981 10.2825 17.1331C10.62 17.9375 10.2281 18.1081 10.0313 18.1381C9.84001 18.1681 9.66376 18.0406 9.52313 17.9075C9.11866 17.519 8.83038 17.0256 8.69063 16.4825C8.66063 16.3662 8.50876 16.3343 8.43938 16.43C7.91438 17.1556 7.64251 18.32 7.62938 19.1431C7.58813 21.6875 9.69001 23.75 12.2325 23.75C15.4369 23.75 17.7713 20.2062 15.93 17.2437C15.3956 16.3812 14.8931 15.8168 14.2706 15.0162Z" fill="url(#paint1_radial_395_28464)"/>
+            <defs>
+              <radialGradient id="paint0_radial_395_28464" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11.6654 23.8064) rotate(-179.751) scale(13.2352 21.7163)">
+                <stop offset="0.314" stopColor="#FF9800"/>
+                <stop offset="0.662" stopColor="#FF6D00"/>
+                <stop offset="0.972" stopColor="#F44336"/>
+              </radialGradient>
+              <radialGradient id="paint1_radial_395_28464" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12.4087 10.6359) rotate(90.5787) scale(13.8481 10.4217)">
+                <stop offset="0.214" stopColor="#FFF176"/>
+                <stop offset="0.328" stopColor="#FFF27D"/>
+                <stop offset="0.487" stopColor="#FFF48F"/>
+                <stop offset="0.672" stopColor="#FFF7AD"/>
+                <stop offset="0.793" stopColor="#FFF9C4"/>
+                <stop offset="0.822" stopColor="#FFF8BD" stopOpacity="0.804"/>
+                <stop offset="0.863" stopColor="#FFF6AB" stopOpacity="0.529"/>
+                <stop offset="0.91" stopColor="#FFF38D" stopOpacity="0.209"/>
+                <stop offset="0.941" stopColor="#FFF176" stopOpacity="0"/>
+              </radialGradient>
+            </defs>
           </svg>
-        <h2 className="text-[32px] font-semibold font-heading text-gray-600">Popular Services</h2> </div>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            size="small"
-            aria-label="view mode"
-          >
-            <ToggleButton value="horizontal" aria-label="list view">
-              <ViewListIcon />
-            </ToggleButton>
-            <ToggleButton value="vertical" aria-label="grid view">
-              <ViewModuleIcon />
-            </ToggleButton>
-          </ToggleButtonGroup>
-          
-        </Box>
+          <h2 className="text-2xl font-semibold font-heading text-gray-700">Popular Services</h2>
         </div>
-        <button className="flex items-center text-sm text-blue-600 hover:underline ml-2">
+        
+        <div className="flex items-center gap-4">
+          {/* Custom Toggle Buttons */}
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === "list" 
+                  ? "bg-event-blue text-white" 
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === "grid" 
+                  ? "bg-event-blue text-white" 
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <button className="flex items-center text-sm text-blue-600 hover:underline">
             See more
             <ArrowRight size={16} className="ml-1" />
           </button>
+        </div>
       </div>
 
       {/* Cards */}
-      <div
-        className={
-          viewMode === "horizontal"
-            ? "space-y-3"
-            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-        }
-      >
-        {services.map((service, index) => (
-          <PopularServiceCard
-            key={index}
-            image={service.image}
-            title={service.title}
-            description={service.description}
-            layout={viewMode}
-          />
+      <div className={
+        viewMode === "grid"
+          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+          : "space-y-4"
+      }>
+        {mockPopularServices.map((service) => (
+          <ServiceCard key={service.id} service={service} layout={viewMode} />
         ))}
       </div>
     </div>

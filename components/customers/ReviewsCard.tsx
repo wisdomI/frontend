@@ -7,9 +7,10 @@ import { EventRequestProps } from "@/types/directrequesttypes"; // <-- from your
 
 
 interface ReviewsCardProps extends EventRequestProps {
-  onEdit: () => void;
+  onEdit?: () => void;
 }
-const ReviewsCard: React.FC<EventRequestProps> = ({
+
+const ReviewsCard: React.FC<ReviewsCardProps> = ({
   id,
   title,
   postedTime,
@@ -27,7 +28,8 @@ const ReviewsCard: React.FC<EventRequestProps> = ({
   services,
   budget,
   additionalInfo,
-  }, { onEdit, ...props }  )   => {
+  onEdit
+}) => {
 
 
   return (
