@@ -89,7 +89,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
           </button>
 
           {/* Event Planner Assigned */}
-          <div className="space-y-1 flex items-center justify-between flex-col">
+          {/* <div className="space-y-1 flex items-center justify-between flex-col">
             <span className="font-medium text-gray-700 font-sans">
               Event planner Assigned:
             </span>
@@ -97,7 +97,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
               <User className="w-5 h-5" />
               {plannerAssigned}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Column */}

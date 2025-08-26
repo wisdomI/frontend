@@ -6,6 +6,10 @@ import SuccessModal from "./SuccessNotificationModal";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import EventTypeSelect from "../select/EventTypeSelect";
 import ServiceTypeSelect from "../select/ServiceTypeSelect";
+import LocationSelect from "../select/LocationSelect";
+import CitySelect from "../select/CitySelect";
+import YesNoSelect from "../select/YesNoSelect";
+import CustomCalendar from "../calendar/CustomCalendar";
 
 
 export default function PostServiceModal() {
@@ -161,25 +165,19 @@ export default function PostServiceModal() {
                   </label>
                   <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                     <div className="flex-1">
-                      <label className="block text-md font-normal   text-gray-500   font-sans  ">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
+                      <CustomCalendar
                         value={formData.startDate}
-                        onChange={(e) => handleInputChange("startDate", e.target.value)}
-                        className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-gray-500"
+                        onChange={(date) => handleInputChange("startDate", date)}
+                        placeholder="Select Start Date"
+                        label="Start Date"
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-md font-normal text-gray-500 mb-1  font-sans ">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
+                      <CustomCalendar
                         value={formData.endDate}
-                        onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        className="w-full px-3 py-2 shadow-sm  rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal  placeholder:text-[#a5a0a0] text-gray-500"
+                        onChange={(date) => handleInputChange("endDate", date)}
+                        placeholder="Select End Date"
+                        label="End Date"
                       />
                     </div>
                   </div>
@@ -190,16 +188,17 @@ export default function PostServiceModal() {
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Location
                   </label>
-                  <select 
+                  <LocationSelect
                     value={formData.eventLocation}
-                    onChange={(e) => handleInputChange("eventLocation", e.target.value)}
-                    className="w-full px-3 py-2  shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                  >
-                    <option value="">Select State </option>
-                    <option value="lagos">Lagos</option>
-                    <option value="abuja">Abuja</option>
-                    <option value="rivers">Rivers</option>
-                  </select>
+                    onChange={(value) => {
+                      handleInputChange("eventLocation", value);
+                      // Reset city when state changes
+                      if (formData.eventCity) {
+                        handleInputChange("eventCity", "");
+                      }
+                    }}
+                    placeholder="Select State"
+                  />
                 </div>
 
                 {/* Event City */}
@@ -211,16 +210,12 @@ export default function PostServiceModal() {
                   </span>
                   </label>
                   
-                  <select 
+                  <CitySelect
                     value={formData.eventCity}
-                    onChange={(e) => handleInputChange("eventCity", e.target.value)}
-                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  placeholder:font-sans placeholder:font-normal rounded-md bg-[#fff] focus:outline-none focus:ring-1 placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                  >
-                    <option value="">Select City </option>
-                    <option value="lagos-island">Lagos Island</option>
-                    <option value="victoria-island">Victoria Island</option>
-                    <option value="ikeja">Ikeja</option>
-                  </select>
+                    onChange={(value) => handleInputChange("eventCity", value)}
+                    selectedState={formData.eventLocation}
+                    placeholder="Select City"
+                  />
                 </div>
 
                 {/* Services Needed */}
@@ -334,14 +329,11 @@ export default function PostServiceModal() {
                   <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Would you like an Event planner to organize your event?
                   </label>
-                  <select 
+                  <YesNoSelect
                     value={formData.eventPlanner}
-                    onChange={(e) => handleInputChange("eventPlanner", e.target.value)}
-                    className="w-full px-3 py-2  shadow-sm font-normal font-sans  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="no">No </option>
-                    <option value="yes">Yes</option>
-                  </select>
+                    onChange={(value) => handleInputChange("eventPlanner", value)}
+                    placeholder="Select Option"
+                  />
                 </div>
 
                 {/* Select Planner */}
@@ -349,15 +341,13 @@ export default function PostServiceModal() {
                   <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Would you like AI to suggest Event Planners that can organize your event?
                   </label>
-                  <select 
+                  <YesNoSelect
                     value={formData.selectedPlanner}
-                    onChange={(e) => handleInputChange("selectedPlanner", e.target.value)}
-                    className="w-full px-3 py-2   shadow-sm rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700 font-normal font-sans  placeholder:font-sans placeholder:font-normal"
-                  >
-                    <option value="">Yes</option>
-                    <option value="No">No</option>
-                    
-                  </select>
+                    onChange={(value) => handleInputChange("selectedPlanner", value)}
+                    placeholder="Select Option"
+                    yesLabel="Yes"
+                    noLabel="No"
+                  />
                 </div>
 
                 {/* Submit */}

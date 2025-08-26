@@ -7,9 +7,9 @@ export default function Footer() {
     <footer className="bg-event-blue text-white">
       <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand & Description */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <div className="mb-6">
               <a href="/" className="inline-block">
                 <Image src={Logo} alt="EventHub Logo" width={150} height={60} />
@@ -26,7 +26,7 @@ export default function Footer() {
             </p>
 
             {/* Contact Info */}
-            <div className="space-y-3">
+            <div className="space-y-3 flex gap-2 ">
               <div className="flex items-center gap-3">
                 <div className="bg-white p-2 rounded-full">
                   <Mail className="w-4 h-4 text-event-blue" />
@@ -49,10 +49,10 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="flex gap-6">
+          <div className="flex gap-2">
           <div>
             <h4 className="font-semibold text-lg mb-6 font-heading">Quick Links</h4>
-            <ul className="space-y-3 text-blue-100 text-sm">
+            <ul className="space-y-2 text-blue-100 text-sm">
               <li><a href="/" className="hover:text-white font-sans transition-colors">Home</a></li>
               <li><a href="/about" className="hover:text-white font-sans transition-colors">About Us</a></li>
               <li><a href="/contact" className="hover:text-white font-sans transition-colors">Contact Us</a></li>
@@ -71,7 +71,7 @@ export default function Footer() {
           {/* Legal Information */}
           <div>
             <h4 className="font-semibold text-lg mb-6 font-heading">Legal Information</h4>
-            <ul className="space-y-3 text-blue-100 text-sm">
+            <ul className="space-y-2 text-blue-100 text-sm">
               <li><a href="/privacy" className="hover:text-white font-sans transition-colors">Privacy Policy</a></li>
               <li><a href="/payment-policy" className="hover:text-white font-sans transition-colors">Payment Policy</a></li>
               <li><a href="/vendor-agreement" className="hover:text-white font-sans transition-colors">Vendor Agreement</a></li>
@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div>
+          <div className="col-span-2">
             <h4 className="font-semibold text-lg font-heading mb-4">Subscribe Newsletter</h4>
             <p className="text-blue-100 text-sm mb-6 font-sans">
               Get the latest Vendor update & Event tips
@@ -101,7 +101,7 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="bg-yellow-400 text-gray-800 px-6 py-3 font-sans rounded-r-lg font-semibold hover:bg-yellow-500 transition-colors"
+                className="bg-yellow text-gray-800 px-6 py-3 font-sans rounded-r-lg font-semibold hover:bg-yellow transition-colors"
               >
                 Subscribe
               </button>

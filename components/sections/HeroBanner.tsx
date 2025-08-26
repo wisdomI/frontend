@@ -1,8 +1,9 @@
-import Link from 'next/link';
+
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled } from '@ant-design/icons';
+import Link from 'next/link';
 
 const HeroWithActions = () => {
   // Slider settings
@@ -35,7 +36,7 @@ const HeroWithActions = () => {
   ];
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 mt-6">
       {/* Hero Banner - aligned with sidebar menu options */}
       <div className="md:col-span-3 mt-16">
         <Slider {...sliderSettings}>
@@ -56,20 +57,24 @@ const HeroWithActions = () => {
 
       {/* Quick Actions - header aligned with sidebar header */}
       <div className="md:col-span-1 flex flex-col">
-        <h2 className="text-[32px] font-semibold font-heading text-gray-700 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-[32px] font-semibold font-heading text-gray-700 mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-2 gap-4 mt-2">
           {actions.map((action, idx) => (
             <Link key={idx} href={action.href} className="block">
-              <div className="bg-event-blue text-white p-4 rounded-xl flex flex-col items-center justify-center hover:bg-blue-700 transition-colors min-h-[120px] text-sm w-full cursor-pointer group">
-                <span className="bg-white text-event-blue p-3 rounded-xl mb-3 text-lg group-hover:scale-105 transition-transform">
+              <div className="bg-event-blue text-white  rounded-xl flex flex-col gap-2    items-center justify-center hover:bg-blue-900 transition-colors min-h-[120px] text-sm w-full cursor-pointer group">
+                <div className=' flex flex-col items-center justify-center'>
+                <p className='p-3 bg-white text-event-blue rounded-xl  font-bold '><span >
                   {action.icon}
-                </span>
-                <span className="text-center leading-tight font-medium">{action.label}</span>
+                </span></p>
+                <p className=' w-full text-center px-4 mx-auto'>{action.label}</p>
+                </div>
+                
               </div>
             </Link>
           ))}
         </div>
       </div>
+     
     </section>
   );
 };

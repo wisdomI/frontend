@@ -44,7 +44,7 @@ module.exports = {
   				'900': '#032D71',
   				'950': '#1e1b4b'
   			},
-  			'dark-blue': '#032D71',
+  			'bg-event-blue': '#032D71',
   			'light-blue': '#6694CB',
   			yellow: '#fec240',
   			'text-black': '#4C4C4C',

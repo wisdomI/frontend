@@ -2,21 +2,21 @@
 "use client";
 
 import React, { useState } from "react";
-import VendorCard from "../ui/modal/VendorsCard";
-import { services } from "@/data/services";
+import ServiceCard from "@/components/ui/ServiceCard";
+import { mockRecentlyViewedServices } from "@/data/mockServices";
 
 const RecentlyViewed = () => {
-  const allServices = services; 
-  const [visibleCount, setVisibleCount] = useState(3); 
-  const maxLoadPerClick = 10; 
+  const allServices = mockRecentlyViewedServices;
+  const [visibleCount, setVisibleCount] = useState(3);
+  const maxLoadPerClick = 3;
 
   const handleSeeMore = () => {
     const newCount = visibleCount + maxLoadPerClick;
-    setVisibleCount(newCount > allServices.length ? allServices.length : newCount); // Limit to total length
+    setVisibleCount(newCount > allServices.length ? allServices.length : newCount);
   };
 
   const handleSeeLess = () => {
-    setVisibleCount(4);
+    setVisibleCount(3);
   };
 
   const recentServices = allServices.slice(0, visibleCount);
@@ -66,16 +66,12 @@ const RecentlyViewed = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {recentServices.map((service, index) => (
-          <VendorCard
-            key={index}
-            verified={true}
-            image={service.image || "./images/image.png"}
-            title={service.title || "Vendor Title"}
-            vendorName={service.vendorName || "Vendor Name"}
-            rating={service.rating || 4.5}
-            reviews={typeof service.reviews === "number" ? service.reviews : 0}
-            location={service.location || "Location"}
+        {recentServices.map((service) => (
+          <ServiceCard
+            key={service.id}
+            service={service}
+            layout="grid"
+            showPrice={true}
           />
         ))}
       </div>

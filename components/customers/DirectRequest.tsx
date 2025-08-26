@@ -1,6 +1,6 @@
 import React from "react";
 import { CheckCircleFilled } from "@ant-design/icons";
-import { Edit2Icon, Eye, Star, Trash2, User } from "lucide-react";
+import { EditIcon, Eye, Star, Trash2, User } from "lucide-react";
 import Image from "next/image";
 import { EventRequestProps } from "@/types/directrequesttypes"; // <-- from your types.ts
 
@@ -10,8 +10,7 @@ interface DirectRequestCardProps extends EventRequestProps {
   onEdit: () => void;
   onServiceDelete?: (serviceIndex: number) => void;
 }
-
-const DirectRequestCard: React.FC<DirectRequestCardProps> = ({
+const DirectRequestCard: React.FC<EventRequestProps> = ({
   id,
   title,
   postedTime,
@@ -29,19 +28,17 @@ const DirectRequestCard: React.FC<DirectRequestCardProps> = ({
   services,
   budget,
   additionalInfo,
-  onEdit,
-  onServiceDelete
-}) => {
+  }, { onEdit, ...props }  )   => {
 
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+    <div className="bg-[#fff] border border-gray-200 rounded-xl shadow-sm p-6 mb-4">
       {/* Main Content - Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
         {/* Left Column */}
         <div className="space-y-4 col-span-1">
           {/* Event Image */}
-          <div className="w-[252px] h-[235px] aspect-square rounded-lg overflow-hidden  mr-4">
+          <div className="w-[237px] h-[235px] aspect-square rounded-lg overflow-hidden   mr-6 ">
             <img
              src={images?.[0] ?? "/images/places.jpg"} // first image
               alt={title}
@@ -126,7 +123,7 @@ const DirectRequestCard: React.FC<DirectRequestCardProps> = ({
               <div className="flex items-center gap-3">
                 <button className="text-white bg-event-blue rounded-md border-event-blue border p-1"
                  onClick={onEdit} >
-                  <Edit2Icon className="w-4 h-4" />
+                  <EditIcon className="w-4 h-4" />
                 </button>
                 <button className="text-red-500 border-red-500 border rounded-md p-1">
                   <Trash2 className="w-4 h-4" />
@@ -164,17 +161,17 @@ const DirectRequestCard: React.FC<DirectRequestCardProps> = ({
               {services.map((service, i) => (
                 <span
                   key={i}
-                  className="bg-event-blue text-white text-sm px-4 py-1 rounded-lg flex items-center gap-2"
+                  className="bg-event-blue text-white text-sm px-4 py-1 rounded-lg"
                 >
                   {service}
-                  {onServiceDelete && (
+                  {/* {onServiceDelete && (
                     <button
                       onClick={() => onServiceDelete(i)}
                       className="text-white hover:text-red-200 ml-1"
                     >
                       ×
                     </button>
-                  )}
+                  )} */}
                 </span>
               ))}
             </div>

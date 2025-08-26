@@ -3,10 +3,11 @@
 import React, { useEffect } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import Sidebar from '@/components/layouts/Sidebar';
+import HeroWithActions from '@/components/sections/HeroBanner';
 import RecentlyViewed from '@/components/sections/RecentlyViewed';
 import WhyChooseEventHub from '@/components/sections/WhyChooseUs';
 import PopularServices from '@/components/sections/PopularServices';
-import HeroWithActions from '@/components/sections/HeroBanner';
+
 
 export default function HomePage() {
   const { showNotification } = useNotificationBreadcrumb()
@@ -23,23 +24,16 @@ export default function HomePage() {
   }, [showNotification])
 
   return (
-    <div className="flex min-h-screen flex-1 ">
-      <Sidebar />
-
-      <main className="flex-1 container mx-auto px-4 py-8  ">
-        {/* <h1 className="text-4xl font-bold text-center mb-8">
-          Welcome to Event Hub
-        </h1> */}
-        {/* Add hero section or other content here */}
-      
-<HeroWithActions/>
-       
-        <WhyChooseEventHub/>
-<RecentlyViewed/>
- <PopularServices/>
-
-      </main>
-      
+    <div className="container mx-auto px-8 md:px-10 lg:px-12">
+      <div className="flex min-h-screen gap-6 py-6">
+        <Sidebar />
+        <main className="flex-1">
+          <HeroWithActions />
+          <WhyChooseEventHub />
+          <RecentlyViewed />
+          <PopularServices />
+        </main>
+      </div>
     </div>
   );
 }

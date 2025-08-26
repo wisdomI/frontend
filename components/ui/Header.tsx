@@ -3,39 +3,35 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Logo from '@/public/images/primary-logo.png'
-const locations = [
-  'New York, NY',
-  'Los Angeles, CA',
-  'Chicago, IL',
-  'Houston, TX',
-  'Phoenix, AZ',
-  'Philadelphia, PA',
-  'San Antonio, TX',
-  'San Diego, CA',
-  'Dallas, TX',
-  'San Jose, CA',
-  'Austin, TX',
-  'Jacksonville, FL',
-  'Fort Worth, TX',
-  'Columbus, OH',
-'Nigeria , Lagos',
-  'Charlotte, NC',
-  'Detroit, MI',
-  'Charlotte, NC',
-  'San Francisco, CA',
-  'Indianapolis, IN',
-  'Seattle, WA',
-  'Denver, CO',
-  'Washington, DC'
-]
+import LocationSelect from './select/LocationSelect'
+
 
 
 
 export default function Header() {
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState('Select Location')
+  const [selectedLocation, setSelectedLocation] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Define locations array for mobile dropdown
+  const locations = [
+    'New York, NY',
+    'Los Angeles, CA',
+    'Chicago, IL',
+    'Houston, TX',
+    'Phoenix, AZ',
+    'Philadelphia, PA',
+    'San Antonio, TX',
+    'San Diego, CA',
+    'Dallas, TX',
+    'San Jose, CA'
+  ]
+
+  const handleLocationChange = (location: string) => {
+    setSelectedLocation(location)
+    setIsLocationDropdownOpen(false)
+  }
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location)
@@ -49,64 +45,33 @@ export default function Header() {
 
   return (
     <header className="bg-[#fff] shadow-sm border-b">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-8 md:px-12 lg:px-16">
         {/* Desktop Header */}
         <div className="hidden lg:flex items-center justify-between h-20 bg-white">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
             <a href="/" className="text-2xl font-bold text-event-blue">
               <Image src={Logo}
-              alt="logo image "
-              width={200}
-              height={200}
+                alt="logo image "
+                width={200}
+                height={200}
               />
             </a>
           </div>
-          
+
           {/* Center Section - Location Dropdown and Search */}
-          <div className="flex items-center font-sans  space-x-0 flex-1 max-w-3xl mx-12">
+          <div className="flex items-center font-sans space-x-0 flex-1 max-w-3xl mx-12">
             {/* Location Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                className="bg-event-blue text-white px-6 py-3 rounded-l-lg hover:bg-event-blue-hover transition-colors flex items-center space-x-3 h-12 min-w-[140px] justify-between"
-              >
-                <span className="text-sm font-medium truncate font-sans ">{selectedLocation}</span>
-                <svg 
-                  className={`w-4 h-4  transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {/* Dropdown Menu */}
-              {isLocationDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                  <div className="p-3">
-                    <input
-                      type="text"
-                      placeholder="Search locations..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-event-blue"
-                    />
-                  </div>
-                  <div className="py-1">
-                    {locations.map((location) => (
-                      <button
-                        key={location}
-                        onClick={() => handleLocationSelect(location)}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-100 hover:text-event-blue transition-colors"
-                      >
-                        {location}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div className="min-w-[200px]">
+              <div className="[&>div>button]:rounded-l-lg [&>div>button]:rounded-r-none [&>div>button]:bg-event-blue [&>div>button]:text-white [&>div>button]:border-event-blue [&>div>button]:h-12 [&>div>button]:hover:bg-event-blue-hover">
+                <LocationSelect
+                  value={selectedLocation}
+                  onChange={handleLocationChange}
+                  placeholder="Select Location"
+                />
+              </div>
             </div>
-            
+
             {/* Search Form */}
             <form onSubmit={handleSearch} className="flex flex-1 font-sans ">
               <input
@@ -127,17 +92,17 @@ export default function Header() {
               </button>
             </form>
           </div>
-          
+
           {/* Right Section - Login and Get Started */}
           <div className="flex items-center space-x-6 min-w-[200px] justify-end">
-            <a 
-              href="/auth/login" 
+            <a
+              href="/auth/login"
               className="text-gray-700 font-sans  hover:text-event-blue transition-colors text-md font-semibold px-2"
             >
               Login
             </a>
-            <a 
-              href="/auth/register" 
+            <a
+              href="/auth/register"
               className="bg-event-blue font-sans text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-md font-semibold"
             >
               Get Started
@@ -148,16 +113,16 @@ export default function Header() {
         {/* Tablet Header */}
         <div className="hidden md:flex lg:hidden items-center justify-between h-16">
           {/* Logo */}
-           <div className="flex items-center min-w-[100px]">
+          <div className="flex items-center min-w-[100px]">
             <a href="/" className="text-xl font-bold text-event-blue">
               <Image src={Logo}
-              alt="logo image "
-              width={100}
-              height={100}
+                alt="logo image "
+                width={100}
+                height={100}
               />
             </a>
           </div>
-          
+
           {/* Simplified Search */}
           <div className="flex items-center flex-1 max-w-md mx-6">
             <form onSubmit={handleSearch} className="flex w-full">
@@ -178,17 +143,17 @@ export default function Header() {
               </button>
             </form>
           </div>
-          
+
           {/* Right Section */}
           <div className="flex items-center space-x-3">
-            <a 
-              href="/auth/login" 
+            <a
+              href="/auth/login"
               className="text-gray-700 hover:text-event-blue transition-colors text-sm font-medium"
             >
               Login
             </a>
-            <a 
-              href="/auth/register" 
+            <a
+              href="/auth/register"
               className="bg-event-blue text-white px-4 py-2 rounded-lg hover:bg-event-blue-hover transition-colors text-sm font-medium"
             >
               Sign Up
@@ -204,7 +169,7 @@ export default function Header() {
               EventHub
             </a>
           </div>
-          
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -252,16 +217,16 @@ export default function Header() {
                   className="w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-between"
                 >
                   <span className="text-sm font-medium">{selectedLocation}</span>
-                  <svg 
-                    className={`w-4 h-4 transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                
+
                 {/* Mobile Dropdown Menu */}
                 {isLocationDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
@@ -283,14 +248,14 @@ export default function Header() {
 
             {/* Mobile Navigation Links */}
             <div className="px-4 space-y-2">
-              <a 
-                href="/auth/login" 
+              <a
+                href="/auth/login"
                 className="block w-full text-center py-3 text-gray-700 hover:text-event-blue transition-colors font-medium"
               >
                 Login
               </a>
-              <a 
-                href="/auth/register" 
+              <a
+                href="/auth/register"
                 className="block w-full text-center bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue-hover transition-colors font-medium"
               >
                 Get Started
@@ -299,11 +264,11 @@ export default function Header() {
           </div>
         )}
       </div>
-      
+
       {/* Overlay to close dropdowns when clicking outside */}
       {(isLocationDropdownOpen || isMobileMenuOpen) && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => {
             setIsLocationDropdownOpen(false)
             setIsMobileMenuOpen(false)

@@ -53,7 +53,7 @@ export default function ServiceRequestClient() {
   return (
     <div className="bg-white rounded-lg p-6">
       {/* Page Header */}
-      <h1 className="text-[20px] font-semibold font-heading text-gray-900 mb-4">Manage all Posts</h1>
+      {/* <h1 className="text-[20px] font-semibold font-heading text-gray-900 mb-4">Manage all Posts</h1> */}
       
       {/* Header Switch Navigation */}
       <Navbar activePage="/service-requests" onPageChange={() => {}} />

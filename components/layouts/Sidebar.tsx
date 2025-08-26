@@ -716,7 +716,7 @@ const FloatingSubmenu: React.FC<FloatingSubmenuProps> = ({ items, position, onCl
           <Link
             key={item.label}
             href={item.route}
-            className="block px-4 py-3 text-[16px] font-heading tracking-tight   font-bold text-[#fff] hover:text-yellow  border-b-1  transition-all duration-200 border-b  border-[#69797f] last:border-b-0"
+            className="block px-4 py-2 text-[16px] font-heading tracking-tight   font-bold text-[#fff] hover:text-yellow  border-b-1  transition-all duration-200 border-b  border-[#69797f] last:border-b-0"
             onClick={onClose}
           >
             {item.label}
@@ -767,7 +767,7 @@ const Sidebar: React.FC = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <section className="px-2">
+    <section className="px-2 mt-6">
       <div className="flex flex-row justify-between items-center">
         <div
           className="mx-2 bg-event-blue p-2 rounded-xl cursor-pointer hover:bg-event-blue transition-colors"
@@ -788,13 +788,13 @@ const Sidebar: React.FC = () => {
         className={`h-fit w-64 ${isFilterOpen ? 'bg-white' : 'bg-event-blue'} ${isFilterOpen ? 'text-gray-800' : 'text-white'} flex flex-col ${isFilterOpen ? 'p-0' : 'p-2'} shadow-lg rounded-2xl overflow-y-auto mt-4 transition-all duration-300 ${
           isMenuOpen ? 'block' : 'hidden md:block'
         }`}
-        style={{ minHeight: 'calc(80vh - 3rem)' }}
+        style={{ minHeight: 'calc(70vh - 3rem)' }}
       >
         <nav className="container flex-1">
           {!isFilterOpen ? (
             <ul>
               {menuItems.map((item) => (
-                <li key={item.label} className="mb-1 group">
+                <li key={item.label} className=" group">
                   <div
                     ref={(el) => (menuRefs.current[item.label] = el)}
                     className="flex items-center justify-between border-b last:border-b-0 border-spacing-x-0 border-[#69797f] hover:text-yellow cursor-pointer px-2 py-3 group hover:bg-event-blue-hover transition-colors"
