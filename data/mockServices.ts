@@ -4,6 +4,7 @@ export interface ServiceData {
   title: string;
   vendorName: string;
   image: string;
+  images?: string[]; // Multiple images for sliding effect
   rating: number;
   reviews: number;
   location: string;
@@ -20,6 +21,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "Professional Wedding Photography",
     vendorName: "Ope's Event Photography",
     image: "./images/image.png",
+    images: ["./images/cc.jpg", "./images/cake56.jpg", "./images/entertain.jpg"],
     rating: 4.8,
     reviews: 45,
     location: "Victoria Island, Lagos",
@@ -34,6 +36,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "Custom Wedding Cakes",
     vendorName: "UK Cakes & Cream",
     image: "./images/cake2.jpg",
+    images: ["./images/cake.jpg", "./images/place3.jpg", "./images/cake6.jpg "],
     rating: 4.6,
     reviews: 32,
     location: "Ikeja, Lagos",
@@ -48,6 +51,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "Event Hall Decoration",
     vendorName: "Elegant Decor Solutions",
     image: "./images/place1.jpg",
+    images: ["./images/place5.jpg", "./images/lady1.jpg", "./images/cake2.jpg"],
     rating: 4.7,
     reviews: 28,
     location: "Lekki, Lagos",
@@ -61,7 +65,8 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     id: "4",
     title: "DJ & Sound Services",
     vendorName: "SoundWave Entertainment",
-    image: "./images/image.png",
+    image: "./images/place1.jpg",
+    images: ["./images/place4.png", "./images/place1.jpg", "./images/cake2.jpg"],
     rating: 4.5,
     reviews: 38,
     location: "Surulere, Lagos",
@@ -76,6 +81,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "Bridal Makeup & Hair",
     vendorName: "Glam Beauty Studio",
     image: "./images/cake2.jpg",
+    images: ["./images/cake2.jpg", "./images/image.png", "./images/place1.jpg"],
     rating: 4.9,
     reviews: 52,
     location: "Victoria Island, Lagos",
@@ -90,6 +96,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "Event Planning Services",
     vendorName: "Perfect Events Co.",
     image: "./images/place1.jpg",
+    images: ["./images/place1.jpg", "./images/cake2.jpg", "./images/image.png"],
     rating: 4.4,
     reviews: 25,
     location: "Ikoyi, Lagos",
@@ -106,7 +113,8 @@ export const mockPopularServices: ServiceData[] = [
     id: "p1",
     title: "Wedding Hall Decoration/Backdrops",
     vendorName: "Ope's Event Decor",
-    image: "./images/image.png",
+    image: "./images/cake2.png",
+    images: ["./images/image.png", "./images/cake2.jpg", "./images/place1.jpg"],
     rating: 4.5,
     reviews: 20,
     location: "Victoria Island, Lagos",
@@ -121,6 +129,7 @@ export const mockPopularServices: ServiceData[] = [
     title: "Book us for all types of Event Cakes",
     vendorName: "UK Cakes & Cream",
     image: "./images/cake2.jpg",
+    images: ["./images/cake2.jpg", "./images/place1.jpg", "./images/image.png"],
     rating: 4.5,
     reviews: 20,
     location: "Victoria Island, Lagos",
@@ -135,11 +144,12 @@ export const mockPopularServices: ServiceData[] = [
     title: "Wedding Hall Decoration/Backdrops",
     vendorName: "Ope's Event Decor",
     image: "./images/place1.jpg",
+    images: ["./images/place1.jpg", "./images/image.png", "./images/cake2.jpg"],
     rating: 4.5,
     reviews: 20,
     location: "Victoria Island, Lagos",
     verified: true,
-    badge: "Best Valued",
+    badge: "Most Booked",
     description: "Elegant decoration services for all types of events",
     price: 150000,
     category: "Decoration"
@@ -148,7 +158,8 @@ export const mockPopularServices: ServiceData[] = [
     id: "p4",
     title: "Wedding Hall Decoration/Backdrops",
     vendorName: "Ope's Event Decor",
-    image: "./images/image.png",
+    image: "./images/lady2.jpg",
+    images: ["./images/Lady7.png", "./images/place5.jpg", "./images/lady3.jpg"],
     rating: 4.5,
     reviews: 20,
     location: "Victoria Island, Lagos",
@@ -175,7 +186,7 @@ export const getBadgeColor = (badge: string): string => {
     case 'top rated':
       return 'bg-green-600';
     case 'most booked':
-      return 'bg-blue-600';
+      return 'bg-blue-900';
     case 'best valued':
       return 'bg-purple-600';
     case 'popular':

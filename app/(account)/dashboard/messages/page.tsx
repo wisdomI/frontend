@@ -106,7 +106,7 @@ const MessagesComponent = () => {
         {/* Left Sidebar - Conversations List */}
         <div className="w-1/3 flex flex-col p-4 border-r border-gray-200">
           {/* Header */}
-      
+
 
           <div className="mb-3">
             {/* Search */}
@@ -379,8 +379,8 @@ const MessagesComponent = () => {
         isOpen={isMediaModalOpen}
         onClose={() => setIsMediaModalOpen(false)}
       />
-      </div>
-    
+    </div>
+
   );
 };
 

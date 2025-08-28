@@ -96,23 +96,23 @@ export default function PostServiceModal() {
 
   return (
     <>
-       
+
       <button
         onClick={() => setIsOpen(true)}
         className="block w-full  text-blue-900 bg-yellow font-sans font-semibold text-center py-3 rounded-lg  hover:bg-yellow transition-colors"
       >
         <PlusOutlined className="mr-2" />
-      Post Service Request
+        Post Service Request
       </button>
-         
+
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
           <div className="  bg-[#f8f8f8] rounded-lg shadow-xl  w-[900px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
-            
+
             {/* Header */}
             <div className="flex items-start justify-between p-4 sm:p-6 ">
               <div className="flex-1 pr-2 mt-4">
-                <h1 className=  "  text-[32px] sm:text-md  text-[#4c4c4c] font-bold  font-heading">
+                <h1 className="  text-[32px] sm:text-md  text-[#4c4c4c] font-bold  font-heading">
                   Post a Service Request
                 </h1>
                 <p className="text-[24px] font-heading sm:text-md text-[#4c4c4c] mt-4">
@@ -129,7 +129,7 @@ export default function PostServiceModal() {
 
             {/* Content */}
             <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              
+
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Event Title */}
@@ -137,13 +137,13 @@ export default function PostServiceModal() {
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event Title
                   </label>
-                                     <input
-                     type="text"
-                     placeholder="Enter Event Title"
-                     value={formData.eventTitle}
-                     onChange={(e) => handleInputChange("eventTitle", e.target.value)}
-                     className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                   />
+                  <input
+                    type="text"
+                    placeholder="Enter Event Title"
+                    value={formData.eventTitle}
+                    onChange={(e) => handleInputChange("eventTitle", e.target.value)}
+                    className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                  />
                 </div>
 
                 {/* Event Type */}
@@ -206,10 +206,10 @@ export default function PostServiceModal() {
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Event City
                     <span className="text-[16px] font-normal  text-gray-500 mb-1 font-sans ">
-                    (Select the City you will like to Host your event)
-                  </span>
+                      (Select the City you will like to Host your event)
+                    </span>
                   </label>
-                  
+
                   <CitySelect
                     value={formData.eventCity}
                     onChange={(value) => handleInputChange("eventCity", value)}
@@ -243,13 +243,13 @@ export default function PostServiceModal() {
                     className="w-full px-3 py-2 shadow-sm rounded-md  bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
-                 <div>
+                <div>
                   <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
                     Budget Range
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g N100,000 - N200,000" 
+                    placeholder="e.g N100,000 - N200,000"
                     value={formData.budgetRange}
                     onChange={(e) => handleInputChange("budgetRange", e.target.value)}
                     className="w-full px-3 py-2  shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-thin  placeholder:font-normal placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
@@ -261,19 +261,19 @@ export default function PostServiceModal() {
               {/* Right Column */}
               <div className="space-y-4">
                 {/* Budget Range */}
-               
+
                 {/* File Upload */}
                 <div>
-                  
+
                   <div className="border-1 border-dashed border-gray-300 bg-[#fff]   rounded-md p-6 text-center">
-                    
+
                     <label className="block text-[16px] font-normal font-sans text-[#4c4c4c] mb-1">
-                    Choose a file or drag & drop it here
-                  </label>
-                  <p className="text-xs font-normal  text-gray-200 mb-3 font-sans">
-                    JPEG, PNG, PDF, and MP4 formats, up to 50MB
-                  </p>
-                    
+                      Choose a file or drag & drop it here
+                    </label>
+                    <p className="text-xs font-normal  text-gray-200 mb-3 font-sans">
+                      JPEG, PNG, PDF, and MP4 formats, up to 50MB
+                    </p>
+
                     <input
                       type="file"
                       multiple
@@ -295,14 +295,14 @@ export default function PostServiceModal() {
                         <div key={index} className="flex items-center   font-sans font-normal justify-between p-2 bg-gray-50 rounded-md">
                           <div className="text-sm text-gray-700">
                             {file.name}{" "}
-                           
+
                           </div>
                           <button
                             onClick={() => handleFileDelete(index)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
-                             <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
-                            <DeleteOutlined  className="w-5 h-5" />
+                            <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
+                            <DeleteOutlined className="w-5 h-5" />
                           </button>
                         </div>
                       ))}
@@ -351,27 +351,26 @@ export default function PostServiceModal() {
                 </div>
 
                 {/* Submit */}
-                
+
               </div>
-             
+
             </div>
-                         <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
-                   <button 
-                     onClick={handleSubmit}
-                     disabled={!isFormValid()}
-                     className={`w-full py-2  font-sans font-semibold rounded-lg  transition-colors mb-4 ${
-                       isFormValid() 
-                         ? 'bg-event-blue text-white hover:bg-blue-900' 
-                         : 'bg-event-blue text-gray-100 cursor-not-allowed'
-                     }`}
-                   >
-                     Request Service
-                   </button>
-                 </div>
+            <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
+              <button
+                onClick={handleSubmit}
+                disabled={!isFormValid()}
+                className={`w-full py-2  font-sans font-semibold rounded-lg  transition-colors mb-4 ${isFormValid()
+                    ? 'bg-event-blue text-white hover:bg-blue-900'
+                    : 'bg-event-blue text-gray-100 cursor-not-allowed'
+                  }`}
+              >
+                Request Service
+              </button>
+            </div>
           </div>
         </div>
       )}
-      
+
       {/* Success Modal */}
       <SuccessModal isOpen={showSuccess} onClose={handleCloseSuccess} />
     </>

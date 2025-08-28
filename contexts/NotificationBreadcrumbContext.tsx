@@ -1,64 +1,65 @@
-'use client'
+"use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 
 interface NotificationBreadcrumbData {
-  message: string
-  type?: 'info' | 'warning' | 'success' | 'error'
-  icon?: 'shield' | 'info' | 'warning' | 'check' | 'alert'
-  dismissible?: boolean
-  autoHide?: boolean
-  duration?: number
+  message: string;
+  type?: "info" | "warning" | "success" | "error";
+  icon?: "shield" | "info" | "warning" | "check" | "alert";
+  dismissible?: boolean;
+  autoHide?: boolean;
+  duration?: number;
 }
 
 interface NotificationBreadcrumbContextType {
-  notification: NotificationBreadcrumbData | null
-  showNotification: (notification: NotificationBreadcrumbData) => void
-  hideNotification: () => void
+  notification: NotificationBreadcrumbData | null;
+  showNotification: (notification: NotificationBreadcrumbData) => void;
+  hideNotification: () => void;
 }
 
-const NotificationBreadcrumbContext = createContext<NotificationBreadcrumbContextType | undefined>(undefined)
+const NotificationBreadcrumbContext = createContext<NotificationBreadcrumbContextType | undefined>(undefined);
 
 interface NotificationBreadcrumbProviderProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const NotificationBreadcrumbProvider: React.FC<NotificationBreadcrumbProviderProps> = ({ children }) => {
-  const [notification, setNotification] = useState<NotificationBreadcrumbData | null>(null)
+  const [notification, setNotification] = useState<NotificationBreadcrumbData | null>(null);
 
-  const showNotification = (notificationData: NotificationBreadcrumbData) => {
-    setNotification(notificationData)
-    
-    // Auto-hide if specified
+  const showNotification = useCallback((notificationData: NotificationBreadcrumbData) => {
+    setNotification(notificationData);
     if (notificationData.autoHide) {
-      const duration = notificationData.duration || 5000
+      const duration = notificationData.duration || 5000;
       setTimeout(() => {
-        setNotification(null)
-      }, duration)
+        setNotification(null);
+      }, duration);
     }
-  }
+  }, []); // Empty deps since setNotification is stable
 
-  const hideNotification = () => {
-    setNotification(null)
-  }
+  const hideNotification = useCallback(() => {
+    setNotification(null);
+  }, []);
 
-  const value: NotificationBreadcrumbContextType = {
-    notification,
-    showNotification,
-    hideNotification,
-  }
+  const value = useMemo(
+    () => ({
+      notification,
+      showNotification,
+      hideNotification,
+    }),
+    [notification, showNotification, hideNotification]
+  );
 
   return (
     <NotificationBreadcrumbContext.Provider value={value}>
       {children}
     </NotificationBreadcrumbContext.Provider>
-  )
-}
+  );
+};
 
 export const useNotificationBreadcrumb = (): NotificationBreadcrumbContextType => {
-  const context = useContext(NotificationBreadcrumbContext)
+  const context = useContext(NotificationBreadcrumbContext);
   if (context === undefined) {
-    throw new Error('useNotificationBreadcrumb must be used within a NotificationBreadcrumbProvider')
+    throw new Error("useNotificationBreadcrumb must be used within a NotificationBreadcrumbProvider");
   }
-  return context
-}
+  return context;
+};

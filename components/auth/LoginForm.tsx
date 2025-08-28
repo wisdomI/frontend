@@ -1,136 +1,137 @@
 'use client'
 
-import React, { useState } from 'react'
-import { signInWithEmail } from '@/lib/auth'
-import { useApp } from '@/contexts/AppContext'
+import { FaTimes } from 'react-icons/fa'
+import Image from 'next/image'
+import { useState } from 'react'
 import ForgetPasswordModal from './ForgetPasswordModal'
-export default function LoginForm() {
-  const [loading, setLoading] = useState(false)
-  const { addNotification } = useApp()
-  
-  const [openForgetPasswordModal, setOpenForgetPasswordModal] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
-  })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
-  }
+interface LoginModalProps {
+  onClose: () => void
+  onRegister?: () => void
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    try {
-      const result = await signInWithEmail(formData.email, formData.password)
-      
-      if (result.error) {
-        addNotification({
-          type: 'error',
-          message: result.error
-        })
-      } else {
-        addNotification({
-          type: 'success',
-          message: 'Successfully signed in!'
-        })
-      }
-    } catch (error: any) {
-      addNotification({
-        type: 'error',
-        message: error.message || 'Failed to sign in'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
+  const [activeTab, setActiveTab] = useState<
+    'individual' | 'vendor' | 'planner'
+  >('vendor')
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="email" className="sr-only">
-          Email address
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={formData.email}
-          onChange={handleChange}
-          className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-event-blue focus:border-event-blue"
-          placeholder="Email address"
-        />
-      </div>
-      <div>
-        <label htmlFor="password" className="sr-only">
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={formData.password}
-          onChange={handleChange}
-          className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-event-blue focus:border-event-blue"
-          placeholder="Password"
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <input
-            id="remember-me"
-            name="rememberMe"
-            type="checkbox"
-            checked={formData.rememberMe}
-            onChange={handleChange}
-            className="h-4 w-4 text-event-blue focus:ring-event-blue border-gray-300 rounded"
-          />
-          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-            Remember me
-          </label>
-        </div>
-
-        <div className="text-sm">
-          <a href="#" className="font-medium text-event-blue hover:opacity-80 transition-all"
-          
-          onClick={(e) => {
-            e.preventDefault();
-            setOpenForgetPasswordModal(true);
-          }}
-          >
-            Forgot your password?
-          </a>
-        </div>
-      </div>
-
-      <div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+      <div className="bg-white rounded-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto animate-slideInUp">
         <button
-          type="submit"
-          disabled={loading}
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-event-blue hover:bg-event-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-event-blue disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white p-1 bg-event-blue rounded"
         >
-          {loading ? (
-            <div className="spinner w-5 h-5"></div>
-          ) : (
-            'Sign in'
-          )}
+          <FaTimes />
         </button>
+
+        {/* Tabs */}
+        <div className="flex bg-gray-100 rounded-full p-1 mb-6">
+          <button
+            onClick={() => setActiveTab('individual')}
+            className={`flex-1 py-2 rounded-full text-sm font-medium ${
+              activeTab === 'individual'
+                ? 'bg-white shadow text-event-blue'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Individual/Org
+          </button>
+          <button
+            onClick={() => setActiveTab('vendor')}
+            className={`flex-1 py-2 rounded-full text-sm font-medium ${
+              activeTab === 'vendor'
+                ? 'bg-white shadow text-event-blue'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Event Vendor
+          </button>
+          <button
+            onClick={() => setActiveTab('planner')}
+            className={`flex-1 py-2 rounded-full text-sm font-medium ${
+              activeTab === 'planner'
+                ? 'bg-white shadow text-event-blue'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Event Planner
+          </button>
+        </div>
+
+        {/* Heading */}
+        <h2 className="text-2xl font-bold text-event-blue mb-2 text-center">
+          Login to EventHub
+        </h2>
+        <p className="text-gray-600 text-center mb-6">
+          Kindly fill in your details to Login
+        </p>
+
+        {/* Email */}
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Email</label>
+          <input
+            type="email"
+            placeholder="Enter Email"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-event-blue outline-none"
+          />
+        </div>
+
+        {/* Password */}
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Password</label>
+          <input
+            type="password"
+            placeholder="Enter Password"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-event-blue outline-none"
+          />
+          <div className="text-right mt-2">
+            <button 
+              onClick={() => setShowForgotPassword(true)}
+              className="text-event-blue text-sm font-medium hover:underline"
+            >
+              Forgot Password?
+            </button>
+          </div>
+        </div>
+
+        {/* Login Button */}
+        <button className="w-full bg-event-blue text-white py-3 rounded-full hover:bg-event-blue-hover transition-colors">
+          Login
+        </button>
+
+        {/* Register Link */}
+        <p className="text-center mt-4 text-sm">
+          Don&apos;t have an account?{' '}
+          <button 
+            onClick={onRegister}
+            className="text-event-blue font-medium hover:underline"
+          >
+            Register
+          </button>
+        </p>
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <hr className="flex-1 border-gray-300" />
+          <span className="mx-2 text-sm text-gray-500">Or Login with</span>
+          <hr className="flex-1 border-gray-300" />
+        </div>
+
+        {/* Social Login */}
+        <div className="flex justify-center gap-6">
+          <Image src="/google-icon.svg" alt="Google" width={28} height={28} />
+          <Image src="/apple-icon.svg" alt="Apple" width={28} height={28} />
+        </div>
       </div>
-      <ForgetPasswordModal
-          open={openForgetPasswordModal}
-          onClose={() => setOpenForgetPasswordModal(false)}
-        />
-    </form>
+
+      {/* Forgot Password Modal */}
+      <ForgetPasswordModal 
+        open={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)}
+        onBackToLogin={() => setShowForgotPassword(false)}
+      />
+    </div>
   )
 }

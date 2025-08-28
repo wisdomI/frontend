@@ -70,7 +70,7 @@ const OtpVerificationSuccessModal: React.FC<{ open: boolean; onClose: () => void
     setTimeout(() => {
       setShowResetPasswordModal(true);
       setLoading(false);
-      onClose(); 
+      onClose();
     }, 1000); // 1-second delay for spinner
   };
 
@@ -85,9 +85,8 @@ const OtpVerificationSuccessModal: React.FC<{ open: boolean; onClose: () => void
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-${isVerified ? "gray-500" : "black"} bg-opacity-50 backdrop-blur-md ${
-          showResetPasswordModal ? "hidden" : ""
-        }`}
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-${isVerified ? "gray-500" : "black"} bg-opacity-50 backdrop-blur-md ${showResetPasswordModal ? "hidden" : ""
+          }`}
         onClick={onClose}
       >
         <div
@@ -114,7 +113,7 @@ const OtpVerificationSuccessModal: React.FC<{ open: boolean; onClose: () => void
                       key={index}
                       id={`otp-${index}`}
                       type="password"
-                      value={digit ? "*" : ""}
+                      value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       maxLength={1}
                       className="w-10 h-10 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"

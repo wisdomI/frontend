@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Logo from '@/public/images/primary-logo.png'
 import LocationSelect from './select/LocationSelect'
+import SignUpFlow from '@/components/auth/SignUpFlow'
+import LoginModal from '@/components/auth/LoginForm'
 
 
 
@@ -13,6 +15,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showSignUpFlow, setShowSignUpFlow] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   // Define locations array for mobile dropdown
   const locations = [
@@ -95,18 +99,18 @@ export default function Header() {
 
           {/* Right Section - Login and Get Started */}
           <div className="flex items-center space-x-6 min-w-[200px] justify-end">
-            <a
-              href="/auth/login"
+            <button
+              onClick={() => setShowLoginModal(true)}
               className="text-gray-700 font-sans  hover:text-event-blue transition-colors text-md font-semibold px-2"
             >
               Login
-            </a>
-            <a
-              href="/auth/register"
+            </button>
+            <button
+              onClick={() => setShowSignUpFlow(true)}
               className="bg-event-blue font-sans text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-md font-semibold"
             >
               Get Started
-            </a>
+            </button>
           </div>
         </div>
 
@@ -146,18 +150,18 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
-            <a
-              href="/auth/login"
+            <button
+              onClick={() => setShowLoginModal(true)}
               className="text-gray-700 hover:text-event-blue transition-colors text-sm font-medium"
             >
               Login
-            </a>
-            <a
-              href="/auth/register"
+            </button>
+            <button
+              onClick={() => setShowSignUpFlow(true)}
               className="bg-event-blue text-white px-4 py-2 rounded-lg hover:bg-event-blue-hover transition-colors text-sm font-medium"
             >
               Sign Up
-            </a>
+            </button>
           </div>
         </div>
 
@@ -248,18 +252,24 @@ export default function Header() {
 
             {/* Mobile Navigation Links */}
             <div className="px-4 space-y-2">
-              <a
-                href="/auth/login"
+              <button
+                onClick={() => {
+                  setShowLoginModal(true)
+                  setIsMobileMenuOpen(false)
+                }}
                 className="block w-full text-center py-3 text-gray-700 hover:text-event-blue transition-colors font-medium"
               >
                 Login
-              </a>
-              <a
-                href="/auth/register"
+              </button>
+              <button
+                onClick={() => {
+                  setShowSignUpFlow(true)
+                  setIsMobileMenuOpen(false)
+                }}
                 className="block w-full text-center bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue-hover transition-colors font-medium"
               >
                 Get Started
-              </a>
+              </button>
             </div>
           </div>
         )}
@@ -274,6 +284,15 @@ export default function Header() {
             setIsMobileMenuOpen(false)
           }}
         />
+      )}
+
+      {/* Authentication Modals */}
+      {showSignUpFlow && (
+        <SignUpFlow onClose={() => setShowSignUpFlow(false)} />
+      )}
+      
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} />
       )}
     </header>
   )
