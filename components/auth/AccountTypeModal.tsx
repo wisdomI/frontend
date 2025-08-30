@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { FaUser, FaBuilding, FaCalendarCheck, FaTimes } from 'react-icons/fa'
-
-type AccountOption = {
-  id: string
-  title: string
-  description: string
-  icon: JSX.Element
-}
+import { FaUser, FaBuilding, FaTimes } from 'react-icons/fa'
 
 interface Props {
   onSelect: (id: string) => void
@@ -18,74 +11,66 @@ interface Props {
 const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
   const [selected, setSelected] = useState<string>('')
 
-  const options: AccountOption[] = [
-    {
-      id: 'individual',
-      title: 'I am an Individual/Organization looking for a Service',
-      description: '',
-      icon: <FaUser size={28} className="text-blue-500" />,
-    },
-    {
-      id: 'vendor',
-      title: 'I am an Event Vendor providing a service',
-      description: '',
-      icon: <FaBuilding size={28} className="text-white" />,
-    },
-    {
-      id: 'planner',
-      title: 'I am an Event Planner managing your service',
-      description: '',
-      icon: <FaCalendarCheck size={28} className="text-blue-500" />,
-    },
-  ]
-
   const handleSelect = (id: string) => {
     setSelected(id)
     onSelect(id)
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mx-auto ml-0">
-      <div className="p-6 w-full max-w-3xl bg-white rounded-2xl shadow-lg relative">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="p-8 w-full max-w-2xl bg-white rounded-2xl shadow-lg relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white p-1 bg-event-blue rounded"
+          className="absolute top-4 right-4 text-white p-2 bg-event-blue rounded-lg w-8 h-8 flex items-center justify-center"
         >
-          <FaTimes />
+          <FaTimes size={14} />
         </button>
-        <h2 className="text-2xl font-bold text-center mb-2">
+        
+        <h2 className="text-2xl font-bold text-event-blue mb-2">
           Which of these best describes you?
         </h2>
-        <p className="text-center text-gray-500 mb-8">
+        <p className="text-gray-600 mb-8">
           Let us know the kind of account you want to create.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {options.map(option => {
-            const isSelected = selected === option.id
-            return (
-              <div
-                key={option.id}
-                onClick={() => handleSelect(option.id)}
-                className={`cursor-pointer flex flex-col items-center justify-center rounded-2xl p-6 border transition-all ${
-                  isSelected
-                    ? 'bg-blue-900 text-white'
-                    : 'bg-white text-gray-800 border-gray-300 hover:border-blue-500 hover:bg-event-blue hover:text-white'
-                }`}
-              >
-                <div
-                  className={`w-14 h-14 flex items-center justify-center rounded-full mb-4 ${
-                    isSelected ? 'bg-event-blue' : 'bg-blue-100'
-                  }`}
-                >
-                  {option.icon}
-                </div>
-                <p className={`text-center font-medium text-sm`}>
-                  {option.title}
-                </p>
-              </div>
-            )
-          })}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Individual/Organization Option */}
+          <div
+            onClick={() => handleSelect('individual')}
+            className={`cursor-pointer rounded-2xl p-8 border-2 transition-all ${
+              selected === 'individual'
+                ? 'bg-event-blue text-white border-event-blue'
+                : 'bg-white text-gray-800 border-gray-200 hover:border-event-blue'
+            }`}
+          >
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${
+              selected === 'individual' ? 'bg-white' : 'bg-blue-50'
+            }`}>
+              <FaUser size={24} className={selected === 'individual' ? 'text-event-blue' : 'text-event-blue'} />
+            </div>
+            <p className="font-medium text-lg leading-tight">
+              I am an Individual/Organization looking for a Service
+            </p>
+          </div>
+
+          {/* Event Vendor Option */}
+          <div
+            onClick={() => handleSelect('vendor')}
+            className={`cursor-pointer rounded-2xl p-8 border-2 transition-all ${
+              selected === 'vendor'
+                ? 'bg-event-blue text-white border-event-blue'
+                : 'bg-gray-50 text-gray-800 border-gray-200 hover:border-event-blue hover:bg-white'
+            }`}
+          >
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${
+              selected === 'vendor' ? 'bg-white' : 'bg-blue-50'
+            }`}>
+              <FaBuilding size={24} className={selected === 'vendor' ? 'text-event-blue' : 'text-event-blue'} />
+            </div>
+            <p className="font-medium text-lg leading-tight">
+              I am an Event Vendor providing a service
+            </p>
+          </div>
         </div>
       </div>
     </div>

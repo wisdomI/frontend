@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Heart, Share2, MapPin, Star } from 'lucide-react';
+import { BsChatDots, BsFillShareFill } from "react-icons/bs";
+
 import { ServiceData, getBadgeColor } from '@/data/mockServices';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useRouter } from 'next/navigation';
@@ -41,8 +43,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         key={i} 
         className={`w-4 h-4 ${
           i < Math.floor(rating) 
-            ? 'text-yellow-400 fill-current' 
-            : 'text-gray-300'
+            ? 'text-yellow fill-current font-heading font-semibold ' 
+            : 'text-gray-600'
         }`} 
       />
     ));
@@ -59,7 +61,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         onClick={handleCardClick}
       >
         <div className="relative flex-shrink-0">
-          <div className="relative w-40 h-32 rounded-lg overflow-hidden">
+          <div className="relative w-40 h-32 rounded-t-xl overflow-hidden">
             <img
               src={images[currentImageIndex]}
               alt={service.title}
@@ -80,10 +82,20 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           
           <div className="absolute top-2 left-2 flex gap-2">
             {service.verified && (
-              <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
-                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
+              <span className="bg-blue-900 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+<g clip-path="url(#clip0_395_30751)">
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7094 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30418 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" fill="#FFEF5E"/>
+<path d="M3.05338 12.9467C2.94625 12.8395 2.86453 12.7096 2.81422 12.5667C2.76392 12.4237 2.74632 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20872 1.38266C7.30366 1.26421 7.42401 1.16861 7.56086 1.10291C7.69771 1.03722 7.84758 1.00311 7.99938 1.00311C8.15119 1.00311 8.30105 1.03722 8.43791 1.10291C8.57476 1.16861 8.6951 1.26421 8.79005 1.38266L9.73005 2.55266C9.83675 2.68526 9.97514 2.78884 10.1324 2.85386C10.2897 2.91887 10.4609 2.94322 10.63 2.92466L12.1214 2.76266C12.2722 2.74624 12.4248 2.7639 12.5678 2.81432C12.7109 2.86474 12.8409 2.94665 12.9481 3.05399L3.05338 12.9467Z" fill="#FFF9BF"/>
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7095 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30419 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10.4333 6.47998L7.95729 9.77998C7.91727 9.83346 7.86624 9.87772 7.80765 9.90978C7.74906 9.94183 7.68427 9.96094 7.61765 9.96581C7.55104 9.97068 7.48416 9.96119 7.42153 9.93798C7.3589 9.91478 7.30198 9.8784 7.25462 9.83131L5.76929 8.34465" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_395_30751">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
                 Verified
               </span>
             )}
@@ -97,11 +109,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <DiamondIcon className="w-5 h-5 flex-shrink-0" />
-              <h3 className="text-lg font-semibold text-gray-800 truncate">{service.title}</h3>
+            <div className="flex items-center gap-2 mb-2 ">
+              
+              <h3 className="text-[20px] font-semibold  font-heading text-gray-800 truncate">{service.title}</h3>
             </div>
-            <Heart 
+            <DiamondIcon className={`w-5 h-5 cursor-pointer transition-colors flex-shrink-0 ml-2 ${
+              isServiceFavorite ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
+            }`}  
+            />
+            {/* <Heart 
               className={`w-5 h-5 cursor-pointer transition-colors flex-shrink-0 ml-2 ${
                 isServiceFavorite ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
               }`}
@@ -109,13 +125,38 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 e.stopPropagation();
                 toggleFavorite(service);
               }}
-            />
+            /> */}
           </div>
-          
-          <p className="text-blue-600 font-medium mb-3">{service.vendorName}</p>
+        <div className='flex justify-between items-center   mb-2 border-b-2 border-blue-100 '>
+        <p className="text-blue-900  font-heading text-[18px] font-medium mb-3">{service.vendorName}</p>
+        <div className="flex gap-1 mb-1 ">
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <BsChatDots className="w-4 h-4" />
+              </button>
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(service);
+                }}
+              >
+                <Heart className={`w-4 h-4 ${isServiceFavorite ? 'fill-current' : ''}`} />
+              </button>
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <BsFillShareFill className="w-4 h-4" />
+              </button>
+            </div>
+        </div>
+       
           
           <div className="flex items-center gap-1 mb-3">
-            <span className="text-sm font-medium text-gray-700">Rating:</span>
+            <span className="text-[16px] font-semibold font-heading  text-gray-700">Rating:</span>
             <div className="flex items-center gap-1">
               {renderStars(service.rating)}
             </div>
@@ -128,29 +169,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               <span>{service.location}</span>
             </div>
             
-            <div className="flex gap-1">
-              <button 
-                className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MessageCircle className="w-4 h-4" />
-              </button>
-              <button 
-                className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(service);
-                }}
-              >
-                <Heart className={`w-4 h-4 ${isServiceFavorite ? 'fill-current' : ''}`} />
-              </button>
-              <button 
-                className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -159,7 +178,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="relative">
@@ -182,17 +201,27 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           </div>
         </div>
         
-        <div className="absolute top-3 left-3 flex gap-2">
+        <div className="absolute top-3 left-3 flex gap-10 justify-between items-center">
           {service.verified && (
-            <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
+            <span className="bg-blue-900 text-white text-sm px-8 py-1 rounded-2xl flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+<g clip-path="url(#clip0_395_30751)">
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7094 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30418 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" fill="#FFEF5E"/>
+<path d="M3.05338 12.9467C2.94625 12.8395 2.86453 12.7096 2.81422 12.5667C2.76392 12.4237 2.74632 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20872 1.38266C7.30366 1.26421 7.42401 1.16861 7.56086 1.10291C7.69771 1.03722 7.84758 1.00311 7.99938 1.00311C8.15119 1.00311 8.30105 1.03722 8.43791 1.10291C8.57476 1.16861 8.6951 1.26421 8.79005 1.38266L9.73005 2.55266C9.83675 2.68526 9.97514 2.78884 10.1324 2.85386C10.2897 2.91887 10.4609 2.94322 10.63 2.92466L12.1214 2.76266C12.2722 2.74624 12.4248 2.7639 12.5678 2.81432C12.7109 2.86474 12.8409 2.94665 12.9481 3.05399L3.05338 12.9467Z" fill="#FFF9BF"/>
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7095 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30419 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10.4333 6.47998L7.95729 9.77998C7.91727 9.83346 7.86624 9.87772 7.80765 9.90978C7.74906 9.94183 7.68427 9.96094 7.61765 9.96581C7.55104 9.97068 7.48416 9.96119 7.42153 9.93798C7.3589 9.91478 7.30198 9.8784 7.25462 9.83131L5.76929 8.34465" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_395_30751">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
               Verified
             </span>
           )}
           {service.badge && (
-            <span className={`${getBadgeColor(service.badge)} text-white text-xs px-2 py-1 rounded-md`}>
+            <span className={`${getBadgeColor(service.badge)} bg-blue-900 text-white text-sm px-8 py-1 rounded-2xl gap-4`}>
               {service.badge}
             </span>
           )}
@@ -202,24 +231,45 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
-            <DiamondIcon className="w-5 h-5 flex-shrink-0" />
-            <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{service.title}</h3>
+            
+            <h3 className="text-[20px] font-semibold text-gray-800 font-heading  line-clamp-2">{service.title}</h3>
           </div>
-          <Heart 
-            className={`w-5 h-5 cursor-pointer flex-shrink-0 ml-2 transition-colors ${
+          <DiamondIcon  className={`w-5 h-5 cursor-pointer flex-shrink-0 ml-2 transition-colors ${
               isServiceFavorite ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(service);
-            }}
-          />
-        </div>
+            }`} />
         
-        <p className="text-blue-600 font-medium mb-3">{service.vendorName}</p>
+        </div>
+        <div className='flex justify-between gap-2 my-2 items-start'>
+
+        <p className="text-blue-900  font-heading text-[18px] font-semibold  mb-3 ">{service.vendorName}</p>
+        <div className="flex gap-1">
+            <button 
+              className="bg-blue-900 p-2 rounded-lg text-white text-white hover:bg-event-blue  transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <BsChatDots className="w-4 h-4" />
+            </button>
+            <button 
+              className="bg-blue-900 p-2 rounded-lg text-white text-white hover:bg-event-blue  transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(service);
+              }}
+            >
+              <Heart className={`w-4 h-4 ${isServiceFavorite ? 'fill-current' : ''}`} />
+            </button>
+            <button 
+              className="bg-blue-900 p-2 rounded-lg text-white hover:bg-event-blue transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <BsFillShareFill className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+       
         
         <div className="flex items-center gap-1 mb-3">
-          <span className="text-sm font-medium text-gray-700">Rating:</span>
+          <span className="text-md font-semibold font-heading text-gray-700">Rating:</span>
           <div className="flex items-center gap-1">
             {renderStars(service.rating)}
           </div>
@@ -232,29 +282,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             <span>{service.location}</span>
           </div>
           
-          <div className="flex gap-1">
-            <button 
-              className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MessageCircle className="w-4 h-4" />
-            </button>
-            <button 
-              className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(service);
-              }}
-            >
-              <Heart className={`w-4 h-4 ${isServiceFavorite ? 'fill-current' : ''}`} />
-            </button>
-            <button 
-              className="bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-          </div>
+         
         </div>
       </div>
     </div>

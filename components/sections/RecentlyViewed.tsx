@@ -43,14 +43,18 @@ const RecentlyViewed = () => {
   */
 
   return (
-    <section className="mb-8 mt-8">
+    <section className="mb-8 mt-8"
+    style={{
+      background: 'radial-gradient(circle at bottom, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 100%)'
+    }}
+    >
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-semibold font-heading text-gray-700">Recently Viewed</h3>
         <div className="flex gap-2">
           {visibleCount < allServices.length && (
             <button
               onClick={handleSeeMore}
-              className="text-sm text-blue-600 font-semibold hover:underline focus:outline-none"
+              className="text-[18px]  text-gray-600  font-semibold  hover:underline  font-sans focus:outline-none"
             >
               See more
             </button>
@@ -58,7 +62,7 @@ const RecentlyViewed = () => {
           {visibleCount > 4 && (
             <button
               onClick={handleSeeLess}
-              className="text-sm text-gray-600 hover:underline focus:outline-none"
+              className="text-[18px] text-gray-600 hover:underline  font-semibold   font-sans focus:outline-none"
             >
               See less
             </button>

@@ -15,8 +15,8 @@ export default function VerificationChoiceModal({
   onClose,
 }: VerificationChoiceModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-lg">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fade-in">
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-lg animate-slide-up">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white p-2 bg-event-blue rounded"

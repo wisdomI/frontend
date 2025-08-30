@@ -2,8 +2,10 @@
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled } from '@ant-design/icons';
+import { PlusOutlined, CalendarOutlined, EyeFilled, WindowsFilled } from '@ant-design/icons';
 import Link from 'next/link';
+import { FileSearch2Icon } from 'lucide-react';
+import { BsFillPersonLinesFill,BsLayoutTextWindowReverse } from 'react-icons/bs';
 
 const HeroWithActions = () => {
   // Slider settings
@@ -29,10 +31,10 @@ const HeroWithActions = () => {
 
   // Quick actions
   const actions = [
-    { icon: <EyeFilled />, label: 'View all Favourites', href: '/favorites' },
-    { icon: <PlusOutlined />, label: 'Post a Service Request', href: '/post-service' },
-    { icon: <FileSearchOutlined />, label: 'Manage all Posts', href: '/manage-posts' },
-    { icon: <CalendarOutlined />, label: 'Manage all Bookings', href: '/manage-bookings' },
+    { icon: < PlusOutlined />, label: 'Post a Service Request', href: '/post-service' },
+    { icon: < FileSearch2Icon />, label: 'Manage all posts', href: '/manage-posts' },
+    { icon: <BsLayoutTextWindowReverse/>, label: 'Manage all Bookings', href: '/bookings' },
+    { icon: <EyeFilled/>, label: 'View all Favorites', href: '/favorites' },
   ];
 
   return (

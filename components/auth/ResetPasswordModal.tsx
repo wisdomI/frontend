@@ -38,11 +38,11 @@ const ResetPasswordModal: React.FC<{ open: boolean; onClose: () => void; email: 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-lg"
+        className="relative bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-lg animate-slideInUp"
         onClick={(e) => e.stopPropagation()}
       >
         <button

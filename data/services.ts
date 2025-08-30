@@ -2,7 +2,7 @@
 export const services = [
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Wedding Hall Decoration / Backdrops",
     vendorName: "Ope's Event Decor",
     rating: 3,
@@ -11,7 +11,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Book us for all types of Event Cakes",
     vendorName: "UK Cakes & Cream",
     rating: 4,
@@ -20,7 +20,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Wedding Hall Decoration / Backdrops",
     vendorName: "Ope's Event Decor",
     rating: 3,
@@ -29,7 +29,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Book us for all types of Event Cakes",
     vendorName: "UK Cakes & Cream",
     rating: 4,
@@ -38,7 +38,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Wedding Hall Decoration / Backdrops",
     vendorName: "Ope's Event Decor",
     rating: 3,
@@ -47,7 +47,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Book us for all types of Event Cakes",
     vendorName: "UK Cakes & Cream",
     rating: 4,
@@ -56,7 +56,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Wedding Hall Decoration / Backdrops",
     vendorName: "Ope's Event Decor",
     rating: 3,
@@ -65,7 +65,7 @@ export const services = [
   },
   {
     verified: true,
-    image: "./images/image.png",
+    image: "/images/image.png",
     title: "Book us for all types of Event Cakes",
     vendorName: "UK Cakes & Cream",
     rating: 4,

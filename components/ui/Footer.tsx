@@ -5,11 +5,11 @@ import Logo from '@/public/images/white-2.png'
 export default function Footer() {
   return (
     <footer className="bg-event-blue text-white">
-      <div className="container mx-auto px-8 md:px-12 lg:px-16 py-12">
+      <div className="container mx-auto px-4 md:px-8 lg:px-10 py-8">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand & Description */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <div className="mb-6">
               <a href="/" className="inline-block">
                 <Image src={Logo} alt="EventHub Logo" width={150} height={60} />
@@ -43,13 +43,13 @@ export default function Footer() {
                 <div className="bg-white p-2 rounded-full">
                   <MapPin className="w-4 h-4 text-event-blue" />
                 </div>
-                <span className="font-sans text-sm">Lagos, Nigeria</span>
+                <span className="font-sans text-sm p-2">Lagos, Nigeria</span>
               </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 col-span-2  justify-center md:mt-10 ">
           <div>
             <h4 className="font-semibold text-lg mb-6 font-heading">Quick Links</h4>
             <ul className="space-y-2 text-blue-100 text-sm">
@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div className="col-span-2">
+          <div className="col-span-2 md:mt-10">
             <h4 className="font-semibold text-lg font-heading mb-4">Subscribe Newsletter</h4>
             <p className="text-blue-100 text-sm mb-6 font-sans">
               Get the latest Vendor update & Event tips
@@ -129,7 +129,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Copyright */}
-        <div className="border-t border-blue-200/20 mt-12 pt-8 text-center">
+        <div className=" mt-6 pt-8 text-center">
           <p className="text-blue-100 text-sm font-sans">
             © 2025 EventHub. All rights reserved.
           </p>

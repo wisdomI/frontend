@@ -1,7 +1,7 @@
 import { LockOutlined } from '@ant-design/icons';
 import { LockIcon, ShieldClose } from 'lucide-react';
 import React from 'react';
-import { BsShield, BsShieldCheck, BsShieldFill } from 'react-icons/bs';
+import { BsShield, BsShieldCheck, BsShieldLockFill } from 'react-icons/bs';
 
 const WhyChooseEventHub = () => {
     return (
@@ -21,11 +21,13 @@ const WhyChooseEventHub = () => {
         </div>
         <div className="flex space-x-6">
           <div className='flex items-center gap-2'>
-            <ShieldClose className='text-event-blue w-5 h-5' />
+            <BsShieldLockFill className='text-event-blue w-5 h-5' />
             <a href="/safe-payments" className="hover:underline font-semibold font-sans text-sm text-gray-700">Safe Payments</a>
           </div>
           <div className='flex items-center gap-2'>
-            <LockIcon className='text-event-blue w-5 h-5'/>
+          <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 0C6.155 0 3 3.155 3 7V8H2C0.9 8 0 8.9 0 10V22C0 23.1 0.9 24 2 24H18C19.1 24 20 23.1 20 22V10C20 8.9 19.1 8 18 8H17V7C17 3.155 13.845 0 10 0ZM10 2C12.755 2 15 4.245 15 7V8H5V7C5 4.245 7.245 2 10 2ZM10 11C12.8 11 15 13.2 15 16C15 18.8 12.8 21 10 21C7.2 21 5 18.8 5 16C5 13.2 7.2 11 10 11ZM10 13C8.3 13 7 14.3 7 16C7 17.7 8.3 19 10 19C11.7 19 13 17.7 13 16C13 15.7 12.906 15.394 12.906 15.094C12.606 15.594 12.1 16 11.5 16C10.7 16 10 15.3 10 14.5C10 13.9 10.406 13.394 10.906 13.094C10.606 13.094 10.3 13 10 13Z" fill="#032D71"/>
+</svg>
             <a href="/data-privacy" className="hover:underline font-semibold font-sans text-sm text-gray-700">Data Privacy</a>
           </div>
         </div>

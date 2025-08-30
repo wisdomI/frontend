@@ -68,8 +68,8 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Pricing & Packages</h2>
-            <p className="text-blue-600 font-semibold mt-1">Event & Occasion Catering</p>
+            <h2 className="text-2xl font-heading  font-bold text-gray-900">Pricing & Packages</h2>
+            <p className="text-blue-900  font-heading font-semibold mt-1">Event & Occasion Catering</p>
           </div>
           <button
             onClick={onClose}
@@ -88,9 +88,9 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
               >
                 {/* Package Header */}
                 <div className="text-center mb-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{pkg.name}</h3>
-                  <div className="text-2xl font-bold text-gray-900 mb-3">{pkg.price}</div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <h3 className="text-lg font-bold font-heading  text-gray-900 mb-2">{pkg.name}</h3>
+                  <div className="text-2xl font-bold font-heading text-gray-900 mb-3">{pkg.price}</div>
+                  <p className="text-sm  font-sans text-gray-600 leading-relaxed">
                     {pkg.description}
                   </p>
                 </div>
@@ -99,7 +99,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
                 <div className="flex-1">
                   <ul className="space-y-3">
                     {pkg.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="text-sm text-gray-700 leading-relaxed">
+                      <li key={featureIndex} className="text-sm font-sans text-gray-700 leading-relaxed">
                         • {feature}
                       </li>
                     ))}
@@ -107,18 +107,18 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Action Button */}
-                <div className="mt-6">
+                {/* <div className="mt-6">
                   <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
                     Select Package
                   </button>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>
 
           {/* Additional Info */}
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 text-center">
+            <p className="text-sm text-gray-600 font-sans  text-center">
               All packages include consultation and basic setup. Custom requests and additional services may incur extra charges.
             </p>
           </div>

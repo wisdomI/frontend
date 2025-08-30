@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import ServiceCard from "@/components/ui/ServiceCard";
 import { ArrowRight, Grid2X2, List } from "lucide-react";
-
+import { BsGrid, BsViewStacked } from "react-icons/bs";
 import { mockPopularServices } from "@/data/mockServices";
 
 const PopularServices: React.FC = () => {
@@ -39,7 +39,7 @@ const PopularServices: React.FC = () => {
             
             
           <h2 className="text-2xl font-semibold font-heading text-gray-700">Popular Services</h2>
-          <div className="flex  rounded-md p-1 border-gray-200 border ">
+          <div className="flex  rounded-md p-2 border-gray-200 border-2 gap-6 ">
             <button
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-md transition-colors ${
@@ -48,7 +48,7 @@ const PopularServices: React.FC = () => {
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
-              <List className="w-4 h-4" />
+              <BsViewStacked className="w-5 h-5 font-bold" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
@@ -58,7 +58,7 @@ const PopularServices: React.FC = () => {
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
-              <Grid2X2 className="w-4 h-4" />
+              <BsGrid  className="w-5 h-5 font-bold" />
             </button>
           </div>
           </div>
@@ -69,9 +69,9 @@ const PopularServices: React.FC = () => {
           {/* Custom Toggle Buttons */}
          
           
-          <button className="flex items-center text-md font-semibold  text-event-blue font-sans hover:underline">
+          <button className="flex items-center text-[18px] font-semibold  text-gray-600 font-sans hover:underline">
             See more
-            <ArrowRight size={16} className="ml-1" />
+            {/* <ArrowRight size={16} className="ml-1" /> */}
           </button>
         </div>
       </div>

@@ -9,10 +9,10 @@ const BusinessPortfolio: React.FC = () => {
       title: "#LoveBeyondBorders2025 in Abuja, Nigeria",
       description: "Experience the epitome of elegance with our signature soft glam makeup service, where flawless skin is our specialty, leaving you looking and feeling confidently radiant...",
       images: [
-        "./images/cake2.jpg",
-        "./images/place1.jpg", 
-        "./images/image.png",
-        "./images/cake2.jpg"
+        "/images/cake2.jpg",
+        "/images/place1.jpg", 
+        "/images/image.png",
+        "/images/cake2.jpg"
       ]
     },
     {
@@ -20,10 +20,10 @@ const BusinessPortfolio: React.FC = () => {
       title: "#LoveBeyondBorders2025 in Abuja, Nigeria",
       description: "Experience the epitome of elegance with our signature soft glam makeup service, where flawless skin is our specialty, leaving you looking and feeling confidently radiant...",
       images: [
-        "./images/cake2.jpg",
-        "./images/place1.jpg",
-        "./images/image.png", 
-        "./images/cake2.jpg"
+        "/images/cake2.jpg",
+        "/images/place1.jpg",
+        "/images/image.png", 
+        "/images/cake2.jpg"
       ]
     },
     {
@@ -31,10 +31,10 @@ const BusinessPortfolio: React.FC = () => {
       title: "#LoveBeyondBorders2025 in Abuja, Nigeria",
       description: "Experience the epitome of elegance with our signature soft glam makeup service, where flawless skin is our specialty, leaving you looking and feeling confidently radiant...",
       images: [
-        "./images/cake2.jpg",
-        "./images/place1.jpg",
-        "./images/image.png",
-        "./images/cake2.jpg"
+        "/images/cake2.jpg",
+        "/images/place1.jpg",
+        "/images/image.png",
+        "/images/cake2.jpg"
       ]
     }
   ];

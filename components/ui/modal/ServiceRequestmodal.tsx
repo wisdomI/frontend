@@ -10,6 +10,7 @@ import LocationSelect from "../select/LocationSelect";
 import CitySelect from "../select/CitySelect";
 import YesNoSelect from "../select/YesNoSelect";
 import CustomCalendar from "../calendar/CustomCalendar";
+import { BsBasketFill, BsBucketFill, BsFillBasketFill } from "react-icons/bs";
 
 
 export default function PostServiceModal() {
@@ -106,16 +107,16 @@ export default function PostServiceModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
-          <div className="  bg-[#f8f8f8] rounded-lg shadow-xl  w-[900px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
+          <div className="  bg-gray-50 rounded-lg shadow-xl  w-[920px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
 
             {/* Header */}
             <div className="flex items-start justify-between p-4 sm:p-6 ">
               <div className="flex-1 pr-2 mt-4">
-                <h1 className="  text-[32px] sm:text-md  text-[#4c4c4c] font-bold  font-heading">
+                <h1 className="  text-[32px] sm:text-md  text-[#4c4c4c] font-bold  font-heading md:mt-4">
                   Post a Service Request
                 </h1>
-                <p className="text-[24px] font-heading sm:text-md text-[#4c4c4c] mt-4">
+                <p className="text-[20px] font-heading sm:text-md text-[#4c4c4c] mt-4">
                   Kindly fill in your Event details
                 </p>
               </div>
@@ -133,8 +134,8 @@ export default function PostServiceModal() {
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Event Title */}
-                <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                <div className="  ">
+                  <label className="block text-{16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Event Title
                   </label>
                   <input
@@ -142,41 +143,42 @@ export default function PostServiceModal() {
                     placeholder="Enter Event Title"
                     value={formData.eventTitle}
                     onChange={(e) => handleInputChange("eventTitle", e.target.value)}
-                    className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                    className="w-full px-3 py-3 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal border border-gray-200 placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
 
                 {/* Event Type */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Event Type
                   </label>
                   <EventTypeSelect
                     value={formData.eventType}
                     onChange={(value) => handleInputChange("eventType", value)}
                     placeholder="Select Event Type"
+                    
                   />
                 </div>
 
                 {/* Event Date */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Event Date
                   </label>
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                  <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <div className="flex-1">
                       <CustomCalendar
                         value={formData.startDate}
                         onChange={(date) => handleInputChange("startDate", date)}
-                        placeholder="Select Start Date"
+                        placeholder="dd/mm/yyyy"
                         label="Start Date"
                       />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 items-center flex justify-center ">
                       <CustomCalendar
                         value={formData.endDate}
                         onChange={(date) => handleInputChange("endDate", date)}
-                        placeholder="Select End Date"
+                          placeholder="dd/mm/yyyy"
                         label="End Date"
                       />
                     </div>
@@ -185,7 +187,7 @@ export default function PostServiceModal() {
 
                 {/* Event Location */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Event Location
                   </label>
                   <LocationSelect
@@ -198,14 +200,15 @@ export default function PostServiceModal() {
                       }
                     }}
                     placeholder="Select State"
+                    
                   />
                 </div>
 
                 {/* Event City */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium  font-heading text-[#4c4c4c] mb-1">
                     Event City
-                    <span className="text-[16px] font-normal  text-gray-500 mb-1 font-sans ">
+                    <span className="text-[16px] mx-2  font-normal  text-gray-500 mb-1 font-sans ">
                       (Select the City you will like to Host your event)
                     </span>
                   </label>
@@ -220,7 +223,7 @@ export default function PostServiceModal() {
 
                 {/* Services Needed */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Services Needed
                   </label>
                   <ServiceTypeSelect
@@ -232,7 +235,7 @@ export default function PostServiceModal() {
 
                 {/* Number of Guests */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Number of Guests
                   </label>
                   <input
@@ -244,7 +247,7 @@ export default function PostServiceModal() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Budget Range
                   </label>
                   <input
@@ -263,9 +266,9 @@ export default function PostServiceModal() {
                 {/* Budget Range */}
 
                 {/* File Upload */}
-                <div>
+                <div className=" flex flex-col gap-4 my-6">
 
-                  <div className="border-1 border-dashed border-gray-300 bg-[#fff]   rounded-md p-6 text-center">
+                  <div className="border-1 border-dashed border-gray-300 bg-[#fff]   rounded-md p-6 py-6 text-center">
 
                     <label className="block text-[16px] font-normal font-sans text-[#4c4c4c] mb-1">
                       Choose a file or drag & drop it here
@@ -293,7 +296,7 @@ export default function PostServiceModal() {
                     <div className="mt-2 space-y-2">
                       {selectedFiles.map((file, index) => (
                         <div key={index} className="flex items-center   font-sans font-normal justify-between p-2 bg-gray-50 rounded-md">
-                          <div className="text-sm text-gray-700">
+                          <div className="text-sm text-gray-700 tracking-tighter">
                             {file.name}{" "}
 
                           </div>
@@ -301,8 +304,9 @@ export default function PostServiceModal() {
                             onClick={() => handleFileDelete(index)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
-                            <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
-                            <DeleteOutlined className="w-5 h-5" />
+                            <div className="flex gap-1 "> <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
+                            <BsBucketFill className="w-5 h-5" /></div>
+                           
                           </button>
                         </div>
                       ))}
@@ -312,21 +316,21 @@ export default function PostServiceModal() {
 
                 {/* Additional Information */}
                 <div>
-                  <label className="block text-[20px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1 ">
                     Additional Information
                   </label>
                   <textarea
                     placeholder="Enter here"
                     value={formData.additionalInfo}
                     onChange={(e) => handleInputChange("additionalInfo", e.target.value)}
-                    className="w-full px-3 py-2  rounded-md bg-[#fff] focus:outline-none focus:ring-1  font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
-                    rows={5}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md bg-[#fff] focus:outline-none focus:ring-1  font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                    rows={6}
                   ></textarea>
                 </div>
 
                 {/* Event Planner */}
                 <div>
-                  <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Would you like an Event planner to organize your event?
                   </label>
                   <YesNoSelect
@@ -338,7 +342,7 @@ export default function PostServiceModal() {
 
                 {/* Select Planner */}
                 <div>
-                  <label className="block text-[16px] font-semibold font-heading text-[#4c4c4c] mb-1">
+                  <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Would you like AI to suggest Event Planners that can organize your event?
                   </label>
                   <YesNoSelect
@@ -358,7 +362,7 @@ export default function PostServiceModal() {
             <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
               <button
                 onClick={handleSubmit}
-                disabled={!isFormValid()}
+                disabled={isFormValid()}
                 className={`w-full py-2  font-sans font-semibold rounded-lg  transition-colors mb-4 ${isFormValid()
                     ? 'bg-event-blue text-white hover:bg-blue-900'
                     : 'bg-event-blue text-gray-100 cursor-not-allowed'

@@ -61,7 +61,7 @@ const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
       >
-        <span className={selectedOption ? "text-gray-900 font-sans" : "text-gray-500 font-sans"}>
+        <span className={selectedOption ? "text-gray-900 font-medium font-sans" : "text-gray-500 font-medium font-sans"}>
           {selectedOption ? (
             <>
               {selectedOption.label} {selectedOption.description}

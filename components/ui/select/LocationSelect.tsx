@@ -281,9 +281,9 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
+        className="w-full px-2 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none   focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
       >
-        <span className={selectedOption ? "text-gray-900 font-sans" : "text-gray-500 font-sans"}>
+        <span className={selectedOption ? "text-gray-900  text-white font-sans" : "text-gray-500 text-white font-sans"}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <svg
@@ -301,7 +301,7 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
       {isOpen && (
         <div className="absolute z-50 flex">
           {/* Countries Panel */}
-          <div className="w-64 mt-1 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto">
+          <div className="w-56 mt-4 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto">
             <div className="p-2">
               {locationOptions.map((country) => (
                 <button
@@ -309,7 +309,7 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
                   type="button"
                   onClick={() => handleCountrySelect(country.id)}
                   onMouseEnter={() => setHoveredCountry(country.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-sans flex items-center justify-between ${
+                  className={`w-full text-left px-2 py-2  mt-4 rounded-xl transition-colors font-sans flex items-center justify-between ${
                     value === country.id
                       ? 'bg-blue-100 text-event-blue font-medium'
                       : hoveredCountry === country.id
@@ -330,7 +330,7 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
 
           {/* States Panel */}
           {hoveredCountry && (
-            <div className="w-64 mt-1 ml-1 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto">
+            <div className="w-56 mt-4 ml-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto">
               <div className="p-2">
                 {locationOptions
                   .find(country => country.id === hoveredCountry)

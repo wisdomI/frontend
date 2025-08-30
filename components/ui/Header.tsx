@@ -67,11 +67,12 @@ export default function Header() {
           <div className="flex items-center font-sans space-x-0 flex-1 max-w-3xl mx-12">
             {/* Location Dropdown */}
             <div className="min-w-[200px]">
-              <div className="[&>div>button]:rounded-l-lg [&>div>button]:rounded-r-none [&>div>button]:bg-event-blue [&>div>button]:text-white [&>div>button]:border-event-blue [&>div>button]:h-12 [&>div>button]:hover:bg-event-blue-hover">
+              <div className="[&>div>button]:rounded-l-lg [&>div>button]:rounded-r-none [&>div>button]:bg-event-blue [&>div>button]:text-white [&>div>button]:border-event-blue [&>div>button]:h-12 text-white [&>div>button]:hover:bg-event-blue-hover">
                 <LocationSelect
                   value={selectedLocation}
                   onChange={handleLocationChange}
                   placeholder="Select Location"
+                 /*  ensure the p;aceholder color here is white*/
                 />
               </div>
             </div>

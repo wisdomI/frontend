@@ -30,11 +30,11 @@ const ForgetPasswordModal: React.FC<{
       <>
         {open ? (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fade-in"
             onClick={onClose}
           >
             <div
-              className="relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl"
+              className="relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl animate-slide-up"
               onClick={(e) => e.stopPropagation()}
             >
               <button

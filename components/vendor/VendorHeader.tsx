@@ -5,6 +5,7 @@ import { ArrowLeft, Heart, Share2, MessageCircle, Calendar, Plus } from 'lucide-
 import { useRouter } from 'next/navigation';
 import { ServiceData } from '@/data/mockServices';
 import DiamondIcon from '@/components/ui/DiamondIcon';
+import { BsChatDots, BsFillShareFill } from "react-icons/bs";
 
 interface VendorHeaderProps {
   vendor: ServiceData;
@@ -38,18 +39,30 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <DiamondIcon className="w-6 h-6" />
-              <h1 className="text-3xl font-bold text-gray-900">{vendor.title}</h1>
+              <h1 className="text-3xl font-heading font-bold text-gray-900">{vendor.title}</h1>
             </div>
             
-            <div className="flex items-center gap-2">
-              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                <MessageCircle className="w-4 h-4" />
+            <div className="flex gap-1 mb-1 ">
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <BsChatDots className="w-4 h-4" />
               </button>
-              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                <Heart className="w-4 h-4" />
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                 
+                }}
+              >
+                <Heart className={`w-4 h-4 `} />
               </button>
-              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                <Share2 className="w-4 h-4" />
+              <button 
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <BsFillShareFill className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -58,9 +71,9 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
             <span className="bg-event-blue text-white px-4 py-2 rounded-lg text-sm font-medium">
               Top Rated
             </span>
-            <div className="text-right">
-              <span className="text-gray-600 text-sm">Total Request</span>
-              <div className="bg-event-blue text-white px-3 py-1 rounded-full text-sm font-medium">
+            <div className="text-right px-4 py-2   flex bg-event-blue text-white px-3 py-1 rounded-lg text-sm font-medium">
+              <p className="text-gray-600 text-sm px-2 text-white">Total Request</p>
+              <div className="">
                 120
               </div>
             </div>
@@ -110,13 +123,13 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
           {/* Center - Additional Images */}
           <div className="flex flex-col gap-4 w-32">
             <div className="w-full h-24 rounded-lg overflow-hidden">
-              <img src="./images/cake2.jpg" alt="Additional" className="w-full h-full object-cover" />
+              <img src="/images/cake2.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
             <div className="w-full h-24 rounded-lg overflow-hidden">
-              <img src="./images/place1.jpg" alt="Additional" className="w-full h-full object-cover" />
+              <img src="/images/place1.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
             <div className="w-full h-24 rounded-lg overflow-hidden">
-              <img src="./images/image.png" alt="Additional" className="w-full h-full object-cover" />
+              <img src="/images/image.png" alt="Additional" className="w-full h-full object-cover" />
             </div>
           </div>
 
@@ -124,38 +137,38 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
           <div className="flex-1 bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img src="./images/cake2.jpg" alt="Vendor" className="w-full h-full object-cover" />
+                <img src="/images/cake2.jpg" alt="Vendor" className="w-full h-full object-cover" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">{vendor.vendorName}</h3>
+                <h3 className="text-xl font-bold font-heading text-gray-900">{vendor.vendorName}</h3>
               </div>
             </div>
 
-            <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+            <p className="text-gray-600  font-sans text-sm mb-4 leading-relaxed">
               Looking for delicious baked treats? I can bake fresh, tasty goodies just for you! From bread and cookies to custom cakes, I'll bring your sweet cravings to life. Contact me today and enjoy baked perfection!
             </p>
 
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-event-blue">🌐</span>
-                <span className="text-event-blue">www.eventhub.com/findplayground2</span>
+                <span className="text-event-blue font-sans">www.eventhub.com/findplayground2</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-event-blue">📍</span>
-                <span>Lagos, Nigeria</span>
-                <span className="text-gray-500">• Travels anywhere</span>
+                <span className='font-sans'>Lagos, Nigeria</span>
+                <span className="text-gray-500 font-sans ">• Travels anywhere</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                 <Calendar className="w-4 h-4" />
-                <span>Available - Next booking: Feb 20, 2025</span>
+                <span className='font-sans'>Available - Next booking: Feb 20, 2025</span>
               </div>
               
               <button 
                 onClick={onMyAvailability}
-                className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
+                className="w-full bg-white border border-gray-300 font-heading text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <Calendar className="w-4 h-4" />
                 Check Availability
@@ -163,7 +176,7 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
               
               <button 
                 onClick={onRequestService}
-                className="w-full bg-event-blue text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
+                className="w-full bg-event-blue font-heading text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Request Service

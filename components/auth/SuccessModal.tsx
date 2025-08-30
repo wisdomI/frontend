@@ -17,8 +17,8 @@ export default function SuccessModal({
   onClose,
 }: SuccessModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-lg w-full max-w-sm p-6 text-center flex flex-col items-center relative">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fade-in">
+      <div className="bg-white rounded-lg w-full max-w-sm p-6 text-center flex flex-col items-center relative animate-slide-up">
         <div className="flex justify-end">
           <button
             onClick={onClose}
