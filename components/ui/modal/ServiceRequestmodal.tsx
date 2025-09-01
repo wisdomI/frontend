@@ -11,7 +11,7 @@ import CitySelect from "../select/CitySelect";
 import YesNoSelect from "../select/YesNoSelect";
 import CustomCalendar from "../calendar/CustomCalendar";
 import { BsBasketFill, BsBucketFill, BsFillBasketFill } from "react-icons/bs";
-
+import { LuTrash2 } from "react-icons/lu";
 
 export default function PostServiceModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +67,7 @@ export default function PostServiceModal() {
   // Handle form submission
   const handleSubmit = () => {
     if (isFormValid()) {
-      console.log("Form submitted:", { ...formData, files: selectedFiles });
+    
       // Here i will be sending data to the backend 
       setIsOpen(false);
       setShowSuccess(true);
@@ -108,7 +108,7 @@ export default function PostServiceModal() {
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
-          <div className="  bg-gray-50 rounded-lg shadow-xl  w-[920px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
+          <div className="  bg-gray-50 rounded-lg shadow-xl  w-[1020px] max-h-[94vh]   overflow-y-auto relative mx-2 px-6">
 
             {/* Header */}
             <div className="flex items-start justify-between p-4 sm:p-6 ">
@@ -143,7 +143,7 @@ export default function PostServiceModal() {
                     placeholder="Enter Event Title"
                     value={formData.eventTitle}
                     onChange={(e) => handleInputChange("eventTitle", e.target.value)}
-                    className="w-full px-3 py-3 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal border border-gray-200 placeholder:text-[#a5a0a0] text-[#a5a0a0]"
+                    className="w-full px-3 py-2 shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal border border-gray-200 placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
 
@@ -174,7 +174,7 @@ export default function PostServiceModal() {
                         label="Start Date"
                       />
                     </div>
-                    <div className="flex-1 items-center flex justify-center ">
+                    <div className="flex-1 ">
                       <CustomCalendar
                         value={formData.endDate}
                         onChange={(date) => handleInputChange("endDate", date)}
@@ -246,6 +246,13 @@ export default function PostServiceModal() {
                     className="w-full px-3 py-2 shadow-sm rounded-md  bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
+                
+
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Budget Range */}
                 <div>
                   <label className="block text-[16px] font-medium font-heading text-[#4c4c4c] mb-1">
                     Budget Range
@@ -258,13 +265,6 @@ export default function PostServiceModal() {
                     className="w-full px-3 py-2  shadow-sm rounded-md bg-[#fff] focus:outline-none focus:ring-1 font-thin  placeholder:font-normal placeholder:text-sans placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
-
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-4">
-                {/* Budget Range */}
-
                 {/* File Upload */}
                 <div className=" flex flex-col gap-4 my-6">
 
@@ -304,8 +304,8 @@ export default function PostServiceModal() {
                             onClick={() => handleFileDelete(index)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
-                            <div className="flex gap-1 "> <span className="text-gray-500 font-normal font-sans mx-2 ">Size: {(file.size / 1024).toFixed(1)}KB</span>
-                            <BsBucketFill className="w-5 h-5" /></div>
+                            <div className="flex gap-1 "> <span className="text-gray-500 font-normal font-sans mx-2 text-sm">Size: {(file.size / 1024).toFixed(1)}KB</span>
+                            <LuTrash2 className="w-5 h-5" /></div>
                            
                           </button>
                         </div>
@@ -368,7 +368,7 @@ export default function PostServiceModal() {
                     : 'bg-event-blue text-gray-100 cursor-not-allowed'
                   }`}
               >
-                Request Service
+               Send Request
               </button>
             </div>
           </div>

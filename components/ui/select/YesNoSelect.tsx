@@ -39,7 +39,7 @@ const YesNoSelect: React.FC<YesNoSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
+        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
       >
         <span className={selectedOption ? "text-gray-900 font-sans" : "text-gray-500 font-sans"}>
           {selectedOption ? selectedOption.label : placeholder}

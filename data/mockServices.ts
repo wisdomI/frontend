@@ -66,7 +66,7 @@ export const mockRecentlyViewedServices: ServiceData[] = [
     title: "DJ & Sound Services",
     vendorName: "SoundWave Entertainment",
     image: "/images/place1.jpg",
-    images: ["/images/place4.png", "/images/place1.jpg", "/images/cake2.jpg"],
+    images: ["/images/place.jpg", "/images/place1.jpg", "/images/cake2.jpg"],
     rating: 4.5,
     reviews: 38,
     location: "Surulere, Lagos",

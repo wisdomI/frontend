@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ServiceData } from '@/data/mockServices';
 import DiamondIcon from '@/components/ui/DiamondIcon';
 import { BsChatDots, BsFillShareFill } from "react-icons/bs";
-
+import { RiLinkM, RiMapPinLine} from "react-icons/ri";
 interface VendorHeaderProps {
   vendor: ServiceData;
   onMyAvailability: () => void;
@@ -14,11 +14,11 @@ interface VendorHeaderProps {
   onRequestService: () => void;
 }
 
-const VendorHeader: React.FC<VendorHeaderProps> = ({ 
-  vendor, 
-  onMyAvailability, 
+const VendorHeader: React.FC<VendorHeaderProps> = ({
+  vendor,
+  onMyAvailability,
   onViewPricing,
-  onRequestService 
+  onRequestService
 }) => {
   const router = useRouter();
 
@@ -36,29 +36,29 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
 
         {/* Main Header */}
         <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center  justify-between gap-2">
             <div className="flex items-center gap-2">
+              <h1 className="text-[24px] font-heading font-bold text-gray-700">{vendor.title}</h1>
               <DiamondIcon className="w-6 h-6" />
-              <h1 className="text-3xl font-heading font-bold text-gray-900">{vendor.title}</h1>
             </div>
-            
+
             <div className="flex gap-1 mb-1 ">
-              <button 
+              <button
                 className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 <BsChatDots className="w-4 h-4" />
               </button>
-              <button 
+              <button
                 className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
-                 
+
                 }}
               >
                 <Heart className={`w-4 h-4 `} />
               </button>
-              <button 
+              <button
                 className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -71,9 +71,9 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
             <span className="bg-event-blue text-white px-4 py-2 rounded-lg text-sm font-medium">
               Top Rated
             </span>
-            <div className="text-right px-4 py-2   flex bg-event-blue text-white px-3 py-1 rounded-lg text-sm font-medium">
+            <div className="">
               <p className="text-gray-600 text-sm px-2 text-white">Total Request</p>
-              <div className="">
+              <div className="text-right px-4 py-2   flex bg-event-blue text-white px-3 py-1 rounded-lg text-sm font-medium">
                 120
               </div>
             </div>
@@ -83,58 +83,94 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
         {/* Content Layout */}
         <div className="flex gap-8">
           {/* Left - Main Image */}
-          <div className="w-96 h-80 relative">
+          <div className="w-[500px] h-[360px] relative">
             <img
               src={vendor.image}
               alt={vendor.title}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-2xl"
             />
             {vendor.verified && (
               <div className="absolute top-3 left-3">
-                <span className="bg-event-blue text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
+                <span className="bg-event-blue text-white font-sans font-medium  text-xs px-2 py-1 rounded-lg flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+<g clip-path="url(#clip0_395_30751)">
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7094 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30418 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" fill="#FFEF5E"/>
+<path d="M3.05338 12.9467C2.94625 12.8395 2.86453 12.7096 2.81422 12.5667C2.76392 12.4237 2.74632 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20872 1.38266C7.30366 1.26421 7.42401 1.16861 7.56086 1.10291C7.69771 1.03722 7.84758 1.00311 7.99938 1.00311C8.15119 1.00311 8.30105 1.03722 8.43791 1.10291C8.57476 1.16861 8.6951 1.26421 8.79005 1.38266L9.73005 2.55266C9.83675 2.68526 9.97514 2.78884 10.1324 2.85386C10.2897 2.91887 10.4609 2.94322 10.63 2.92466L12.1214 2.76266C12.2722 2.74624 12.4248 2.7639 12.5678 2.81432C12.7109 2.86474 12.8409 2.94665 12.9481 3.05399L3.05338 12.9467Z" fill="#FFF9BF"/>
+<path d="M7.20938 1.38266C7.30433 1.26421 7.42467 1.16861 7.56153 1.10291C7.69838 1.03722 7.84825 1.00311 8.00005 1.00311C8.15185 1.00311 8.30172 1.03722 8.43857 1.10291C8.57543 1.16861 8.69577 1.26421 8.79072 1.38266L9.73072 2.55266C9.83742 2.68526 9.97581 2.78884 10.1331 2.85386C10.2904 2.91887 10.4615 2.94322 10.6307 2.92466L12.1221 2.76266C12.2727 2.74641 12.4251 2.76416 12.5679 2.81458C12.7108 2.86501 12.8406 2.94684 12.9476 3.05404C13.0547 3.16124 13.1364 3.29109 13.1867 3.43403C13.2369 3.57697 13.2545 3.72936 13.2381 3.87999L13.0754 5.37066C13.057 5.53996 13.0815 5.71117 13.1468 5.86847C13.212 6.02577 13.3159 6.1641 13.4487 6.27066L14.6174 7.20999C14.7358 7.30493 14.8314 7.42528 14.8971 7.56213C14.9628 7.69899 14.9969 7.84885 14.9969 8.00066C14.9969 8.15246 14.9628 8.30232 14.8971 8.43918C14.8314 8.57603 14.7358 8.69638 14.6174 8.79132L13.4481 9.73132C13.3153 9.83782 13.2115 9.97603 13.1463 10.1332C13.081 10.2904 13.0564 10.4615 13.0747 10.6307L13.2381 12.122C13.2541 12.2726 13.2363 12.425 13.1858 12.5678C13.1354 12.7107 13.0535 12.8404 12.9464 12.9475C12.8392 13.0546 12.7095 13.1363 12.5666 13.1867C12.4237 13.2371 12.2713 13.2548 12.1207 13.2387L10.6294 13.0767C10.4601 13.0582 10.289 13.0826 10.1317 13.1478C9.97437 13.2129 9.83601 13.3166 9.72938 13.4493L8.79072 14.6173C8.69591 14.736 8.57562 14.8318 8.43875 14.8976C8.30187 14.9635 8.15194 14.9977 8.00005 14.9977C7.84816 14.9977 7.69823 14.9635 7.56135 14.8976C7.42448 14.8318 7.30419 14.736 7.20938 14.6173L6.27072 13.448C6.16416 13.3151 6.02584 13.2113 5.86853 13.1461C5.71123 13.0808 5.54002 13.0562 5.37072 13.0747L3.87938 13.2373C3.72875 13.2537 3.57637 13.236 3.43346 13.1857C3.29055 13.1353 3.16075 13.0536 3.05361 12.9464C2.94647 12.8393 2.86472 12.7095 2.81438 12.5666C2.76404 12.4237 2.74638 12.2713 2.76272 12.1207L2.92472 10.6293C2.94309 10.4602 2.91858 10.2891 2.85345 10.132C2.78832 9.9748 2.68467 9.83656 2.55205 9.72999L1.38272 8.79132C1.26427 8.69638 1.16867 8.57603 1.10297 8.43918C1.03728 8.30232 1.00317 8.15246 1.00317 8.00066C1.00317 7.84885 1.03728 7.69899 1.10297 7.56213C1.16867 7.42528 1.26427 7.30493 1.38272 7.20999L2.55205 6.27066C2.68489 6.1641 2.78874 6.02577 2.85399 5.86847C2.91924 5.71117 2.94379 5.53996 2.92538 5.37066L2.76205 3.87999C2.74561 3.7293 2.76318 3.57685 2.81348 3.43385C2.86377 3.29086 2.9455 3.16097 3.05266 3.05375C3.15981 2.94654 3.28965 2.86473 3.43261 2.81435C3.57558 2.76397 3.72802 2.7463 3.87872 2.76266L5.37005 2.92466C5.53924 2.94322 5.71037 2.91887 5.86767 2.85386C6.02496 2.78884 6.16335 2.68526 6.27005 2.55266L7.20938 1.38266Z" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10.4333 6.47998L7.95729 9.77998C7.91727 9.83346 7.86624 9.87772 7.80765 9.90978C7.74906 9.94183 7.68427 9.96094 7.61765 9.96581C7.55104 9.97068 7.48416 9.96119 7.42153 9.93798C7.3589 9.91478 7.30198 9.8784 7.25462 9.83131L5.76929 8.34465" stroke="#191919" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_395_30751">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
                   Verified
                 </span>
               </div>
             )}
-            
+
             {/* Social Media Icons */}
-            <div className="absolute bottom-3 left-3 flex gap-2">
-              <div className="bg-pink-500 p-2 rounded">
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
+            <div className="absolute bottom-0  flex gap-2 bg-black  bg-opacity-50 w-full rounded-b-xl h-16">
+              <div className='flex gap-4 mx-2 '>
+
+                <div className=" px-2 py-2 mx-2 w-8 h-8 ">
+                  <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M32.1562 0H9.84375C4.4072 0 0 4.4072 0 9.84375V32.1562C0 37.5928 4.4072 42 9.84375 42H32.1562C37.5928 42 42 37.5928 42 32.1562V9.84375C42 4.4072 37.5928 0 32.1562 0Z" fill="url(#paint0_radial_1376_33241)" />
+                    <path d="M32.1562 0H9.84375C4.4072 0 0 4.4072 0 9.84375V32.1562C0 37.5928 4.4072 42 9.84375 42H32.1562C37.5928 42 42 37.5928 42 32.1562V9.84375C42 4.4072 37.5928 0 32.1562 0Z" fill="url(#paint1_radial_1376_33241)" />
+                    <path d="M21.0015 4.59375C16.5459 4.59375 15.9866 4.61327 14.2367 4.69284C12.4901 4.77291 11.2978 5.04935 10.2547 5.45508C9.17552 5.87409 8.26022 6.43469 7.34836 7.34688C6.43568 8.25891 5.87508 9.17421 5.45475 10.2529C5.04788 11.2964 4.7711 12.4891 4.69252 14.2349C4.61426 15.9849 4.59375 16.5444 4.59375 21.0002C4.59375 25.4559 4.61344 26.0134 4.69284 27.7633C4.77323 29.5099 5.04968 30.7022 5.45508 31.7453C5.87442 32.8245 6.43502 33.7398 7.34721 34.6516C8.25891 35.5643 9.17421 36.1262 10.2526 36.5452C11.2965 36.951 12.4889 37.2274 14.2352 37.3075C15.9853 37.3871 16.5441 37.4066 20.9995 37.4066C25.4556 37.4066 26.0131 37.3871 27.763 37.3075C29.5096 37.2274 30.7031 36.951 31.7471 36.5452C32.8258 36.1262 33.7398 35.5643 34.6513 34.6516C35.564 33.7398 36.1244 32.8245 36.5449 31.7458C36.9482 30.7022 37.2251 29.5096 37.3072 27.7636C37.3857 26.0137 37.4062 25.4559 37.4062 21.0002C37.4062 16.5444 37.3857 15.9853 37.3072 14.2352C37.2251 12.4886 36.9482 11.2965 36.5449 10.2534C36.1244 9.17421 35.564 8.25891 34.6513 7.34688C33.7388 6.43437 32.8261 5.87377 31.7461 5.45524C30.7002 5.04935 29.5073 4.77274 27.7607 4.69284C26.0106 4.61327 25.4535 4.59375 20.9964 4.59375H21.0015ZM19.5297 7.55032C19.9666 7.54966 20.454 7.55032 21.0015 7.55032C25.3821 7.55032 25.9012 7.56607 27.6311 7.64466C29.2307 7.71783 30.0989 7.98509 30.6772 8.20969C31.4429 8.50697 31.9887 8.86249 32.5626 9.43687C33.1369 10.0111 33.4922 10.5579 33.7903 11.3236C34.0149 11.9011 34.2825 12.7693 34.3553 14.3689C34.4339 16.0985 34.451 16.6179 34.451 20.9964C34.451 25.3749 34.4339 25.8945 34.3553 27.6239C34.2822 29.2235 34.0149 30.0917 33.7903 30.6693C33.493 31.435 33.1369 31.9802 32.5626 32.5541C31.9884 33.1283 31.4432 33.4837 30.6772 33.7811C30.0996 34.0067 29.2307 34.2733 27.6311 34.3465C25.9015 34.4251 25.3821 34.4421 21.0015 34.4421C16.6207 34.4421 16.1014 34.4251 14.372 34.3465C12.7724 34.2727 11.9042 34.0054 11.3254 33.7808C10.5599 33.4833 10.0129 33.128 9.43868 32.5538C8.86446 31.9796 8.5091 31.434 8.211 30.668C7.9864 30.0904 7.71881 29.2222 7.64597 27.6225C7.56738 25.893 7.55163 25.3736 7.55163 20.9923C7.55163 16.611 7.56738 16.0944 7.64597 14.3648C7.71914 12.7652 7.9864 11.897 8.211 11.3187C8.50845 10.553 8.86446 10.0062 9.43884 9.43195C10.0132 8.85773 10.5599 8.50221 11.3256 8.20427C11.9039 7.97869 12.7724 7.71209 14.372 7.63859C15.8855 7.57017 16.472 7.54966 19.5297 7.54622V7.55032ZM29.7591 10.2744C28.6722 10.2744 27.7904 11.1554 27.7904 12.2425C27.7904 13.3294 28.6722 14.2113 29.7591 14.2113C30.846 14.2113 31.7279 13.3294 31.7279 12.2425C31.7279 11.1556 30.846 10.2738 29.7591 10.2738V10.2744ZM21.0015 12.5747C16.3487 12.5747 12.5762 16.3472 12.5762 21.0002C12.5762 25.6531 16.3487 29.4238 21.0015 29.4238C25.6545 29.4238 29.4256 25.6531 29.4256 21.0002C29.4256 16.3474 25.6541 12.5747 21.0011 12.5747H21.0015ZM21.0015 15.5313C24.0217 15.5313 26.4703 17.9796 26.4703 21.0002C26.4703 24.0204 24.0217 26.469 21.0015 26.469C17.9813 26.469 15.5328 24.0204 15.5328 21.0002C15.5328 17.9796 17.9811 15.5313 21.0015 15.5313Z" fill="white" />
+                    <defs>
+                      <radialGradient id="paint0_radial_1376_33241" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11.1562 45.2348) rotate(-90) scale(41.6251 38.7146)">
+                        <stop stop-color="#FFDD55" />
+                        <stop offset="0.1" stop-color="#FFDD55" />
+                        <stop offset="0.5" stop-color="#FF543E" />
+                        <stop offset="1" stop-color="#C837AB" />
+                      </radialGradient>
+                      <radialGradient id="paint1_radial_1376_33241" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(-7.03516 3.02548) rotate(78.681) scale(18.6067 76.6972)">
+                        <stop stop-color="#3771C8" />
+                        <stop offset="0.128" stop-color="#3771C8" />
+                        <stop offset="1" stop-color="#6600FF" stop-opacity="0" />
+                      </radialGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="py-2 mx-2  w-8 h-8">
+
+                  <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M35.6996 2.1H6.29961C3.98961 2.1 2.09961 3.99 2.09961 6.3V35.7C2.09961 38.0121 3.98961 39.9 6.29961 39.9H20.9996V25.2H16.7996V20.0025H20.9996V15.6975C20.9996 11.1531 23.5448 7.9611 28.9082 7.9611L32.6945 7.9653V13.4358H30.1808C28.0934 13.4358 27.2996 15.0024 27.2996 16.4556V20.0046H32.6924L31.4996 25.2H27.2996V39.9H35.6996C38.0096 39.9 39.8996 38.0121 39.8996 35.7V6.3C39.8996 3.99 38.0096 2.1 35.6996 2.1Z" fill="#0A66C2" />
+                  </svg>
+                </div>
+                <div className=" py-2 w-8 h-8">
+                  <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_1376_33248" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="42" height="42">
+                      <path d="M0 0H42V42H0V0Z" fill="white" />
+                    </mask>
+                    <g mask="url(#mask0_1376_33248)">
+                      <path d="M33.075 1.968H39.516L25.446 18.09L42 40.032H29.04L18.882 26.727L7.272 40.032H0.825L15.873 22.782L0 1.971H13.29L22.458 14.13L33.075 1.968ZM30.81 36.168H34.38L11.34 5.631H7.512L30.81 36.168Z" fill="white" />
+                    </g>
+                  </svg>
+                </div>
               </div>
-              <div className="bg-blue-600 p-2 rounded">
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                </svg>
-              </div>
-              <div className="bg-black p-2 rounded">
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </div>
+
             </div>
           </div>
 
           {/* Center - Additional Images */}
-          <div className="flex flex-col gap-4 w-32">
-            <div className="w-full h-24 rounded-lg overflow-hidden">
+          <div className="flex flex-col gap-9 w-32 h-[440px]">
+            <div className="w-full h-24 gap-8 rounded-xl overflow-hidden">
               <img src="/images/cake2.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
             <div className="w-full h-24 rounded-lg overflow-hidden">
               <img src="/images/place1.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
-            <div className="w-full h-24 rounded-lg overflow-hidden">
+            <div className="w-full h-24 rounded-xl overflow-hidden">
               <img src="/images/image.png" alt="Additional" className="w-full h-full object-cover" />
             </div>
           </div>
 
           {/* Right - Vendor Info Card */}
-          <div className="flex-1 bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex-1  ">
+            <div className=' bg-white rounded-xl p-2 border border-gray-200 '>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full overflow-hidden">
                 <img src="/images/cake2.jpg" alt="Vendor" className="w-full h-full object-cover" />
@@ -147,34 +183,40 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
             <p className="text-gray-600  font-sans text-sm mb-4 leading-relaxed">
               Looking for delicious baked treats? I can bake fresh, tasty goodies just for you! From bread and cookies to custom cakes, I'll bring your sweet cravings to life. Contact me today and enjoy baked perfection!
             </p>
-
-            <div className="space-y-3 mb-4">
+            </div>
+            <div className="space-y-1 mb-1 mt-4  bg-white rounded-xl p-2 border border-gray-200 ">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-event-blue">🌐</span>
+              <RiLinkM className='w-8 h-8 text-white bg-event-blue '/>
                 <span className="text-event-blue font-sans">www.eventhub.com/findplayground2</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-event-blue">📍</span>
+                <div className='w-4 h-4'>
+                <RiMapPinLine  className='w-8 h-8 text-white bg-event-blue ' />
+                </div>
+              
                 <span className='font-sans'>Lagos, Nigeria</span>
                 <span className="text-gray-500 font-sans ">• Travels anywhere</span>
               </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+              <div className="        w-full border  bg-[#d3e7ff] border-event-blue  font-heading text-event-blue  py-1 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span className='font-sans'>Available - Next booking: Feb 20, 2025</span>
+                <span className='font-sans text-center '>Available - Next booking: Feb 20, 2025</span>
               </div>
-              
-              <button 
+<div>
+<button
                 onClick={onMyAvailability}
-                className="w-full bg-white border border-gray-300 font-heading text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
+                
               >
                 <Calendar className="w-4 h-4" />
                 Check Availability
               </button>
+            </div>
+</div>
               
-              <button 
+
+            <div className="space-y-3">
+              
+
+              <button
                 onClick={onRequestService}
                 className="w-full bg-event-blue font-heading text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
               >

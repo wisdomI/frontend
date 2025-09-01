@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-
+import { HiPhone } from "react-icons/hi";
 import { cn } from '@/lib/utils';
 import { mockConversations } from '@/data/mockmessages';
 import { Conversation, Message } from '@/types/message';
@@ -104,7 +104,7 @@ const MessagesComponent = () => {
 
       <div className="flex h-full bg-white rounded-lg mb-10 py-2">
         {/* Left Sidebar - Conversations List */}
-        <div className="w-1/3 flex flex-col p-4 border-r border-gray-200">
+        <div className="w-1/3 flex flex-col p-4  border-gray-200">
           {/* Header */}
 
 
@@ -195,7 +195,7 @@ const MessagesComponent = () => {
         {/* Right Side - Chat Interface */}
         <div className="flex-1 flex flex-col p-4">
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-4 mb-3 border border-gray-200 bg-white shadow-sm rounded-lg">
+          <div className="flex items-center justify-between p-2 mb-3 border border-gray-200 bg-white shadow-sm rounded-lg">
             <div className="flex items-center">
               <Avatar className="h-10 w-10 mr-3 border-4 border-green-500">
                 <AvatarImage src={selectedConversation.avatar} alt={selectedConversation.name} />
@@ -215,7 +215,7 @@ const MessagesComponent = () => {
                 <Video className="h-5 w-5 hover:border-gray-500 text-gray-600" />
               </Button>
               <Button variant="ghost" size="sm">
-                <Phone className="h-5 w-5 text-gray-600" />
+                <HiPhone className="h-5 w-5 text-gray-600" />
               </Button>
               <div className="relative">
                 <Button

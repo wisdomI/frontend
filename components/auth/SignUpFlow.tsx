@@ -14,10 +14,11 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
   )
   const [contact, setContact] = useState('')
   const [type, setType] = useState<'email' | 'phone'>('email')
+  const [accountType, setAccountType] = useState<string>('individual')
 
   // Handle modal transitions
-  const handleContinueFromAccount = (accountType: string) => {
-    setType(accountType as 'email' | 'phone')
+  const handleContinueFromAccount = (selectedAccountType: string) => {
+    setAccountType(selectedAccountType)
     setStep('signup')
   }
 
@@ -67,7 +68,7 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
           onClose={onClose} 
           onContinue={handleContinueFromSignup}
           onLogin={handleLoginFromSignup}
-          accountType={type}
+          accountType={accountType}
         />
       )}
       {step === 'choice' && (

@@ -39,7 +39,7 @@ const PopularServices: React.FC = () => {
             
             
           <h2 className="text-2xl font-semibold font-heading text-gray-700">Popular Services</h2>
-          <div className="flex  rounded-md p-2 border-gray-200 border-2 gap-6 ">
+          <div className="flex  rounded-md p-1 border-gray-200 border-2 gap-6 ">
             <button
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-md transition-colors ${

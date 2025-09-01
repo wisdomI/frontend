@@ -189,7 +189,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans min-h-[48px]"
+        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans min-h-[48px]"
       >
         <div className="flex flex-wrap gap-1 items-center pr-8">
           {selectedLabels.length > 0 ? (

@@ -58,7 +58,7 @@ const ServicesOffered: React.FC<ServicesOfferedProps> = ({ onViewPricing }) => {
               <h3 className="font-semibold  font-heading text-event-blue text-sm mb-3">
                 {service.title}
               </h3>
-              <p className="text-xs font-sans text-gray-600 mb-4 leading-relaxed">
+              <p className="text-sm font-sans text-gray-600 mb-4 leading-relaxed">
                 {service.description}
               </p>
               <button 

@@ -38,7 +38,8 @@ export const mockConversations: Conversation[] = [
         content: 'Please I will like us to discuss about that Cake request for my daughter',
         timestamp: '4:54pm',
         isOwn: false
-      }
+      },
+      
     ]
   },
   {
@@ -99,6 +100,42 @@ export const mockConversations: Conversation[] = [
   },
   {
     id: '5',
+    name: 'UK Cakes and Cream',
+    avatar: 'https://images.pexels.com/photos/1126728/pexels-photo-1126728.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+    lastMessage: 'ImageBG4.jpeg',
+    timestamp: '4:54pm',
+    isUnread: true,
+    hasAttachment: true,
+    attachmentType: 'image',
+    messages: [
+      {
+        id: '1',
+        content: 'Check out this cake design inspiration',
+        timestamp: '4:54pm',
+        isOwn: false
+      }
+    ]
+  },
+  {
+    id: '6',
+    name: 'UK Cakes and Cream',
+    avatar: 'https://images.pexels.com/photos/1126728/pexels-photo-1126728.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+    lastMessage: 'ImageBG4.jpeg',
+    timestamp: '4:54pm',
+    isUnread: true,
+    hasAttachment: true,
+    attachmentType: 'image',
+    messages: [
+      {
+        id: '1',
+        content: 'Check out this cake design inspiration',
+        timestamp: '4:54pm',
+        isOwn: false
+      }
+    ]
+  },
+  {
+    id: '7',
     name: 'UK Cakes and Cream',
     avatar: 'https://images.pexels.com/photos/1126728/pexels-photo-1126728.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
     lastMessage: 'ImageBG4.jpeg',

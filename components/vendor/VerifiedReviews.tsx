@@ -41,7 +41,7 @@ const VerifiedReviews: React.FC = () => {
         key={i} 
         className={`w-4 h-4 ${
           i < rating 
-            ? 'text-yellow-400 fill-current' 
+            ? 'text-yellow fill-current' 
             : 'text-gray-300'
         }`} 
       />
@@ -50,8 +50,8 @@ const VerifiedReviews: React.FC = () => {
 
   return (
     <div className="mb-12">
-      <h2 className="text-xl font-bold text-gray-700 mb-6">
-        Verified Reviews & Ratings <span className="text-lg font-normal text-gray-600">(60%)</span>
+      <h2 className="text-xl font-heading font-bold text-gray-700 mb-6">
+        Verified Reviews & Ratings <span className="text-lg font-sans font-normal text-event-blue">(60%)</span>
       </h2>
       
       <div className="grid grid-cols-2 gap-6">
@@ -65,14 +65,14 @@ const VerifiedReviews: React.FC = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                  <span className="text-sm text-gray-500">{review.date}</span>
+                  <h4 className="font-semibold text-gray-900 font-heading ">{review.name}</h4>
+                  <span className="text-sm text-gray-500 font-sans ">{review.date}</span>
                 </div>
-                <p className="text-gray-700 text-sm mb-3 leading-relaxed">
+                <p className=" font-sans text-gray-700 text-sm mb-3 leading-relaxed">
                   {review.comment}
                 </p>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-medium text-gray-700">Rating:</span>
+                  <span className="text-sm font-medium font-heading text-gray-700">Rating:</span>
                   <div className="flex items-center gap-1">
                     {renderStars(review.rating)}
                   </div>

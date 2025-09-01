@@ -6,6 +6,7 @@ import { PlusOutlined, CalendarOutlined, EyeFilled, WindowsFilled } from '@ant-d
 import Link from 'next/link';
 import { FileSearch2Icon } from 'lucide-react';
 import { BsFillPersonLinesFill,BsLayoutTextWindowReverse } from 'react-icons/bs';
+import { RiMenuSearchLine } from "react-icons/ri";
 
 const HeroWithActions = () => {
   // Slider settings
@@ -31,10 +32,10 @@ const HeroWithActions = () => {
 
   // Quick actions
   const actions = [
-    { icon: < PlusOutlined />, label: 'Post a Service Request', href: '/post-service' },
-    { icon: < FileSearch2Icon />, label: 'Manage all posts', href: '/manage-posts' },
-    { icon: <BsLayoutTextWindowReverse/>, label: 'Manage all Bookings', href: '/bookings' },
-    { icon: <EyeFilled/>, label: 'View all Favorites', href: '/favorites' },
+    { icon: < PlusOutlined className='w-6 h-6 flex items-center justify-center font-sans'/>, label: 'Post a Service Request', href: '/post-service' },
+    { icon: < RiMenuSearchLine className='w-6 h-6 flex items-center justify-center' />, label: 'Manage all posts', href: '/manage-posts' },
+    { icon: <BsLayoutTextWindowReverse className='w-6 h-6 flex items-center justify-center  '/>, label: 'Manage all Bookings', href: '/bookings' },
+    { icon: <EyeFilled className='w-6 h-6 flex items-center justify-center'/>, label: 'View all Favorites', href: '/favorites' },
   ];
 
   return (

@@ -18,7 +18,24 @@ export default function CodeVerificationModal({
   onResend,
   onClose,
 }: CodeVerificationModalProps) {
-  const [code, setCode] = useState('')
+  const [otp, setOtp] = useState(['', '', '', '', '', ''])
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+  }
+
+  const handleVerify = () => {
+    const code = otp.join('');
+    onVerify(code);
+  }
+
+  const isOtpComplete = otp.every((digit) => digit !== '');
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fade-in">
@@ -42,19 +59,27 @@ export default function CodeVerificationModal({
           <span className="font-medium">{contact}</span>
         </p>
 
-        {/* Code Input */}
-        <input
-          type="text"
-          maxLength={6}
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg p-3 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-        />
+        {/* PIN Input */}
+        <div className="flex justify-center gap-2 mb-6">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              id={`otp-${index}`}
+              type="text"
+              value={digit}
+              onChange={(e) => handleOtpChange(index, e.target.value)}
+              maxLength={1}
+              className="w-12 h-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 text-lg font-semibold"
+              autoFocus={index === 0}
+            />
+          ))}
+        </div>
 
         {/* Verify Button */}
         <button
-          onClick={() => onVerify(code)}
-          className="w-full bg-blue-900 text-white py-3 rounded-lg mt-4 hover:bg-blue-800"
+          onClick={handleVerify}
+          disabled={!isOtpComplete}
+          className="w-full bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           Verify
         </button>

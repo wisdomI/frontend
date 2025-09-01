@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { RiCalendar2Line } from "react-icons/ri";
 
 interface CustomCalendarProps {
   value: string;
@@ -70,7 +71,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     }
 
     // Add days from next month to fill the grid
-    const remainingCells = 42 - days.length; // 6 rows × 7 days = 42 cells
+    const remainingCells = 42 - days.length; 
     for (let day = 1; day <= remainingCells; day++) {
       const nextMonthDay = new Date(year, month + 1, day);
       days.push({
@@ -104,7 +105,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="relative">
+    <div className="relative  ">
       {label && (
         <label className="block text-md font-normal text-gray-500 mb-1 font-sans">
           {label}
@@ -114,23 +115,33 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
+        className="w-full px-4 py-1 text-left  bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
       >
+        <div className='flex items-center justify-center'>
+          <RiCalendar2Line className='text-gray-500 w-5 h-5 mx-1
+          
+          '/>
         <span className={selectedDate ? "text-gray-900 font-sans" : "text-gray-500 font-sans"}>
           {selectedDate ? selectedDate.toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
           }) : placeholder}
-        </span>
-        <svg
+          {/* <svg
           className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
+        </svg> */}
+        </span>
+        <div className='flex items-center justify-center'>
+        
+        </div>
+        </div>
+       
+        
       </button>
 
       {isOpen && (
