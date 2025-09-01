@@ -122,7 +122,7 @@ export default function ProfileHeader() {
             {/* Profile Dropdown */}
             <div className="relative">
               <button className="flex items-center space-x-2 text-gray-700 hover:text-event-blue transition-colors">
-                <div className="w-8 h-8 bg-event-blue rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-event-blue rounded-full flex items-center justify-center border border-green-200">
                   <span className="text-white text-sm font-semibold">D</span>
                 </div>
                 <span className="font-sans font-bold">Daniel</span>

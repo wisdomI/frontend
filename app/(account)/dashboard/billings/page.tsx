@@ -167,7 +167,7 @@ export default function PaymentBillingPage() {
       {/* Page Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-[20px] font-semibold font-heading text-gray-900">Payment & Billings</h1>
-        
+
         {/* Date Range Filter */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">From:</span>
@@ -183,81 +183,81 @@ export default function PaymentBillingPage() {
         </div>
       </div>
       <div className='border border-gray-200 rounded-lg'>
-      {/* Search and Filter Bar */}
-      <div className="flex justify-between items-center mb-6 p-4">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <input
-              type="text"
-              placeholder="Search by Invoice Number, Vendor"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        {/* Search and Filter Bar */}
+        <div className="flex justify-between items-center mb-6 p-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Search by Invoice Number, Vendor"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Filter by:</span>
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none bg-blue-600 text-white px-4 py-2 rounded-lg pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Payment Status">Payment Status</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
-              <option value="Overdue">Overdue</option>
-            </select>
-            <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-4 w-4 pointer-events-none" />
-          </div>
-        </div>
-      </div>
 
-      {/* Payment Table */}
-     
-      <div className="overflow-x-auto border border-gray-200 p-4">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Date & Time</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Invoice Number</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Event/Vendor</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Payment Method</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Amount</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">Payment Status</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map((payment) => (
-              <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-3 px-4 text-sm text-gray-900">
-                  {payment.date}, {payment.time}
-                </td>
-                <td className="py-3 px-4 text-sm text-gray-900">{payment.invoiceNumber}</td>
-                <td className="py-3 px-4 text-sm text-blue-600 hover:underline cursor-pointer">
-                  {payment.eventVendor}
-                </td>
-                <td className="py-3 px-4 text-sm text-gray-900">{payment.paymentMethod}</td>
-                <td className="py-3 px-4 text-sm text-gray-900">{payment.amount}</td>
-                <td className="py-3 px-4">
-                  <span className={getStatusBadge(payment.status)}>
-                    {payment.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                </td>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Filter by:</span>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none bg-blue-600 text-white px-4 py-2 rounded-lg pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Payment Status">Payment Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+              <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-4 w-4 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Table */}
+
+        <div className="overflow-x-auto border border-gray-200 p-4">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Date & Time</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Invoice Number</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Event/Vendor</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Payment Method</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Amount</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Payment Status</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {payments.map((payment) => (
+                <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="py-3 px-4 text-sm text-gray-900">
+                    {payment.date}, {payment.time}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-900">{payment.invoiceNumber}</td>
+                  <td className="py-3 px-4 text-sm text-blue-600 hover:underline cursor-pointer">
+                    {payment.eventVendor}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-900">{payment.paymentMethod}</td>
+                  <td className="py-3 px-4 text-sm text-gray-900">{payment.amount}</td>
+                  <td className="py-3 px-4">
+                    <span className={getStatusBadge(payment.status)}>
+                      {payment.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6">

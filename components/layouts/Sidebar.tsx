@@ -298,6 +298,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ChevronRight, 
+  ChevronDown,
   Menu, 
   Filter,
   Users, 
@@ -309,15 +310,27 @@ import {
   Truck,
   Sparkles,
   Headphones,
-  Baby
+  Baby,
+  X
 } from 'lucide-react';
 
 import ServiceRequestmodal from '../ui/modal/ServiceRequestmodal';
-// const ServiceRequestmodal = () => (
-//   <button className="w-full text-center py-2 text-black">
-//     Request Service
-//   </button>
-// );
+import LocationSelect from '../ui/select/LocationSelect';
+import CustomCalendar from '../ui/calendar/CustomCalendar';
+// Filter interfaces and types
+interface FilterState {
+  categories: string[];
+  budgetRanges: string[];
+  location: string;
+  startDate: string;
+  endDate: string;
+  filterOptions: string[];
+}
+
+interface FilterComponentProps {
+  onFilterChange: (filters: FilterState) => void;
+  onShowResults: (filters: FilterState) => void;
+}
 
 const icons = {
   catering: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
