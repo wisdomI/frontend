@@ -6,86 +6,11 @@ import { selectMenuItem } from '@/store/dashboardSlice';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import BookingCard from '@/components/customers/BookingCard';
 import ProgressTrackerModal from '@/components/customers/ProgressTrackerModal';
-
-interface BookingData {
-  id: string;
-  vendorName: string;
-  vendorImage: string;
-  eventTitle: string;
-  eventType: string;
-  eventDate: string;
-  eventLocation: string;
-  numberOfGuests: number;
-  servicesNeeded: string[];
-  budget: string;
-  additionalInfo: string;
-  status: 'Pending' | 'Active' | 'Completed' | 'Cancelled';
-  totalPaid: string;
-  acceptedHours: string;
-  image: string;
-  verified: boolean;
-}
-
-const mockBookings: BookingData[] = [
-  {
-    id: '1',
-    vendorName: 'UK Cakes & Cream',
-    vendorImage: '/api/placeholder/40/40',
-    eventTitle: 'Baby Linda\'s Birthday Party',
-    eventType: 'Social Event (Wedding, Birthday)',
-    eventDate: '12th May, 2025',
-    eventLocation: 'Surulere, Lagos State',
-    numberOfGuests: 15,
-    servicesNeeded: ['Catering'],
-    budget: 'N200,000 - N300,000',
-    additionalInfo: 'We need really flavourful cake and some Cherry ice cream for topping',
-    status: 'Pending',
-    totalPaid: '₦0.00',
-    acceptedHours: '17 hours ago',
-    image: '/api/placeholder/150/100',
-    verified: true
-  },
-  {
-    id: '2',
-    vendorName: 'UK Cakes & Cream',
-    vendorImage: '/api/placeholder/40/40',
-    eventTitle: 'Baby Linda\'s Birthday Party',
-    eventType: 'Social Event (Wedding, Birthday)',
-    eventDate: '12th May, 2025',
-    eventLocation: 'Surulere, Lagos State',
-    numberOfGuests: 15,
-    servicesNeeded: ['Catering'],
-    budget: 'N200,000 - N300,000',
-    additionalInfo: 'We need really flavourful cake and some Cherry ice cream for topping',
-    status: 'Active',
-    totalPaid: '₦0.00',
-    acceptedHours: '17 hours ago',
-    image: '/api/placeholder/150/100',
-    verified: true
-  },
-  {
-    id: '3',
-    vendorName: 'UK Cakes & Cream',
-    vendorImage: '/api/placeholder/40/40',
-    eventTitle: 'Baby Linda\'s Birthday Party',
-    eventType: 'Social Event (Wedding, Birthday)',
-    eventDate: '12th May, 2025',
-    eventLocation: 'Surulere, Lagos State',
-    numberOfGuests: 15,
-    servicesNeeded: ['Catering'],
-    budget: 'N200,000 - N300,000',
-    additionalInfo: 'We need really flavourful cake and some Cherry ice cream for topping',
-    status: 'Completed',
-    totalPaid: '₦0.00',
-    acceptedHours: '17 hours ago',
-    image: '/api/placeholder/150/100',
-    verified: true
-  }
-];
+import { mockBookings, BookingData } from '@/data/mockBookings';
 
 export default function ManageBookingsPage() {
-  const [bookings, setBookings] = useState<BookingData[]>(mockBookings);
-  const [activeTab, setActiveTab] = useState<'Pending' | 'Active' | 'Completed' | 'Cancelled'>('Pending');
+  const [bookings] = useState<BookingData[]>(mockBookings);
+  const [activeTab, setActiveTab] = useState<'Pending' | 'In Progress' | 'Completed' | 'Cancelled'>('Pending');
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const dispatch = useDispatch();
@@ -119,7 +44,7 @@ export default function ManageBookingsPage() {
 
   const tabs = [
     { key: 'Pending' as const, label: 'Pending', count: bookings.filter(b => b.status === 'Pending').length },
-    { key: 'Active' as const, label: 'Active', count: bookings.filter(b => b.status === 'Active').length },
+    { key: 'In Progress' as const, label: 'In Progress', count: bookings.filter(b => b.status === 'In Progress').length },
     { key: 'Completed' as const, label: 'Completed', count: bookings.filter(b => b.status === 'Completed').length },
     { key: 'Cancelled' as const, label: 'Cancelled', count: bookings.filter(b => b.status === 'Cancelled').length },
   ];
@@ -168,7 +93,7 @@ export default function ManageBookingsPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No {activeTab.toLowerCase()} bookings</h3>
             <p className="text-gray-500">
               {activeTab === 'Pending' && "No pending bookings at the moment."}
-              {activeTab === 'Active' && "No active bookings at the moment."}
+              {activeTab === 'In Progress' && "No active bookings at the moment."}
               {activeTab === 'Completed' && "No completed bookings yet."}
               {activeTab === 'Cancelled' && "No cancelled bookings."}
             </p>

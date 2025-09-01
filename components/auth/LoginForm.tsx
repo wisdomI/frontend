@@ -18,8 +18,8 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="bg-gray-50 rounded-2xl w-full max-w-lg p-12 relative max-h-[92vh] overflow-y-auto">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white p-2 bg-event-blue rounded-lg w-8 h-8 flex items-center justify-center"
@@ -28,7 +28,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
           </button>
 
           {/* Tabs */}
-          <div className="flex bg-gray-100 rounded-full p-1 mb-6">
+          <div className="flex bg-gray-100 rounded-full mt-4 p-1 mb-6">
             <button
               onClick={() => setActiveTab('individual')}
               className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
@@ -49,7 +49,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
             >
               Event Vendor
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab('planner')}
               className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
                 activeTab === 'planner'
@@ -58,7 +58,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
               }`}
             >
               Event Planner
-            </button>
+            </button> */}
           </div>
 
           {/* Heading */}
@@ -124,9 +124,9 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
 
           {/* Divider */}
           <div className="flex items-center mb-6">
-            <hr className="flex-1 border-gray-300" />
+            <hr className="flex-1 border-event-blue" />
             <span className="mx-4 text-sm text-gray-500">Or Login with</span>
-            <hr className="flex-1 border-gray-300" />
+            <hr className="flex-1 border-event-blue" />
           </div>
 
           {/* Social Login */}

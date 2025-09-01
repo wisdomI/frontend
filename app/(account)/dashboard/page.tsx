@@ -6,7 +6,7 @@ import Navbar from "@/components/customers/Headerswitch";
 
 export default function ClientDashboard() {
   const { showNotification } = useNotificationBreadcrumb();
-  const [activePage, setActivePage] = React.useState("/service-requests");
+  const [activePage, setActivePage] = React.useState("/profile");
 
   const handlePageChange = (path: string) => {
     setActivePage(path);
@@ -27,7 +27,7 @@ export default function ClientDashboard() {
     <div className="container min-h-auto mx-auto mt-2">
       <section className="container mx-auto p-4">
         <Navbar activePage={activePage} onPageChange={handlePageChange} />
-        {activePage === "/service-requests" ? (
+        {activePage === "/profile" ? (
           <div className="min-h-screen bg-[#fff] rounded-md"></div>
         ) : null}
       </section>

@@ -17,12 +17,12 @@ export default function AccountLayout({ children }: Props) {
                 </div>
             </div>
 
-            {/* Main Content Area - aligned with header container */}
+           
             <div className="container mx-auto px-8 md:px-12 lg:px-16 py-6 flex-1">
                 <div className="flex gap-6 items-start">
                     {/* Left Sidebar */}
                     <div className="w-64 flex-shrink-0">
-                        {/* Account Title - aligned with page headers */}
+                       
                         <div className="mb-4 mt-4 ">
                             <h2 className="text-[20px] font-semibold font-heading text-gray-900 pb-2">My Account</h2>
                         </div>

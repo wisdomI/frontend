@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import Header from '@/components/ui/Header';
+import ProfileHeader from '@/components/auth/ProfileHeader';
 import Footer from '@/components/ui/Footer';
 import Providers from '@/components/providers/Providers';
 import NotificationContainer from '@/components/ui/NotificationContainer';
@@ -14,10 +16,13 @@ interface ClientLayoutProps {
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard');
+
   return (
     <Providers>
       <Provider store={store}>
-        <Header />
+        {isDashboard ? <ProfileHeader /> : <Header />}
         <NotificationBreadcrumbWrapper />
         {children}
         <Footer />

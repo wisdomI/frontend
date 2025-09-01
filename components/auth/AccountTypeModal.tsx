@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { FaUser, FaBuilding, FaTimes } from 'react-icons/fa'
-
+import { RiAccountCircleLine, } from "react-icons/ri";
 interface Props {
   onSelect: (id: string) => void
   onClose: () => void
@@ -18,7 +18,7 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="p-8 md:w-[1000px] md:h-[460px] max-w-auto bg-white rounded-2xl shadow-lg relative">
+      <div className="p-8 md:w-[900px] md:h-[420px] max-w-auto bg-white rounded-2xl shadow-lg relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white p-2 bg-event-blue rounded-lg w-8 h-8 flex items-center justify-center"
@@ -44,9 +44,9 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
           >
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${selected === 'individual' ? 'bg-white' : 'bg-blue-50'
               }`}>
-              <FaUser size={24} className={selected === 'individual' ? 'text-event-blue' : 'text-event-blue'} />
+              <RiAccountCircleLine size={32} className={selected === 'individual' ? 'text-event-blue' : 'text-event-blue'} />
             </div>
-            <p className="font-medium text-lg leading-tight">
+            <p className="font-medium text-lg text-center  leading-tight">
               I am an Individual/Organization looking for a Service
             </p>
           </div>
@@ -63,7 +63,7 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
               }`}>
               <FaBuilding size={24} className={selected === 'vendor' ? 'text-event-blue' : 'text-event-blue'} />
             </div>
-            <p className="font-medium text-lg leading-tight">
+            <p className="font-medium text-lg text-center  leading-tight">
               I am an Event Vendor providing a service
             </p>
           </div>
