@@ -1,6 +1,6 @@
 import React from "react";
 import { CheckCircleFilled } from "@ant-design/icons";
-import { Edit2Icon, Eye, Star, Trash2, User } from "lucide-react";
+import { EditIcon, Eye, Star, Trash2, User } from "lucide-react";
 import Image from "next/image";
 import { EventRequestProps } from "@/types/directrequesttypes"; // <-- from your types.ts
 
@@ -37,7 +37,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
 
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6 w-full  md:h-[525px] ">
+    <div className="bg-white rounded-xl shadow-sm p-6 mb-6 w-full mt-4  md:h-fit  ">
       {/* Main Content - Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
         {/* Left Column */}
@@ -53,7 +53,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
 
           {/* Total Visit */}
           <div className="flex justify-between items-center py-1 ">
-            <span className="font-medium text-gray-700">Total Visit</span>
+            <span className="font-medium font-sans  text-gray-700">Total Visit</span>
             <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-event-blue">
               <CheckCircleFilled className="text-white text-[16px] font-medium inline-block" />
               <span className="text-white text-[16px] font-sans font-medium">
@@ -69,10 +69,11 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
           >
             <Eye className="w-5 h-5" />
             View All Offers
-            {/* Notification Badge */}
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
               3
             </span>
+            {/* Notification Badge */}
+            
           </button>
 
           {/* Event Planner Assigned */}
@@ -115,7 +116,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
               </span>
                 <button className="text-white bg-event-blue rounded-md border-event-blue border p-1"
                  onClick={onEdit} >
-                  <Edit2Icon className="w-4 h-4" />
+                  <EditIcon className="w-4 h-4" />
                 </button>
                 <button className="text-red-500 border-red-500 border rounded-md p-1">
                   <Trash2 className="w-4 h-4" />
@@ -125,27 +126,27 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
           </div>
 
           {/* Event Details */}
-          <div className="flex justify-between items-center py-4 border-b border-gray-100">
+          <div className="flex justify-between items-center py-2 border-b border-gray-50">
             <span className="font-medium text-gray-600 font-sans">Event Type:</span>
             <span className="font-normal text-gray-600 font-sans">{eventType}</span>
           </div>
 
-          <div className="flex justify-between items-center py-4 border-b border-gray-100">
+          <div className="flex justify-between items-center py-2 border-b border-gray-50">
             <span className="font-medium text-gray-600 font-sans">Event Date:</span>
             <span className="font-normal text-gray-600 font-sans">{eventDate}</span>
           </div>
 
-          <div className="flex justify-between items-center py-4 border-b border-gray-100">
+          <div className="flex justify-between items-center py-2 border-b bborder-gray-50">
             <span className="font-medium text-gray-600 font-sans">Event Location:</span>
             <span className="font-normal text-gray-600 font-sans">{eventLocation}</span>
           </div>
 
-          <div className="flex justify-between items-center py-4 border-b border-gray-100">
+          <div className="flex justify-between items-center py-2 border-b border-gray-50">
             <span className="font-medium text-gray-600 font-sans">No. of Guests:</span>
             <span className="font-normal text-gray-600 font-sans">{guests}</span>
           </div>
 
-          <div className="py-3 border-b border-gray-100 flex justify-between items-start">
+          <div className="py-3 border-b border-gray-50 flex justify-between items-start">
             <div className="flex justify-between items-start mb-3">
               <span className="font-medium text-gray-600 font-sans">Services Needed:</span>
             </div>
@@ -153,7 +154,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
               {services.map((service, i) => (
                 <span
                   key={i}
-                  className="bg-event-blue text-white text-sm px-4 py-4 rounded-lg flex items-center gap-2"
+                  className="bg-event-blue text-white text-sm px-4 py-2 rounded-lg flex items-center gap-2"
                 >
                   {service}
                   {onServiceDelete && (

@@ -45,7 +45,7 @@ const [requests, setRequests] = useState<EventRequestProps[]>(mockRequests);
         <h1 className="text-2xl font-bold mb-4">
             <Navbar activePage="/direct-request" onPageChange={() => {}} />
         </h1>
-        <div className=" bg-gray-50 p-4 space-y-6 ">
+        <div className="  p-4 space-y-6 ">
          {
          requests.map((event) => (
         <DirectRequestCard

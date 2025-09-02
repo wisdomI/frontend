@@ -22,7 +22,7 @@ const HeaderSwitch: React.FC<HeaderSwitchProps> = ({
         onClick={() => handleTabChange('posts')}
         className={`flex-1 py-3 px-6 rounded-xl text-center font-medium transition-all duration-200 ${
           currentTab === 'posts'
-            ? 'bg-white text-event-blue shadow-sm'
+            ? 'bg-white text-event-blue shadow-sm hover:border-[#CAF0F8]'
             : 'text-white hover:text-gray-200'
         }`}
       >
@@ -32,7 +32,7 @@ const HeaderSwitch: React.FC<HeaderSwitchProps> = ({
         onClick={() => handleTabChange('direct')}
         className={`flex-1 py-3 px-6 rounded-xl text-center font-medium transition-all duration-200 ${
           currentTab === 'direct'
-            ? 'bg-white text-event-blue shadow-sm'
+            ? 'bg-white text-event-blue shadow-sm hover:border-[#CAF0F8]'
             : 'text-white hover:text-gray-200'
         }`}
       >

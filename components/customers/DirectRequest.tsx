@@ -107,7 +107,7 @@ const DirectRequestCard: React.FC<EventRequestProps> = ({
                    {organizer?.initials ?? "NA"}
                   </span>
                 </div>
-                <span className="font-medium text-gray-800 underline">
+                <span className="font-semibold font-heading tetx-[18px]  text-event-blue underline">
                 {organizer?.name ?? "Unknown Organizer"}
                 </span>
               </div>
@@ -184,11 +184,11 @@ const DirectRequestCard: React.FC<EventRequestProps> = ({
 
           <div className="py-3 flex justify-between items-start">
             <div className="mb-2">
-              <span className="font-medium font-sans text-gray-600">
+              <span className="font-medium font-sans text-gray-800">
                 Additional Information
               </span>
             </div>
-            <p className="text-gray-600 font-normal font-sans leading-relaxed">
+            <p className="text-gray-800 font-normal font-sans leading-relaxed">
               {additionalInfo}
             </p>
           </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Logo from '@/public/images/primary-logo.png'
+import ProfileImage from "@/public/images/Ellipse 229.png"
 import LocationSelect from '@/components/ui/select/LocationSelect'
 
 export default function ProfileHeader() {
@@ -122,8 +123,12 @@ export default function ProfileHeader() {
             {/* Profile Dropdown */}
             <div className="relative">
               <button className="flex items-center space-x-2 text-gray-700 hover:text-event-blue transition-colors">
-                <div className="w-8 h-8 bg-event-blue rounded-full flex items-center justify-center border border-green-200">
-                  <span className="text-white text-sm font-semibold">D</span>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center border border-green-200">
+                <Image src={ProfileImage}
+                alt="logo image "
+                width={130}
+                height={130}
+              />
                 </div>
                 <span className="font-sans font-bold">Daniel</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

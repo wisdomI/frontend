@@ -20,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onPageChange }) => {
         backgroundColor: '#032d71',
         padding: '12px',
         borderRadius: '16px',
-         marginTop:"50px"
+         marginTop:"40px"
       }}
     >
       {navItems.map((item) => (
@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onPageChange }) => {
           key={item.path}
           href={item.path}
           style={{
-            color: '#fff',
+            color: '#CAF0F8',
             fontSize: '16px',
             marginRight: '20px',
             textDecoration: 'none',
