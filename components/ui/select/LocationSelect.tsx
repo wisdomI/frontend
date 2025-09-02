@@ -81,15 +81,17 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans"
+        className={`w-full px-4 py-2 pr-8 text-left border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-transparent font-sans ${
+          selectedOption ? 'bg-event-blue text-white' : 'bg-white text-gray-500'
+        }`}
       >
-        <span className={selectedOption ? "text-gray-900 font-sans" : "text-gray-500 font-sans"}>
+        <span className="font-sans">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <svg
-          className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 transition-transform ${
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-transform ${
             isOpen ? 'rotate-180' : ''
-          }`}
+          } ${selectedOption ? 'text-white' : 'text-gray-400'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

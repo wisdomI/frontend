@@ -38,10 +38,10 @@ const ServicesOffered: React.FC<ServicesOfferedProps> = ({ onViewPricing }) => {
     <div className="mb-12">
       <h2 className="text-xl font-bold font-heading text-gray-700 mb-6">Services Offered</h2>
       
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {services.map((service) => (
           <div key={service.id} className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
-            <div className="relative h-48">
+            <div className="relative h-32">
               <img
                 src={service.image}
                 alt={service.title}
@@ -54,7 +54,7 @@ const ServicesOffered: React.FC<ServicesOfferedProps> = ({ onViewPricing }) => {
               </div>
             </div>
             
-            <div className="p-4">
+            <div className="p-3">
               <h3 className="font-semibold  font-heading text-event-blue text-sm mb-3">
                 {service.title}
               </h3>
@@ -63,7 +63,7 @@ const ServicesOffered: React.FC<ServicesOfferedProps> = ({ onViewPricing }) => {
               </p>
               <button 
                 onClick={onViewPricing}
-                className="w-full bg-event-blue text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-1 font-heading"
+                className="w-full bg-event-blue text-white py-2 px-4 rounded text-sm hover:bg-blue-900 transition-colors flex items-center justify-center gap-1 font-heading"
               >
                 View Pricing
                 <span className="text-xs">›</span>

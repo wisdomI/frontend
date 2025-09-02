@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@iconify/react";
 import SuccessModal from "./SuccessNotificationModal";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import EventTypeSelect from "../select/EventTypeSelect";
 import ServiceTypeSelect from "../select/ServiceTypeSelect";
 import LocationSelect from "../select/LocationSelect";
 import CitySelect from "../select/CitySelect";
 import YesNoSelect from "../select/YesNoSelect";
 import CustomCalendar from "../calendar/CustomCalendar";
-import { BsBasketFill, BsBucketFill, BsFillBasketFill } from "react-icons/bs";
+
 import { LuTrash2 } from "react-icons/lu";
 
 export default function PostServiceModal() {
@@ -67,7 +66,7 @@ export default function PostServiceModal() {
   // Handle form submission
   const handleSubmit = () => {
     if (isFormValid()) {
-    
+
       // Here i will be sending data to the backend 
       setIsOpen(false);
       setShowSuccess(true);
@@ -156,7 +155,7 @@ export default function PostServiceModal() {
                     value={formData.eventType}
                     onChange={(value) => handleInputChange("eventType", value)}
                     placeholder="Select Event Type"
-                    
+
                   />
                 </div>
 
@@ -178,7 +177,7 @@ export default function PostServiceModal() {
                       <CustomCalendar
                         value={formData.endDate}
                         onChange={(date) => handleInputChange("endDate", date)}
-                          placeholder="dd/mm/yyyy"
+                        placeholder="dd/mm/yyyy"
                         label="End Date"
                       />
                     </div>
@@ -200,7 +199,7 @@ export default function PostServiceModal() {
                       }
                     }}
                     placeholder="Select State"
-                    
+
                   />
                 </div>
 
@@ -246,7 +245,7 @@ export default function PostServiceModal() {
                     className="w-full px-3 py-2 shadow-sm rounded-md  bg-[#fff] focus:outline-none focus:ring-1 font-normal font-sans  placeholder:font-sans placeholder:font-normal placeholder:text-[#a5a0a0] text-[#a5a0a0]"
                   />
                 </div>
-                
+
 
               </div>
 
@@ -305,8 +304,8 @@ export default function PostServiceModal() {
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
                             <div className="flex gap-1 "> <span className="text-gray-500 font-normal font-sans mx-2 text-sm">Size: {(file.size / 1024).toFixed(1)}KB</span>
-                            <LuTrash2 className="w-5 h-5" /></div>
-                           
+                              <LuTrash2 className="w-5 h-5" /></div>
+
                           </button>
                         </div>
                       ))}
@@ -362,13 +361,13 @@ export default function PostServiceModal() {
             <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
               <button
                 onClick={handleSubmit}
-                disabled={isFormValid()}
+                disabled={!isFormValid()}
                 className={`w-full py-2  font-sans font-semibold rounded-lg  transition-colors mb-4 ${isFormValid()
-                    ? 'bg-event-blue text-white hover:bg-blue-900'
-                    : 'bg-event-blue text-gray-100 cursor-not-allowed'
+                  ? 'bg-event-blue text-white hover:bg-blue-900'
+                  : 'bg-gray-400 text-gray-100 cursor-not-allowed'
                   }`}
               >
-               Send Request
+                Send Request
               </button>
             </div>
           </div>

@@ -7,18 +7,24 @@ import { ServiceData } from '@/data/mockServices';
 import DiamondIcon from '@/components/ui/DiamondIcon';
 import { BsChatDots, BsFillShareFill } from "react-icons/bs";
 import { RiLinkM, RiMapPinLine} from "react-icons/ri";
+import VendorContactInfo from './VendorContactInfo';
+import VendorProfileCard from './VendorProfileCard';
 interface VendorHeaderProps {
   vendor: ServiceData;
   onMyAvailability: () => void;
   onViewPricing: () => void;
   onRequestService: () => void;
+  badgeText?: string;
+  totalRequests?: number;
 }
 
 const VendorHeader: React.FC<VendorHeaderProps> = ({
   vendor,
   onMyAvailability,
   onViewPricing,
-  onRequestService
+  onRequestService,
+  badgeText = "Top Rated",
+  totalRequests = 120
 }) => {
   const router = useRouter();
 
@@ -44,22 +50,23 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
 
             <div className="flex gap-1 mb-1 ">
               <button
-                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-900 transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 <BsChatDots className="w-4 h-4" />
               </button>
               <button
-                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-event-blue transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
 
                 }}
+
               >
                 <Heart className={`w-4 h-4 `} />
               </button>
               <button
-                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                className="bg-blue-900 p-2 rounded-lg text-white hover:bg-event-blue transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 <BsFillShareFill className="w-4 h-4" />
@@ -67,23 +74,26 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="bg-event-blue text-white px-4 py-2 rounded-lg text-sm font-medium">
-              Top Rated
-            </span>
-            <div className="">
-              <p className="text-gray-600 text-sm px-2 text-white">Total Request</p>
-              <div className="text-right px-4 py-2   flex bg-event-blue text-white px-3 py-1 rounded-lg text-sm font-medium">
-                120
+ <div className="flex items-center justify-between md:gap-[290px] gap-6">
+              <div className="bg-event-blue text-white px-4 py-2 rounded-lg">
+                <span className="font-sans font-medium text-sm">{badgeText}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-sans text-gray-600 text-sm">Total Request</span>
+                <div className="bg-event-blue text-white px-3 py-1 rounded-lg flex items-center gap-1">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="font-sans font-medium">{totalRequests}</span>
+                </div>
               </div>
             </div>
-          </div>
         </div>
 
         {/* Content Layout */}
-        <div className="flex gap-8">
+        <div className="flex gap-8 items-start h-[480px]">
           {/* Left - Main Image */}
-          <div className="w-[500px] h-[360px] relative">
+          <div className="w-[500px] h-full relative">
             <img
               src={vendor.image}
               alt={vendor.title}
@@ -156,74 +166,41 @@ const VendorHeader: React.FC<VendorHeaderProps> = ({
           </div>
 
           {/* Center - Additional Images */}
-          <div className="flex flex-col gap-9 w-32 h-[440px]">
-            <div className="w-full h-24 gap-8 rounded-xl overflow-hidden">
+          <div className="flex flex-col gap-4 w-32 h-full">
+            <div className="w-full h-[152px] rounded-xl overflow-hidden">
               <img src="/images/cake2.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
-            <div className="w-full h-24 rounded-lg overflow-hidden">
+            <div className="w-full h-[152px] rounded-lg overflow-hidden">
               <img src="/images/place1.jpg" alt="Additional" className="w-full h-full object-cover" />
             </div>
-            <div className="w-full h-24 rounded-xl overflow-hidden">
+            <div className="w-full h-[152px] rounded-xl overflow-hidden">
               <img src="/images/image.png" alt="Additional" className="w-full h-full object-cover" />
             </div>
           </div>
 
-          {/* Right - Vendor Info Card */}
-          <div className="flex-1  ">
-            <div className=' bg-white rounded-xl p-2 border border-gray-200 '>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img src="/images/cake2.jpg" alt="Vendor" className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold font-heading text-gray-900">{vendor.vendorName}</h3>
-              </div>
-            </div>
+          {/* Right - Vendor Info */}
+          <div className="flex-1  h-full">
+            {/* Badges Section */}
+           
 
-            <p className="text-gray-600  font-sans text-sm mb-4 leading-relaxed">
-              Looking for delicious baked treats? I can bake fresh, tasty goodies just for you! From bread and cookies to custom cakes, I'll bring your sweet cravings to life. Contact me today and enjoy baked perfection!
-            </p>
-            </div>
-            <div className="space-y-1 mb-1 mt-4  bg-white rounded-xl p-2 border border-gray-200 ">
-              <div className="flex items-center gap-2 text-sm">
-              <RiLinkM className='w-8 h-8 text-white bg-event-blue '/>
-                <span className="text-event-blue font-sans">www.eventhub.com/findplayground2</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className='w-4 h-4'>
-                <RiMapPinLine  className='w-8 h-8 text-white bg-event-blue ' />
-                </div>
-              
-                <span className='font-sans'>Lagos, Nigeria</span>
-                <span className="text-gray-500 font-sans ">• Travels anywhere</span>
-              </div>
-              <div className="        w-full border  bg-[#d3e7ff] border-event-blue  font-heading text-event-blue  py-1 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span className='font-sans text-center '>Available - Next booking: Feb 20, 2025</span>
-              </div>
-<div>
-<button
-                onClick={onMyAvailability}
-                
-              >
-                <Calendar className="w-4 h-4" />
-                Check Availability
-              </button>
-            </div>
-</div>
-              
+            {/* Vendor Profile Card */}
+            <VendorProfileCard
+              vendorName={vendor.vendorName}
+              vendorImage="/images/cake2.jpg"
+              description="Do you need a Black Bridal Makeup Artist who understands your skin? As a professional Wedding Makeup Artist, we create beautifully tailored bridal makeup looks for all skin tones."
+              badgeText="Top Rated"
+              totalRequests={120}
+            />
 
-            <div className="space-y-3">
-              
-
-              <button
-                onClick={onRequestService}
-                className="w-full bg-event-blue font-heading text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Request Service
-              </button>
-            </div>
+            {/* Contact Info */}
+            <VendorContactInfo
+              websiteUrl="www.eventhub.com/ruthiebridalmakeovers"
+              location="Abuja, Nigeria"
+              travelInfo="+ Northern Nlg only"
+              availabilityStatus="Busy until Feb 15, 2025"
+              onCheckAvailability={onMyAvailability}
+              onRequestService={onRequestService}
+            />
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { selectMenuItem } from '@/store/dashboardSlice';
 import Navbar from '@/components/customers/Headerswitch';
@@ -16,6 +17,7 @@ export default function ServiceRequestClient() {
   const [selectedRequest, setSelectedRequest] = useState<EventRequestProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleEditClick = (request: EventRequestProps) => {
     setSelectedRequest(request);
@@ -38,6 +40,10 @@ export default function ServiceRequestClient() {
         return request;
       })
     );
+  };
+
+  const handleViewOffers = (request: EventRequestProps) => {
+    router.push(`/dashboard/service-requests/offers?title=${encodeURIComponent(request.title)}&id=${request.id}`);
   };
 
   useEffect(() => {
@@ -66,6 +72,7 @@ export default function ServiceRequestClient() {
             {...event}
             onEdit={() => handleEditClick(event)}
             onServiceDelete={(serviceIndex) => handleServiceDelete(event.id, serviceIndex)}
+            onViewOffers={() => handleViewOffers(event)}
           />
         ))}
         

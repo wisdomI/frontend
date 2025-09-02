@@ -9,6 +9,7 @@ import { EventRequestProps } from "@/types/directrequesttypes"; // <-- from your
 interface ServiceRequestCardProps extends EventRequestProps {
   onEdit: () => void;
   onServiceDelete?: (serviceIndex: number) => void;
+  onViewOffers?: () => void;
 }
 
 const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
@@ -30,7 +31,8 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
   budget,
   additionalInfo,
   onEdit,
-  onServiceDelete
+  onServiceDelete,
+  onViewOffers
 }) => {
 
 
@@ -60,32 +62,17 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
             </div>
           </div>
 
-          {/* Rating */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center gap-4 mt-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700 font-sans">Rating:</span>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-5 h-5 ${
-                        star <= rating ? "fill-yellow text-yellow" : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              <span className="text-gray-700 font-sans font-medium">
-                ({ratingCount})
-              </span>
-            </div>
-          </div>
-
-          {/* Viewed Status */}
-          <button className="w-full flex items-center justify-center gap-2 bg-event-blue text-white px-4 py-2 my-2 rounded-lg font-medium transition-colors">
+          {/* View All Offers */}
+          <button 
+            onClick={onViewOffers}
+            className="w-full flex items-center justify-center gap-2 bg-event-blue text-white px-4 py-2 my-2 rounded-lg font-medium transition-colors hover:bg-blue-700 relative"
+          >
             <Eye className="w-5 h-5" />
-            {viewedStatus}
+            View All Offers
+            {/* Notification Badge */}
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+              3
+            </span>
           </button>
 
           {/* Event Planner Assigned */}

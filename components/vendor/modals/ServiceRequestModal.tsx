@@ -341,7 +341,7 @@ export default function ServiceRequestModal({ isOpen, onClose }: ServiceRequestM
               disabled={!isFormValid()}
               className={`w-full py-2 font-sans font-semibold rounded-lg transition-colors mb-4 ${isFormValid()
                 ? 'bg-event-blue text-white hover:bg-blue-900'
-                : 'bg-event-blue text-gray-100 cursor-not-allowed'
+                : 'bg-gray-400 text-gray-100 cursor-not-allowed'
                 }`}
             >
               Request Service

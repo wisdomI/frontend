@@ -32,10 +32,10 @@ export default function SignUpModal({ onClose, onContinue, onLogin, accountType 
           <FaTimes size={14} />
         </button>
 
-        <h2 className="text-2xl font-bold text-event-blue mb-2">
+        <h2 className="text-2xl font-heading font-bold text-event-blue mb-2">
           Create an EventHub Account
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 mb-6 font-sans">
           EventHub makes your Event Planning easy.
         </p>
 
@@ -43,7 +43,7 @@ export default function SignUpModal({ onClose, onContinue, onLogin, accountType 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Account Type Selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Account Type</label>
+            <label className="block text-sm font-sans font-medium text-gray-700 mb-2">Select Account Type</label>
             <select
               value={selectedAccountType}
               onChange={(e) => setSelectedAccountType(e.target.value)}
@@ -59,7 +59,7 @@ export default function SignUpModal({ onClose, onContinue, onLogin, accountType 
             // Organization Form Fields
             <>
               <div>
-                <label className="block text-sm font-medium font-heading text-gray-700 mb-1">Business Name</label>
+                <label className="block text-sm font-sans font-medium text-gray-700 mb-1">Business Name</label>
                 <input
                   type="text"
                   placeholder="Enter Company Name"

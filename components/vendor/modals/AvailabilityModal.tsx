@@ -48,7 +48,7 @@ const AvailabilityModal: React.FC<AvailabilityModalProps> = ({
           <h2 className="text-2xl font-bold text-gray-900">My Availability</h2>
           <button
             onClick={onClose}
-            className="bg-event-blue text-white p-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-event-blue text-white p-2 rounded-lg hover:bg-blue-900 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -59,10 +59,10 @@ const AvailabilityModal: React.FC<AvailabilityModalProps> = ({
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-700">{currentMonth}</h3>
             <div className="flex gap-2">
-              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-900 transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-blue-900 transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -105,7 +105,7 @@ const AvailabilityModal: React.FC<AvailabilityModalProps> = ({
               onSetAvailability();
               onClose();
             }}
-            className="w-full bg-event-blue text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-event-blue text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-900 transition-colors flex items-center justify-center gap-2"
           >
             <span className="text-2xl">+</span>
             Set Availability

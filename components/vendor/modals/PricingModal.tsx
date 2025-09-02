@@ -73,7 +73,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="bg-event-blue text-white p-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-event-blue text-white p-2 rounded-lg hover:bg-event-blue transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

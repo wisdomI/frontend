@@ -49,10 +49,10 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
               <ChevronDown className="w-5 h-5 text-gray-600" />
             </div>
             <div className="flex gap-2">
-              <button className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-event-blue transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+              <button className="bg-event-blue text-white p-2 rounded-full hover:bg-event-blue transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -79,7 +79,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
                     ? 'text-gray-300 cursor-not-allowed' 
                     : isSelected(date)
                       ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-700 hover:bg-event-blue hover:text-white'
                   }
                 `}
                 disabled={!isCurrentMonth(date)}
@@ -93,13 +93,13 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-event-blue hover:text-white transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               onClick={onClose}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="flex-1 bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue transition-colors font-medium"
             >
               Save Availability
             </button>
