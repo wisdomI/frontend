@@ -23,12 +23,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={raleway.className}>
         <Providers>
-          <Header />
           <NotificationBreadcrumbWrapper />
           <main className="min-h-screen">
             {children}
           </main>
-          <Footer />
           <NotificationContainer />
         </Providers>
       </body>

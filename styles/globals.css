@@ -45,7 +45,7 @@ a {
 
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -60,4 +60,11 @@ a {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+.sx-react-calendar-wrapper {
+  /* width: 1200px; */
+  max-width: 100vw;
+  height: 800px;
+  max-height: 90vh;
 }

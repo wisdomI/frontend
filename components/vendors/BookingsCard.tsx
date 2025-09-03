@@ -4,8 +4,11 @@ import client from '../../public/images/client.png'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { MessageOutlined } from '@ant-design/icons'
+import { VscMilestone } from 'react-icons/vsc'
+import { MdSupportAgent } from 'react-icons/md'
 
-interface ManageClientCardProps {
+
+interface BookingsCardProps {
   clientName: string
   clientAvatar: string
   eventTitle: string
@@ -19,11 +22,10 @@ interface ManageClientCardProps {
   servicesNeeded: string
   budget: string
   additionalInfo?: string
-  onReject: () => void
-  onAccept: () => void
+  completed?:boolean
 }
 
-const ManageClientCard: FC<ManageClientCardProps> = ({
+const BookingsCard: FC<BookingsCardProps> = ({
   clientName,
   clientAvatar,
   eventTitle,
@@ -37,12 +39,10 @@ const ManageClientCard: FC<ManageClientCardProps> = ({
   servicesNeeded,
   budget,
   additionalInfo,
-  onReject,
-  onAccept,
+  completed
 }) => {
   return (
     <div className="bg-white border rounded-xl p-4 shadow-sm">
-      {/* Header */}
       <div className="flex flex-col gap-4 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -59,17 +59,27 @@ const ManageClientCard: FC<ManageClientCardProps> = ({
             </h3>
           </div>
           <div className="flex items-center gap-3">
-            <Button className="p-1">Create progress tracker</Button>
-            <p className="text-green-600 border border-green-600 p-1 px-2 font-medium rounded-md">
+            <Button className={`flex items-center p-1 gap-2 text-event-blue ${completed ? "bg-white text-blue-700 border border-event-blue" : "bg-event-blue text-white"}`}>
+              <VscMilestone width="24" height="24" className={`${completed ? "text-event-blue"  : "text-white"}`}/>
+              {completed
+                ? 'View progress tracker'
+                : 'Create progress tracker'}
+            </Button>
+            <p
+              className={`border ${completed ? 'border-gray-500 text-gray-500' : 'border-green-600 text-green-600'}  p-1 px-2 font-medium rounded-md`}
+            >
               In progress
             </p>
-            <div className='p-2 py-1 bg-event-blue rounded-lg'>
+            <div className="p-2 py-1 bg-event-blue rounded-lg">
               <MessageOutlined
                 style={{
                   fontSize: 18,
                   color: '#fff',
                 }}
               />
+            </div>
+            <div className="p-1 bg-[#FEC240] rounded-lg">
+              <MdSupportAgent className="text-black text-2xl" />
             </div>
           </div>
         </div>
@@ -126,4 +136,4 @@ const ManageClientCard: FC<ManageClientCardProps> = ({
   )
 }
 
-export default ManageClientCard
+export default BookingsCard

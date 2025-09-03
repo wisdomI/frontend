@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dashboardOutline from '@iconify/icons-material-symbols/dashboard-outline'
+import { TbBriefcase2 } from 'react-icons/tb'
 import { BsPeople } from 'react-icons/bs'
 // import jobSearch from '@iconify-json/hugeicons/icons/job-search.json'
 // import userManagement from '@iconify-json/ix/icons/user-management.json'
@@ -20,9 +21,12 @@ import reviewsOutline from '@iconify/icons-material-symbols/reviews-outline'
 import settingsOutline from '@iconify/icons-material-symbols/settings-outline'
 import { IoHelpCircleOutline } from 'react-icons/io5'
 import logo from "../../public/images/yellow-logo.svg"
+import { usePathname } from 'next/navigation'
 
 
 const Sidebar = () => {
+  const pathname = usePathname()
+
   const menuItems = [
     {
       label: 'Dashboard',
@@ -31,18 +35,13 @@ const Sidebar = () => {
     },
     {
       label: 'Service Requests',
-      icon: <Icon icon="hugeicons:job-search" width="24" height="24" />,
+      icon: <TbBriefcase2 width="26" height="26"/>,
       path: '/vendor/service-requests',
-    },
-    {
-      label: 'Manage Clients',
-      icon: <Icon icon="ix:user-management" width="24" height="24" />,
-      path: '/vendor/manage-clients',
     },
     {
       label: 'Manage Bookings',
       icon: <Icon icon={eventNoteOutline} width="24" height="24" />,
-      path: '/manage-bookings',
+      path: '/vendor/manage-bookings',
     },
     {
       label: 'Messages',
@@ -57,7 +56,7 @@ const Sidebar = () => {
     {
       label: 'Schedule Meetings',
       icon: <Icon icon={calendarMonthOutline} width="24" height="24" />,
-      path: '/schedule-meetings',
+      path: '/vendor/schedule-meetings',
     },
     {
       label: 'My Earnings',
@@ -82,7 +81,7 @@ const Sidebar = () => {
     {
       label: 'Rating & Reviews',
       icon: <Icon icon={reviewsOutline} width="24" height="24" />,
-      path: '/rating-reviews',
+      path: '/vendor/ratings-and-reviews',
     },
     {
       label: 'Settings',
@@ -92,21 +91,29 @@ const Sidebar = () => {
   ]
 
   return (
-    <aside className="bg-event-blue text-white w-64 fixed top-0 left-0 h-screen flex flex-col justify-between py-6 overflow-y-auto">
+    <aside className="bg-event-blue text-white w-72 fixed top-0 left-0 h-screen flex flex-col justify-between p-4 overflow-y-auto">
       <div>
         <Image src={logo} alt="Logo" width={257} height={44} className="p-4" />
-        <div className="px-4 py-6 font-bold text-lg">Admin User</div>
-        <nav className="space-y-1">
-          {menuItems.map(item => (
-            <Link
-              key={item.label}
-              href={item.path}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-blue-900 w-full"
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          ))}
+        {/* <div className="px-4 py-6 font-bold text-lg">Admin User</div> */}
+        <nav className="space-y-1 py-2">
+          {menuItems.map(item => {
+            const isActive = pathname === item.path
+            return (
+              <Link
+                key={item.label}
+                href={item.path}
+                className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg 
+                  ${
+                    isActive
+                      ? 'bg-white text-event-blue font-semibold'
+                      : 'hover:bg-event-blue'
+                  }`}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
         </nav>
       </div>
       <div className="p-4 border-t border-blue-800">

@@ -2,6 +2,11 @@ import { FC } from 'react'
 import { FaStar, FaEye } from 'react-icons/fa'
 import client from '../../public/images/client.png'
 import Image from 'next/image'
+import { MessageOutlined } from '@ant-design/icons'
+import { PiCheckCircleFill } from 'react-icons/pi'
+import { FaTimes } from 'react-icons/fa'
+
+
 
 interface ServiceRequestCardProps {
   clientName: string
@@ -17,8 +22,9 @@ interface ServiceRequestCardProps {
   servicesNeeded: string
   budget: string
   additionalInfo?: string
-  onReject: () => void
-  onAccept: () => void
+  onReject?: () => void
+  onAccept?: () => void
+  status: 'active' | 'accepted' | 'rejected'
 }
 
 const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
@@ -37,9 +43,10 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
   additionalInfo,
   onReject,
   onAccept,
+  status,
 }) => {
   return (
-    <div className="bg-white border rounded-xl p-4 shadow-sm">
+    <div className="border rounded-xl p-4 shadow-sm transition bg-white">
       {/* Header */}
       <div className="flex flex-col gap-4 pb-2">
         <div className="flex items-center justify-between">
@@ -56,8 +63,44 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
               {clientName}
             </h3>
           </div>
-          <span className="text-sm text-gray-500">{sentTime}</span>
+
+          {/* Date + Status badge */}
+          <div className="flex items-center gap-2">
+            {status === 'active' && (
+              <span className="text-sm text-gray-500">Sent {sentTime}</span>
+            )}
+            {status !== 'active' && (
+              <>
+                <p className="text-sm text-gray-500 flex gap-1 items-center">
+                  {status === 'accepted' ? 'Accepted' : 'Rejected'}
+                  <span>{sentTime}</span>
+                </p>
+                <div
+                  className={`text-[14px] font-semibold px-3 py-1 text-center rounded-lg flex items-center gap-2 ${
+                    status === 'accepted'
+                      ? 'text-green-700 border border-green-700'
+                      : 'text-red-500 border border-red-500'
+                  }`}
+                >
+                  {status === 'accepted' ? <PiCheckCircleFill className='w-5 h-5'/> : <FaTimes />}
+                  {status === 'accepted' ? 'Accepted' : 'Rejected'}
+                </div>
+
+                {status === 'accepted' && (
+                  <div className="p-2 py-1 bg-event-blue rounded-lg">
+                    <MessageOutlined
+                      style={{
+                        fontSize: 18,
+                        color: '#fff',
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
+
         <div className="flex items-center justify-between">
           <p className="font-bold text-lg font-asul">{eventTitle}</p>
           <div className="flex flex-col gap-1 text-right">
@@ -108,21 +151,23 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <button
-          // onClick={onReject}
-          className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg font-semibold hover:bg-red-50"
-        >
-          ✕ Reject Offer
-        </button>
-        <button
-          // onClick={onAccept}
-          className="flex-1 flex items-center gap-1 justify-center bg-event-blue text-white py-2 rounded-lg font-semibold hover:bg-event-blue-dark"
-        >
-          <FaEye /> Accept Offer
-        </button>
-      </div>
+      {/* Action Buttons (only for active) */}
+      {status === 'active' && (
+        <div className="flex gap-3">
+          <button
+            onClick={onReject}
+            className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg font-semibold hover:bg-red-50"
+          >
+            ✕ Reject Offer
+          </button>
+          <button
+            onClick={onAccept}
+            className="flex-1 flex items-center gap-1 justify-center bg-event-blue text-white py-2 rounded-lg font-semibold hover:bg-event-blue-dark"
+          >
+            <FaEye /> Accept Offer
+          </button>
+        </div>
+      )}
     </div>
   )
 }

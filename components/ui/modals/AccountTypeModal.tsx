@@ -31,12 +31,12 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
       description: '',
       icon: <FaBuilding size={28} className="text-white" />,
     },
-    {
-      id: 'planner',
-      title: 'I am an Event Planner managing your service',
-      description: '',
-      icon: <FaCalendarCheck size={28} className="text-blue-500" />,
-    },
+    // {
+    //   id: 'planner',
+    //   title: 'I am an Event Planner managing your service',
+    //   description: '',
+    //   icon: <FaCalendarCheck size={28} className="text-blue-500" />,
+    // },
   ]
 
   const handleSelect = (id: string) => {
@@ -46,28 +46,29 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mx-auto ml-0">
-      <div className="p-6 w-full max-w-3xl bg-white rounded-2xl shadow-lg relative">
+      <div className="p-12 w-full max-w-3xl bg-white rounded-2xl shadow-lg relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white p-1 bg-event-blue rounded"
         >
           <FaTimes />
         </button>
-        <h2 className="text-2xl font-bold text-center mb-2">
+        <h2 className="text-2xl font-bold text-left mb-2 font-asul">
           Which of these best describes you?
         </h2>
-        <p className="text-center text-gray-500 mb-8">
+        <p className="text-left text-gray-500 mb-8">
           Let us know the kind of account you want to create.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="flex grid-cols-1 sm:flex gap-4">
           {options.map(option => {
             const isSelected = selected === option.id
             return (
               <div
                 key={option.id}
                 onClick={() => handleSelect(option.id)}
-                className={`cursor-pointer flex flex-col items-center justify-center rounded-2xl p-6 border transition-all ${
+                className={`cursor-pointer flex flex-col items-center justify-center rounded-2xl p-6 border transition-all w-[300px] shadow-[0px 4px 48px 0px #00000014;
+] ${
                   isSelected
                     ? 'bg-blue-900 text-white'
                     : 'bg-white text-gray-800 border-gray-300 hover:border-blue-500 hover:bg-event-blue hover:text-white'
@@ -80,7 +81,7 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
                 >
                   {option.icon}
                 </div>
-                <p className={`text-center font-medium text-sm`}>
+                <p className={`text-center font-medium text-xl`}>
                   {option.title}
                 </p>
               </div>

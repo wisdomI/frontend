@@ -9,7 +9,7 @@ const NotificationsPanel = () => {
   ]
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
+    <div className="bg-white p-4 rounded-lg shadow h-fit">
       <h3 className="font-bold mb-4">Notifications</h3>
       {notifications.map((n, i) => (
         <div key={i} className="border-b pb-2 mb-2">

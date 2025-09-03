@@ -1,6 +1,5 @@
 'use client'
 
-
 import React, { useEffect } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import Sidebar from '@/components/layouts/Sidebar';

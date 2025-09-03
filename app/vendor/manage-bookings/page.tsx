@@ -1,9 +1,19 @@
-
-import ManageClientCard from '@/components/vendors/ManageClientCard'
+"use client"
+import BookingsCard from '@/components/vendors/BookingsCard'
 import FilterCard from '@/components/vendors/FilterCard'
+import TabNavigation from '@/components/ui/TabNavigation'
+import { useState } from 'react'
 
-export default function ManageClientsPage() {
-  const serviceRequestsData = [
+
+export default function ManageBookingsPage() {
+  const [activeTab, setActiveTab] = useState('active')
+
+  const tabs = [
+    { label: 'Active Bookings', value: 'active' },
+    { label: 'Completed Bookings', value: 'completed' },
+  ]
+  
+  const bookingsData = [
     {
       clientName: 'Daniel Adebayo',
       clientAvatar: '/images/avatar1.jpg',
@@ -17,6 +27,7 @@ export default function ManageClientsPage() {
       guests: 14,
       servicesNeeded: 'Small Chops, Cake Bakers',
       budget: '₦100,000 - ₦199,000',
+      status: 'active',
       additionalInfo:
         'We need milky flavoured cake and some Cherry as toppings',
     },
@@ -33,6 +44,7 @@ export default function ManageClientsPage() {
       guests: 150,
       servicesNeeded: 'Full Catering, Live Band, Decor',
       budget: '₦800,000 - ₦1,200,000',
+      status: 'active',
       additionalInfo:
         'Decor should be traditional Igbo style with palm wine service.',
     },
@@ -49,6 +61,7 @@ export default function ManageClientsPage() {
       guests: 250,
       servicesNeeded: 'Buffet Catering, DJ, Event Host',
       budget: '₦2,000,000 - ₦3,500,000',
+      status: 'completed',
       additionalInfo:
         'Prefer buffet style and a lively MC to keep the staff engaged.',
     },
@@ -65,6 +78,7 @@ export default function ManageClientsPage() {
       guests: 50,
       servicesNeeded: 'Small Chops, Photographer',
       budget: '₦150,000 - ₦250,000',
+      status: 'active',
       additionalInfo:
         'Photographer should deliver both soft copies and an album.',
     },
@@ -81,34 +95,34 @@ export default function ManageClientsPage() {
       guests: 300,
       servicesNeeded: 'Catering, Live Band, Sound System, Lighting',
       budget: '₦3,500,000 - ₦5,000,000',
+      status: 'completed',
       additionalInfo:
         'Event should have elegant white-and-gold theme with fireworks.',
     },
   ]
 
+  const filteredBookings = bookingsData.filter(b => b.status === activeTab)
 
   return (
     <div>
-      <h2 className="p-4 py-2 font-bold text-3xl pt-4 text-gray-600">Manage Bookings</h2>
-      {/* Service requests list */}
+      <h2 className="p-4 py-2 font-bold text-3xl pt-4 text-gray-600 font-asul">
+        Manage Bookings
+      </h2>
+      <div className="p-4">
+        <TabNavigation
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
+
       <div className="flex w-full p-4 gap-4">
-        {/* Service requests list */}
         <div className="flex flex-col gap-6 flex-1 max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
-          {serviceRequestsData.map((req, idx) => (
-            <ManageClientCard
-              key={idx}
-              {...req}
-              onReject={() =>
-                console.log(`Offer rejected for ${req.eventTitle}`)
-              }
-              onAccept={() =>
-                console.log(`Offer accepted for ${req.eventTitle}`)
-              }
-            />
+          {filteredBookings.map((req, idx) => (
+            <BookingsCard key={idx} {...req} completed={req.status === "completed"} />
           ))}
         </div>
 
-        {/* Sticky filter sidebar */}
         <div className="sticky top-20">
           <FilterCard />
         </div>
