@@ -50,8 +50,12 @@ export default function Header() {
         <div className="hidden lg:flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
-            <a href="/" className="text-2xl font-bold text-event-blue">
-              EventHub
+            <a href="/" className="flex items-center">
+              <img 
+                src="/images/primary-logo 3.png" 
+                alt="EventHub" 
+                className="h-6 w-30"
+              />
             </a>
           </div>
 
@@ -228,8 +232,12 @@ export default function Header() {
         <div className="flex md:hidden items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="text-xl font-bold text-event-blue">
-              EventHub
+            <a href="/" className="flex items-center">
+              <img 
+                src="/images/primary-logo 3.png" 
+                alt="EventHub" 
+                className="h-6 w-20"
+              />
             </a>
           </div>
 

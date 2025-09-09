@@ -17,20 +17,20 @@ export const useCustomers = (options: UseCustomersOptions = {}) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true)
-        const response = await customerAPI.getAll(options)
-        setCustomers(response.data)
-        setError(null)
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch service providers')
-      } finally {
-        setLoading(false)
-      }
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true)
+      const response = await customerAPI.getAll(options)
+      setCustomers(response.data)
+      setError(null)
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch service providers')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchCustomers()
   }, [options.search, options.category, options.location])
 

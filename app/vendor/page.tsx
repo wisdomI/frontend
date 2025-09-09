@@ -93,20 +93,22 @@ const DashboardPage = () => {
   ]
   return (
     <div className="flex">
-      <main className="flex-1 bg-gray-50 p-6">
+      <main className="flex-1 bg-gray-50 p-4 lg:p-6">
         <ProfileSetupSteps />
         <WelcomeBanner businessName="UK Cakes & Cream" verified={false} />
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
           <StatsCard label="Active Bookings" value={1} change={2.5} />
           <StatsCard label="Pending Bookings" value={1} change={-2.5} />
           <StatsCard label="Completed Bookings" value={1} change={2.5} />
         </div>
 
         {/* Chart + Right Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2"> <EarningsPaymentChart /></div>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2"> 
+            <EarningsPaymentChart />
+          </div>
           <div className="space-y-6">
             <UpcomingMeetings />
             <Availability />
@@ -114,8 +116,8 @@ const DashboardPage = () => {
         </div>
 
         {/* Service Requests + Notifications */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+          <div className="xl:col-span-2">
             {serviceRequestsData.map((req, idx) => (
               <ServiceRequestCard
                 key={idx}

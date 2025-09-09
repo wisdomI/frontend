@@ -1,388 +1,370 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Icon } from "@iconify/react";
-import SuccessModal from "./SuccessNotificationModal";
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { Icon } from '@iconify/react'
+import { PlusIcon } from '@heroicons/react/24/solid'
+import SuccessModal from './SuccessNotificationModal'
 
-export default function PostServiceModal() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+export default function PostServiceModal({ trigger }: { trigger?: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const [formData, setFormData] = useState({
-    eventTitle: "",
-    eventType: "",
-    startDate: "",
-    endDate: "",
-    eventLocation: "",
-    eventCity: "",
-    servicesNeeded: "",
-    numberOfGuests: "",
-    budgetRange: "",
-    additionalInfo: "",
-    eventPlanner: "no",
-    selectedPlanner: "",
-  });
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    eventTitle: '',
+    eventType: '',
+    startDate: '',
+    endDate: '',
+    eventLocation: '',
+    eventCity: '',
+    servicesNeeded: '',
+    numberOfGuests: '',
+    budgetRange: '',
+    additionalNotes: '',
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+  })
 
-  // Check if form is valid
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
   const isFormValid = () => {
-    return (
-      formData.eventTitle.trim() !== "" &&
-      formData.eventType !== "" &&
-      formData.startDate !== "" &&
-      formData.endDate !== "" &&
-      formData.eventLocation !== "" &&
-      formData.eventCity !== "" &&
-      formData.servicesNeeded !== "" &&
-      formData.numberOfGuests !== "" &&
-      formData.budgetRange.trim() !== "" &&
-      formData.additionalInfo.trim() !== ""
-    );
-  };
+    return formData.eventTitle.trim() !== '' &&
+           formData.eventType !== '' &&
+           formData.startDate !== '' &&
+           formData.endDate !== '' &&
+           formData.eventLocation.trim() !== '' &&
+           formData.eventCity.trim() !== '' &&
+           formData.servicesNeeded.trim() !== '' &&
+           formData.numberOfGuests !== '' &&
+           formData.budgetRange !== '' &&
+           formData.contactName.trim() !== '' &&
+           formData.contactEmail.trim() !== '' &&
+           formData.contactPhone.trim() !== ''
+  }
 
-  // Handle input changes
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setSelectedFiles(prev => [...prev, ...files]);
-  };
-
-  // Handle file deletion
-  const handleFileDelete = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
     if (isFormValid()) {
-      console.log("Form submitted:", { ...formData, files: selectedFiles });
-      // Here i will be sending data to the backend 
-      setIsOpen(false);
-      setShowSuccess(true);
+      setIsOpen(false)
+      setShowSuccess(true)
       // Reset form
       setFormData({
-        eventTitle: "",
-        eventType: "",
-        startDate: "",
-        endDate: "",
-        eventLocation: "",
-        eventCity: "",
-        servicesNeeded: "",
-        numberOfGuests: "",
-        budgetRange: "",
-        additionalInfo: "",
-        eventPlanner: "no",
-        selectedPlanner: "",
-      });
-      setSelectedFiles([]);
+        eventTitle: '',
+        eventType: '',
+        startDate: '',
+        endDate: '',
+        eventLocation: '',
+        eventCity: '',
+        servicesNeeded: '',
+        numberOfGuests: '',
+        budgetRange: '',
+        additionalNotes: '',
+        contactName: '',
+        contactEmail: '',
+        contactPhone: '',
+      })
     }
-  };
+  }
 
-  // Handle closing success modal
   const handleCloseSuccess = () => {
-    setShowSuccess(false);
-  };
+    setShowSuccess(false)
+  }
 
-  return (
-    <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="block w-full bg-yellow-400 text-blue-900 font-semibold text-center py-3 rounded-lg hover:bg-yellow-500 transition-colors"
-      >
-        + Post Service Request
-      </button>
+  const modalContent = isOpen ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto relative">
+        {/* Header */}
+        <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex-1 pr-2">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-800">
+              Post a Service Request
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              Kindly fill in your Event details
+            </p>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
+          >
+            ✕
+          </button>
+        </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-xs sm:max-w-lg md:max-w-3xl lg:max-w-3xl max-h-[95vh] overflow-y-auto relative mx-2">
-            
-            {/* Header */}
-            <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
-              <div className="flex-1 pr-2">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">
-                  Post a Service Request
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                  Kindly fill in your Event details
-                </p>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
-              >
-                ✕
-              </button>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Event Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Event Title *
+              </label>
+              <input
+                type="text"
+                name="eventTitle"
+                value={formData.eventTitle}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="Enter event title"
+                required
+              />
             </div>
 
-            {/* Content */}
-            <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              
-              {/* Left Column */}
-              <div className="space-y-4">
-                {/* Event Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Title
-                  </label>
-                                     <input
-                     type="text"
-                     placeholder="Enter Event Title"
-                     value={formData.eventTitle}
-                     onChange={(e) => handleInputChange("eventTitle", e.target.value)}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                   />
-                </div>
+            {/* Event Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Event Type *
+              </label>
+              <select
+                name="eventType"
+                value={formData.eventType}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                required
+              >
+                <option value="">Select event type</option>
+                <option value="wedding">Wedding</option>
+                <option value="corporate">Corporate Event</option>
+                <option value="birthday">Birthday Party</option>
+                <option value="anniversary">Anniversary</option>
+                <option value="graduation">Graduation</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
 
-                {/* Event Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Type
-                  </label>
-                                     <select 
-                     value={formData.eventType}
-                     onChange={(e) => handleInputChange("eventType", e.target.value)}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                   >
-                     <option value="">Select ▼</option>
-                     <option value="wedding">Wedding</option>
-                     <option value="birthday">Birthday</option>
-                     <option value="corporate">Corporate</option>
-                     <option value="other">Other</option>
-                   </select>
-                </div>
-
-                {/* Event Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Date
-                  </label>
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.startDate}
-                        onChange={(e) => handleInputChange("startDate", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.endDate}
-                        onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Event Location */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Location
-                  </label>
-                  <select 
-                    value={formData.eventLocation}
-                    onChange={(e) => handleInputChange("eventLocation", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="">Select State ▼</option>
-                    <option value="lagos">Lagos</option>
-                    <option value="abuja">Abuja</option>
-                    <option value="rivers">Rivers</option>
-                  </select>
-                </div>
-
-                {/* Event City */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event City
-                  </label>
-                  <p className="text-xs text-gray-500 mb-1">
-                    (Select the City you will like to Host your event)
-                  </p>
-                  <select 
-                    value={formData.eventCity}
-                    onChange={(e) => handleInputChange("eventCity", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="">Select City ▼</option>
-                    <option value="lagos-island">Lagos Island</option>
-                    <option value="victoria-island">Victoria Island</option>
-                    <option value="ikeja">Ikeja</option>
-                  </select>
-                </div>
-
-                {/* Services Needed */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Services Needed
-                  </label>
-                  <select 
-                    value={formData.servicesNeeded}
-                    onChange={(e) => handleInputChange("servicesNeeded", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="">Select Services ▼</option>
-                    <option value="catering">Catering</option>
-                    <option value="photography">Photography</option>
-                    <option value="venue">Venue</option>
-                  </select>
-                </div>
-
-                {/* Number of Guests */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Guests
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Enter no. of Guests"
-                    value={formData.numberOfGuests}
-                    onChange={(e) => handleInputChange("numberOfGuests", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  />
-                </div>
+            {/* Date Range */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Date *
+                </label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  required
+                />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  End Date *
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  required
+                />
+              </div>
+            </div>
 
-              {/* Right Column */}
-              <div className="space-y-4">
-                {/* Budget Range */}
+            {/* Location */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Location *
+                </label>
+                <input
+                  type="text"
+                  name="eventLocation"
+                  value={formData.eventLocation}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="Enter venue address"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  name="eventCity"
+                  value={formData.eventCity}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="Enter city"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Services Needed */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Services Needed *
+              </label>
+              <textarea
+                name="servicesNeeded"
+                value={formData.servicesNeeded}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="Describe the services you need (catering, photography, decoration, etc.)"
+                required
+              />
+            </div>
+
+            {/* Guest Count and Budget */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Guests *
+                </label>
+                <input
+                  type="number"
+                  name="numberOfGuests"
+                  value={formData.numberOfGuests}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="Enter guest count"
+                  min="1"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Budget Range *
+                </label>
+                <select
+                  name="budgetRange"
+                  value={formData.budgetRange}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  required
+                >
+                  <option value="">Select budget range</option>
+                  <option value="under-1000">Under $1,000</option>
+                  <option value="1000-5000">$1,000 - $5,000</option>
+                  <option value="5000-10000">$5,000 - $10,000</option>
+                  <option value="10000-25000">$10,000 - $25,000</option>
+                  <option value="over-25000">Over $25,000</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Additional Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Additional Notes
+              </label>
+              <textarea
+                name="additionalNotes"
+                value={formData.additionalNotes}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="Any additional information or special requirements"
+              />
+            </div>
+
+            {/* Contact Information */}
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Contact Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Budget Range
+                    Contact Name *
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g N100,000 - N200,000"
-                    value={formData.budgetRange}
-                    onChange={(e) => handleInputChange("budgetRange", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
+                    name="contactName"
+                    value={formData.contactName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="Your name"
+                    required
                   />
                 </div>
-
-                {/* File Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Choose a file or drag & drop it here
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    JPEG, PNG, PDF, and MP4 formats, up to 50MB
-                  </p>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <input
-                      type="file"
-                      multiple
-                      accept=".jpg,.jpeg,.png,.pdf,.mp4"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="bg-event-blue text-white px-4 py-2 rounded-md hover:bg-event-blue-hover transition-colors cursor-pointer"
-                    >
-                      Browse File
-                    </label>
-                  </div>
-                  {selectedFiles.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {selectedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                          <div className="text-sm text-gray-700">
-                            {file.name}{" "}
-                            <span className="text-gray-500">Size: {(file.size / 1024).toFixed(1)}KB</span>
-                          </div>
-                          <button
-                            onClick={() => handleFileDelete(index)}
-                            className="text-red-500 hover:text-red-700 transition-colors"
-                          >
-                            <Icon icon="mdi:delete" className="w-5 h-5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Additional Information */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Additional Information
+                    Email *
                   </label>
-                  <textarea
-                    placeholder="Enter here"
-                    value={formData.additionalInfo}
-                    onChange={(e) => handleInputChange("additionalInfo", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                    rows={3}
-                  ></textarea>
+                  <input
+                    type="email"
+                    name="contactEmail"
+                    value={formData.contactEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="your@email.com"
+                    required
+                  />
                 </div>
-
-                {/* Event Planner */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Would you like an Event planner to organize your event?
+                    Phone *
                   </label>
-                  <select 
-                    value={formData.eventPlanner}
-                    onChange={(e) => handleInputChange("eventPlanner", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="no">No ▼</option>
-                    <option value="yes">Yes</option>
-                  </select>
+                  <input
+                    type="tel"
+                    name="contactPhone"
+                    value={formData.contactPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="Your phone number"
+                    required
+                  />
                 </div>
-
-                {/* Select Planner */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select an Event Planner
-                  </label>
-                  <select 
-                    value={formData.selectedPlanner}
-                    onChange={(e) => handleInputChange("selectedPlanner", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 text-gray-700"
-                  >
-                    <option value="">Select Event Planner ▼</option>
-                    <option value="habeeb">Habeeb Event Planner</option>
-                    <option value="other">Other Planner</option>
-                  </select>
-                </div>
-
-                {/* Submit */}
-                
               </div>
-             
             </div>
-                         <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
-                   <button 
-                     onClick={handleSubmit}
-                     disabled={!isFormValid()}
-                     className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                       isFormValid() 
-                         ? 'bg-event-blue text-white hover:bg-blue-900' 
-                         : 'bg-blue-900 text-gray-100 cursor-not-allowed'
-                     }`}
-                   >
-                     Request Service
-                   </button>
-                 </div>
           </div>
+
+          {/* Submit Button */}
+          <div className="pt-2 mb-4 sm:mb-6 mx-4 sm:mx-8 flex justify-center items-center">
+            <button
+              onClick={handleSubmit}
+              disabled={!isFormValid()}
+              className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                isFormValid()
+                  ? 'bg-event-blue text-white hover:bg-blue-900'
+                  : 'bg-blue-900 text-gray-100 cursor-not-allowed'
+              }`}
+            >
+              Request Service
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  ) : null
+
+  return (
+    <>
+      {trigger ? (
+        <div onClick={() => setIsOpen(true)}>
+          {trigger}
         </div>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-full bg-yellow-400 text-blue-900 font-semibold text-center py-2 md:py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-1 md:space-x-2 text-xs md:text-sm"
+        >
+          <PlusIcon className="h-4 w-4 md:h-5 md:w-5" />
+          <span className="hidden sm:inline">Post Service Request</span>
+          <span className="sm:hidden">Post Request</span>
+        </button>
       )}
-      
+
+      {mounted && createPortal(modalContent, document.body)}
+
       {/* Success Modal */}
       <SuccessModal isOpen={showSuccess} onClose={handleCloseSuccess} />
     </>
-  );
+  )
 }
