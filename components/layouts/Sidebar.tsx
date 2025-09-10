@@ -355,7 +355,13 @@ const Sidebar: React.FC = () => {
         fixed md:static top-0 left-0 z-50 md:z-auto
         h-screen md:h-full md:max-h-full md:overflow-y-auto
       `}>
-        <div className="flex flex-col h-full md:h-full">
+        {isFilterModalOpen ? (
+          <FilterModal 
+            isOpen={isFilterModalOpen} 
+            onClose={() => setIsFilterModalOpen(false)} 
+          />
+        ) : (
+          <div className="flex flex-col h-full md:h-full">
           {/* Header Section */}
           <div className="mb-4">
             <div className="flex items-center justify-between">
@@ -444,13 +450,8 @@ const Sidebar: React.FC = () => {
             <PostServiceModal />
           </div>
         </div>
+        )}
       </aside>
-      
-      {/* Filter Modal */}
-      <FilterModal 
-        isOpen={isFilterModalOpen} 
-        onClose={() => setIsFilterModalOpen(false)} 
-      />
     </>
   )
 }

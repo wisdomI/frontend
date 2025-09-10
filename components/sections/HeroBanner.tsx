@@ -14,9 +14,12 @@ const HeroBanner = () => {
     autoplay: true,
     autoplaySpeed: 5000,
     pauseOnHover: true,
+    dotsClass: "slick-dots-custom",
     
     customPaging: (i: number) => (
-      <div className="w-2 h-2 rounded-full bg-white/50 transition-all duration-300"></div>
+      <div className={`h-2 transition-all duration-300 ${
+        i === 0 ? 'bg-blue-900 w-6 rounded-full' : 'bg-white border border-gray-300 w-2 rounded-full'
+      }`}></div>
     ),
     responsive: [
       {
@@ -80,50 +83,84 @@ const HeroBanner = () => {
     <>
       <style jsx global>{`
         .slick-dots-custom .slick-active div {
-          background-color: #ffffff !important;
+          background-color: #1e3a8a !important;
           width: 24px !important;
-          border-radius: 12px !important;
+          height: 8px !important;
+          border-radius: 4px !important;
         }
         .slick-dots-custom div {
           width: 8px !important;
           height: 8px !important;
           border-radius: 50% !important;
-          background-color: rgba(255, 255, 255, 0.5) !important;
+          background-color: #ffffff !important;
+          border: 1px solid #d1d5db !important;
           transition: all 0.3s ease !important;
         }
         .slick-dots-custom div:hover {
-          background-color: rgba(255, 255, 255, 0.8) !important;
+          background-color: #f3f4f6 !important;
         }
         .slick-dots {
-          bottom: 10px !important;
-          position: absolute !important;
+          position: static !important;
+          margin-top: 16px !important;
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: center !important;
+          align-items: center !important;
+          list-style: none !important;
+          padding: 0 !important;
+          width: 100% !important;
         }
         .slick-dots li {
           margin: 0 4px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .slick-dots li button {
+          border: none !important;
+          background: transparent !important;
+          padding: 0 !important;
+          cursor: pointer !important;
         }
         .slick-dots li button:before {
-          font-size: 12px !important;
+          display: none !important;
+        }
+        .slick-dots-custom {
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: center !important;
+          align-items: center !important;
+          width: 100% !important;
+          margin: 16px 0 0 0 !important;
+          padding: 0 !important;
+          list-style: none !important;
+        }
+        .slick-dots-custom li {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          margin: 0 4px !important;
         }
       `}</style>
-      <section className="mb-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+      
+      <section className="mt-8 mb-12 pt-0">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
           {/* Main Slider Section */}
           <div className="lg:col-span-3 order-1 lg:order-1">
-            <div className="relative rounded-xl overflow-hidden shadow-xl pb-4">
-              <Slider {...sliderSettings}>
-                {slides.map((slide, index) => (
-                  <div key={index} className="relative">
-                    <div className="relative h-64 md:h-80 lg:h-96 xl:h-[400px]">
-                      <img 
-                        src={slide.image}
-                        alt={slide.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+            <Slider {...sliderSettings}>
+              {slides.map((slide, index) => (
+                <div key={index} className="relative">
+                  <div className="relative h-64 md:h-80 lg:h-96 xl:h-[400px]">
+                    <img 
+                      src={slide.image}
+                      alt={slide.title} 
+                      className="w-full h-full object-cover rounded-xl"
+                    />
                   </div>
-                ))}
-              </Slider>
-            </div>
+                </div>
+              ))}
+            </Slider>
           </div>
           
           {/* Quick Actions Section */}

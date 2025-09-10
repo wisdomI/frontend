@@ -131,7 +131,7 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="w-64 flex-shrink-0 h-full bg-white overflow-y-auto">
       <style jsx>{`
         /* Smooth transitions for all slider elements */
         .slider-track {
@@ -147,26 +147,26 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
           transform: translateY(-6px) scale(1.05);
         }
       `}</style>
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-800">Filter</h2>
+        <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-800">Filter</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 hover:text-gray-700 transition-colors p-1"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
           {/* Category Section */}
           <div>
             <div 
-              className="flex items-center justify-between mb-4 cursor-pointer"
+              className="flex items-center justify-between mb-3 cursor-pointer"
               onClick={() => setIsCategoryOpen(!isCategoryOpen)}
             >
-              <h3 className="text-lg font-semibold text-gray-800">Category</h3>
+              <h3 className="text-base font-semibold text-gray-800">Category</h3>
               <ChevronDownIcon 
                 className={`w-5 h-5 text-gray-500 transition-transform ${
                   isCategoryOpen ? 'rotate-180' : ''
@@ -174,16 +174,16 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
               />
             </div>
             {isCategoryOpen && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {categories.map((category) => (
-                  <label key={category} className="flex items-center space-x-3 cursor-pointer">
+                  <label key={category} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedCategories.includes(category)}
                       onChange={() => handleCategoryToggle(category)}
-                      className="w-4 h-4 text-event-blue border-gray-300 rounded focus:ring-event-blue"
+                      className="w-3 h-3 text-event-blue border-gray-300 rounded focus:ring-event-blue"
                     />
-                    <span className="text-gray-700">{category}</span>
+                    <span className="text-sm text-gray-700">{category}</span>
                   </label>
                 ))}
               </div>
@@ -193,10 +193,10 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
           {/* Budget Section */}
           <div>
             <div 
-              className="flex items-center justify-between mb-4 cursor-pointer"
+              className="flex items-center justify-between mb-3 cursor-pointer"
               onClick={() => setIsBudgetOpen(!isBudgetOpen)}
             >
-              <h3 className="text-lg font-semibold text-gray-800">Budget</h3>
+              <h3 className="text-base font-semibold text-gray-800">Budget</h3>
               <ChevronDownIcon 
                 className={`w-5 h-5 text-gray-500 transition-transform ${
                   isBudgetOpen ? 'rotate-180' : ''
@@ -204,16 +204,16 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
               />
             </div>
             {isBudgetOpen && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {budgetRanges.map((budget) => (
-                  <label key={budget} className="flex items-center space-x-3 cursor-pointer">
+                  <label key={budget} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedBudgets.includes(budget)}
                       onChange={() => handleBudgetToggle(budget)}
-                      className="w-4 h-4 text-event-blue border-gray-300 rounded focus:ring-event-blue"
+                      className="w-3 h-3 text-event-blue border-gray-300 rounded focus:ring-event-blue"
                     />
-                    <span className="text-gray-700">{budget}</span>
+                    <span className="text-sm text-gray-700">{budget}</span>
                   </label>
                 ))}
               </div>
@@ -222,30 +222,30 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
 
           {/* Distance Slider */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Distance</h3>
+            <h3 className="text-base font-semibold text-gray-800 mb-3">Distance</h3>
             
             {/* Distance Input Fields */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-2 mb-3">
               <div className="flex-1">
-                <label className="block text-sm text-gray-600 mb-2">Min Distance (km)</label>
+                <label className="block text-xs text-gray-600 mb-1">Min (km)</label>
                 <input
                   type="number"
                   min="1"
                   max="100"
                   value={distanceRange.min}
                   onChange={(e) => handleDistanceInputChange('min', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent text-center"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-event-blue focus:border-transparent text-center"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm text-gray-600 mb-2">Max Distance (km)</label>
+                <label className="block text-xs text-gray-600 mb-1">Max (km)</label>
                 <input
                   type="number"
                   min="1"
                   max="100"
                   value={distanceRange.max}
                   onChange={(e) => handleDistanceInputChange('max', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent text-center"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-event-blue focus:border-transparent text-center"
                 />
               </div>
             </div>
@@ -339,13 +339,13 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
 
           {/* Filter Options */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Select filter Options</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <h3 className="text-base font-semibold text-gray-800 mb-3">Select filter Options</h3>
+            <div className="grid grid-cols-2 gap-2">
               {filterOptions.map((option) => (
                 <button
                   key={option}
                   onClick={() => setSelectedFilter(option)}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
                     selectedFilter === option
                       ? 'bg-event-blue text-white'
                       : 'bg-white text-gray-700 border border-event-blue hover:bg-gray-50'
@@ -359,27 +359,27 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
 
           {/* Location */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Location</h3>
+            <h3 className="text-base font-semibold text-gray-800 mb-3">Location</h3>
             <div className="relative">
               <button 
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="w-full bg-event-blue text-white px-4 py-3 rounded-lg flex items-center justify-between hover:bg-event-blue-hover transition-colors"
+                className="w-full bg-event-blue text-white px-3 py-2 rounded flex items-center justify-between hover:bg-event-blue-hover transition-colors text-sm"
               >
                 <span>{selectedLocation}</span>
                 <ChevronDownIcon 
-                  className={`w-5 h-5 transition-transform ${
+                  className={`w-4 h-4 transition-transform ${
                     isLocationOpen ? 'rotate-180' : ''
                   }`} 
                 />
               </button>
               
               {isLocationOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 max-h-32 overflow-y-auto">
                   {locations.map((location) => (
                     <button
                       key={location}
                       onClick={() => handleLocationSelect(location)}
-                      className="w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 first:rounded-t last:rounded-b"
                     >
                       {location}
                     </button>
@@ -391,37 +391,46 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
 
           {/* Availability */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Availability</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <h3 className="text-base font-semibold text-gray-800 mb-3">Availability</h3>
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Start Date</label>
+                <label className="block text-xs text-gray-600 mb-1">Start Date</label>
                 <div className="relative">
+                  <svg className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   <input
                     type="date"
                     value="2023-05-12"
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-event-blue rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
+                    className="w-full pl-8 pr-2 py-1 text-sm border border-event-blue rounded focus:ring-1 focus:ring-event-blue focus:border-transparent"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">End Date</label>
+                <label className="block text-xs text-gray-600 mb-1">End Date</label>
                 <div className="relative">
+                  <svg className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   <input
                     type="date"
                     value="2023-05-23"
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-event-blue rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
+                    className="w-full pl-8 pr-2 py-1 text-sm border border-event-blue rounded focus:ring-1 focus:ring-event-blue focus:border-transparent"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Show Results Button */}
+        </div>
+        
+        {/* Show Results Button - Fixed at bottom */}
+        <div className="p-4 border-t bg-gray-50">
           <button
             onClick={handleShowResults}
-            className="w-full bg-event-blue text-white py-4 rounded-lg font-semibold text-lg hover:bg-event-blue-hover transition-colors"
+            className="w-full bg-event-blue text-white py-3 rounded font-semibold text-sm hover:bg-event-blue-hover transition-colors"
           >
             Show Result (12)
           </button>
