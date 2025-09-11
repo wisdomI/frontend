@@ -6,67 +6,9 @@ import VendorCard from '@/components/ui/modals/VendorCard'
 import NotificationContainer from '@/components/ui/NotificationContainer'
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext'
 import CardViewToggle from '@/components/CardViewToggle'
-import Sidebar from '@/components/layouts/Sidebar'
 import HeroBanner from '@/components/sections/HeroBanner'
 import WhyChooseEventHub from '@/components/sections/WhyChooseUs'
-
-
-const mockVendors = [
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Decor+1',
-    title: 'Wedding Hall Decoration / Backdrops',
-    vendorName: "Ope's Event Decor",
-    rating: 3,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Cakes+1',
-    title: 'Book us for all types of Event Cakes',
-    vendorName: 'UK Cakes & Cream',
-    rating: 4,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Decor+2',
-    title: 'Wedding Hall Decoration / Backdrops',
-    vendorName: "Ope's Event Decor",
-    rating: 3,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Cakes+2',
-    title: 'Book us for all types of Event Cakes',
-    vendorName: 'UK Cakes & Cream',
-    rating: 4,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Decor+3',
-    title: 'Wedding Hall Decoration / Backdrops',
-    vendorName: "Ope's Event Decor",
-    rating: 3,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-  {
-    verified: true,
-    image: 'https://via.placeholder.com/300x200?text=Cakes+3',
-    title: 'Book us for all types of Event Cakes',
-    vendorName: 'UK Cakes & Cream',
-    rating: 4,
-    reviews: 20,
-    location: 'Victoria Island, Lagos',
-  },
-]
+import { vendorsData } from '@/data/vendors'
 
 type CardView = 'grid' | 'list'
 
@@ -87,7 +29,6 @@ export default function VendorsPage() {
   }, [showNotification])
   return (
     <div className="flex min-h-screen flex-1">
-      <Sidebar />
       <div className="flex-1 container mx-auto px-4 py-8">
         <HeroBanner />
         <WhyChooseEventHub />
@@ -105,8 +46,18 @@ export default function VendorsPage() {
                 : 'flex flex-col gap-4 py-4'
             }
           >
-            {mockVendors.map((vendor, index) => (
-              <VendorCard {...vendor} key={index} view={view} />
+            {vendorsData.map((vendor, index) => (
+              <VendorCard 
+                id={vendor.id}
+                verified={vendor.verified}
+                title={vendor.title}
+                vendorName={vendor.vendorName}
+                rating={vendor.rating}
+                reviews={vendor.reviews}
+                location={vendor.location}
+                key={vendor.id} 
+                view={view} 
+              />
             ))}
           </div>
         </div>

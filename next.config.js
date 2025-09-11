@@ -19,6 +19,12 @@ const nextConfig = {
       },
     })
     
+    // Fix for styled-jsx module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'styled-jsx': require.resolve('styled-jsx'),
+    }
+    
     return config
   },
   images: {
