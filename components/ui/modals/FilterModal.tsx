@@ -345,7 +345,7 @@ export default function FilterModal({ isOpen, onClose }: FilterModalProps) {
                 <button
                   key={option}
                   onClick={() => setSelectedFilter(option)}
-                  className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
+                  className={`w-full h-10 px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center ${
                     selectedFilter === option
                       ? 'bg-event-blue text-white'
                       : 'bg-white text-gray-700 border border-event-blue hover:bg-gray-50'

@@ -394,17 +394,15 @@ const Sidebar: React.FC = () => {
                       <div
                         className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors cursor-pointer ${
                           active
-                            ? 'bg-yellow-400 text-blue-900' 
-                            : index === 0 && !active
-                            ? 'text-white hover:bg-blue-800'
+                            ? 'text-yellow-400 bg-blue-900' 
                             : 'text-white hover:bg-blue-800'
                         }`}
                         onClick={() => handleToggle(item.label)}
                       >
                         <div className="flex items-center space-x-2 md:space-x-3">
-                          <div className={`${active ? 'text-blue-900' : 'text-white'}`}>
+                          <div className={`${active ? 'text-yellow-400' : 'text-white'}`}>
                             {React.cloneElement(item.icon, {
-                              className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-blue-900' : 'text-white'}`,
+                              className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-yellow-400' : 'text-white'}`,
                             })}
                           </div>
                           <span className="font-medium text-sm md:text-base">
@@ -415,7 +413,7 @@ const Sidebar: React.FC = () => {
                           <ChevronRightIcon 
                             className={`h-4 w-4 md:h-5 md:w-5 transition-transform ${
                               openMenus[item.label] ? 'rotate-90' : ''
-                            } ${active ? 'text-blue-900' : 'text-white'}`} 
+                            } ${active ? 'text-yellow-400' : 'text-white'}`} 
                           />
                         )}
                       </div>
@@ -427,7 +425,7 @@ const Sidebar: React.FC = () => {
                                 href={sub.route}
                                 className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors ${
                                   isSubMenuActive(sub.route)
-                                    ? 'bg-blue-700 text-white'
+                                    ? 'bg-blue-900 text-yellow-400'
                                     : 'text-gray-200 hover:bg-blue-700 hover:text-white'
                                 }`}
                                 onClick={() => setIsMobileOpen(false)}
