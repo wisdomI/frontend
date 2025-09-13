@@ -13,7 +13,7 @@ const DashboardPage = () => {
     {
       clientName: 'Daniel Adebayo',
       clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda’s Birthday Party',
+      eventTitle: 'Baby Linda\'s Birthday Party',
       rating: 4,
       totalBookings: 5,
       sentTime: 'Sent 17 hours ago',

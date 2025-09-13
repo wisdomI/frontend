@@ -12,6 +12,7 @@ export default function VendorLayout({
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
   // Only apply vendor dashboard layout to the main vendor page (/vendor)
   // Vendor profile pages (/vendor/[vendorId]) should use the main site layout
@@ -29,14 +30,18 @@ export default function VendorLayout({
         {/* Sidebar */}
         <div className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          fixed inset-y-0 left-0 z-50 w-64 bg-event-blue text-white transition-transform duration-300 ease-in-out
-          lg:translate-x-0 lg:static lg:inset-0 lg:w-64
+          fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:static lg:inset-0
         `}>
-          <Sidebar onClose={() => setSidebarOpen(false)} />
+          <Sidebar 
+            onClose={() => setSidebarOpen(false)}
+            isCollapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
         </div>
         
         {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
+        <div className="flex-1 flex flex-col min-w-0">
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-auto">{children}</main>
         </div>

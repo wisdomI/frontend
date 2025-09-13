@@ -1,7 +1,7 @@
 'use client'
 
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import HeroBanner from '@/components/sections/HeroBanner';
 import RecentlyViewed from '@/components/sections/RecentlyViewed';
@@ -11,8 +11,7 @@ import PopularServices from '@/components/sections/PopularServices';
 export default function HomePage() {
   const { showNotification } = useNotificationBreadcrumb()
 
-  useEffect(() => {
-    // Show the security reminder notification on page load
+  const showSecurityReminder = useCallback(() => {
     showNotification({
       message: 'Security Reminder: EventHub will never ask you to make payments outside the platform. Only complete transactions through our secure system.',
       type: 'info',
@@ -20,7 +19,12 @@ export default function HomePage() {
       dismissible: true,
       autoHide: false
     })
-  }, []) // Remove showNotification dependency to prevent infinite loop
+  }, [showNotification])
+
+  useEffect(() => {
+    // Show the security reminder notification on page load
+    showSecurityReminder()
+  }, [showSecurityReminder])
 
   return (
     <div className="flex min-h-screen flex-1">

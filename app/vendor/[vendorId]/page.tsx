@@ -25,7 +25,7 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Vendor Not Found</h1>
-          <p className="text-gray-600 mb-6">The vendor you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The vendor you&apos;re looking for doesn&apos;t exist.</p>
           <a href="/vendors" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
             Browse All Vendors
           </a>
