@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+      },
       colors: {
         primary: {
           50: '#eff6ff',
@@ -39,8 +42,9 @@ module.exports = {
         'light-gray': '#4C4C4C',
       },
       fontFamily: {
-        asul: ['Asul', 'serif'],
-        sans: ['Raleway', 'sans-serif'],
+        raleway: ['var(--font-raleway)', 'sans-serif'],
+        mooli: ['var(--font-mooli)', 'sans-serif'],
+        sans: ['var(--font-mooli)', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

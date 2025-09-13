@@ -7,8 +7,6 @@ export function middleware(request: NextRequest) {
   // Protected routes that require authentication
   const protectedRoutes = ['/dashboard', '/booking', '/chat']
   
-  // Admin-only routes
-  const adminRoutes = ['/dashboard/admin']
   
   // Vendor-only routes
   const vendorRoutes = ['/dashboard/vendor']
@@ -37,11 +35,6 @@ export function middleware(request: NextRequest) {
     // In a real app, you would decode the JWT token to get user role
     // For now, we'll assume the role is stored in a cookie
     const userRole = request.cookies.get('userRole')?.value
-
-    // Check admin routes
-    if (adminRoutes.some(route => pathname.startsWith(route)) && userRole !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
 
     // Check vendor routes
     if (vendorRoutes.some(route => pathname.startsWith(route)) && userRole !== 'vendor') {

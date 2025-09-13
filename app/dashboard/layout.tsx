@@ -19,11 +19,6 @@ export default function DashboardLayout({
                 Vendor Dashboard
               </a>
             </li>
-            <li>
-              <a href="/dashboard/admin" className="block py-2 px-4 rounded hover:bg-gray-700">
-                Admin Dashboard
-              </a>
-            </li>
           </ul>
         </nav>
       </aside>

@@ -9,7 +9,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand & Description */}
           <div className="md:col-span-1">
-            <h3 className="text-2xl font-bold mb-4">EventHub</h3>
+            <div className="mb-4">
+              <img 
+                src="/images/primary-logo 3.png" 
+                alt="EventHub" 
+                className="h-6 w-30"
+              />
+            </div>
             <p className="text-blue-100 text-sm leading-relaxed mb-4">
               Event Hub is a trusted digital marketplace in Nigeria that simplifies discovering, 
               verifying, booking, and coordinating event service providers like caterers, photographers, 

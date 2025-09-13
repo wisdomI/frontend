@@ -1,18 +1,49 @@
+'use client'
+
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import DashboardHeader from '@/components/vendors/DashboardHeader'
 import Sidebar from '@/components/vendors/VendorSidebar'
 
-export default function DashboardLayout({
+export default function VendorLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="ml-64 flex-1">
-        <DashboardHeader />
-        <main className='w-full flex-1'>{children}</main>
+  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // Only apply vendor dashboard layout to the main vendor page (/vendor)
+  // Vendor profile pages (/vendor/[vendorId]) should use the main site layout
+  if (pathname === '/vendor') {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        
+        {/* Sidebar */}
+        <div className={`
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed inset-y-0 left-0 z-50 w-64 bg-event-blue text-white transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:static lg:inset-0 lg:w-64
+        `}>
+          <Sidebar onClose={() => setSidebarOpen(false)} />
+        </div>
+        
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
+          <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+          <main className="flex-1 overflow-auto">{children}</main>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+  
+  // For vendor profile pages, just render children (they'll use main layout)
+  return <>{children}</>
 }

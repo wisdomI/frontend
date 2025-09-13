@@ -1,6 +1,8 @@
 'use client'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 import { BsHeart } from 'react-icons/bs'
@@ -11,6 +13,7 @@ import vendorImage from '../../../../frontend/public/images/vendor-img1.jpg'
 import vendorImage2 from '../../../../frontend/public/images/vendor-img2.jpg'
 
 type VendorCardProps = {
+  id: string
   verified: boolean
   title: string
   vendorName: string
@@ -21,6 +24,7 @@ type VendorCardProps = {
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({
+  id,
   verified,
   title,
   vendorName,
@@ -29,6 +33,8 @@ const VendorCard: React.FC<VendorCardProps> = ({
   location,
   view
 }) => {
+  const router = useRouter()
+  
   const renderStars = () => {
     return Array.from({ length: 5 }, (_, i) =>
       i < rating ? (
@@ -51,7 +57,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
 
   return (
     <div
-      className={`bg-white shadow-md rounded-2xl ${view === 'grid' ? 'w-[380px]' : 'w-full flex justify-start p-6 pr-2'}`}
+      className={`bg-white shadow-md rounded-2xl hover:shadow-lg transition-shadow ${view === 'grid' ? 'w-[380px]' : 'w-full flex justify-start p-6 pr-2'}`}
     >
       <div
         className={`relative ${view === 'grid' ? 'w-full' : 'w-[35%]'}`}
@@ -275,8 +281,24 @@ const VendorCard: React.FC<VendorCardProps> = ({
         <p className="flex items-center gap-1 text-gray-500 text-sm mt-1">
           <HiOutlineLocationMarker /> {location}
         </p>
+        
+        {/* View Details Button */}
+        <div className="mt-4">
+          <button 
+            className="w-full bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 cursor-pointer relative z-10"
+            onClick={() => {
+              console.log('Button clicked for vendor:', id);
+              router.push(`/vendor/${id}`);
+            }}
+          >
+            <span>View Details</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
-    </div>
+      </div>
   )
 }
 

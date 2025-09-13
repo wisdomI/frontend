@@ -1,0 +1,3 @@
+- [x] Update app/layout.tsx: Change body to flex flex-col min-h-screen, make content div flex-1, remove pb-8
+- [x] Update components/layouts/Sidebar.tsx: Remove sticky classes, change max-h to full, add overflow-y-auto, adjust heights
+- [x] Fix QuickActions.tsx: Add w-full to Link for consistent width

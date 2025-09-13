@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react'
 
 interface NotificationBreadcrumbData {
   message: string
@@ -26,7 +26,7 @@ interface NotificationBreadcrumbProviderProps {
 export const NotificationBreadcrumbProvider: React.FC<NotificationBreadcrumbProviderProps> = ({ children }) => {
   const [notification, setNotification] = useState<NotificationBreadcrumbData | null>(null)
 
-  const showNotification = (notificationData: NotificationBreadcrumbData) => {
+  const showNotification = useCallback((notificationData: NotificationBreadcrumbData) => {
     setNotification(notificationData)
     
     // Auto-hide if specified
@@ -36,11 +36,11 @@ export const NotificationBreadcrumbProvider: React.FC<NotificationBreadcrumbProv
         setNotification(null)
       }, duration)
     }
-  }
+  }, [])
 
-  const hideNotification = () => {
+  const hideNotification = useCallback(() => {
     setNotification(null)
-  }
+  }, [])
 
   const value: NotificationBreadcrumbContextType = {
     notification,

@@ -3,7 +3,6 @@
 
 import React, { useEffect } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
-import Sidebar from '@/components/layouts/Sidebar';
 import HeroBanner from '@/components/sections/HeroBanner';
 import RecentlyViewed from '@/components/sections/RecentlyViewed';
 import WhyChooseEventHub from '@/components/sections/WhyChooseUs';
@@ -21,24 +20,20 @@ export default function HomePage() {
       dismissible: true,
       autoHide: false
     })
-  }, [showNotification])
+  }, []) // Remove showNotification dependency to prevent infinite loop
 
   return (
-    <div className="flex min-h-screen flex-1 ">
-      <Sidebar />
-
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {/* <h1 className="text-4xl font-bold text-center mb-8">
-          Welcome to Event Hub
-        </h1> */}
-        {/* Add hero section or other content here */}
-        <HeroBanner/>
-        <WhyChooseEventHub/>
-<RecentlyViewed/>
- <PopularServices/>
-
+    <div className="flex min-h-screen flex-1">
+      <main className="flex-1 w-full">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <HeroBanner/>
+          <div className="space-y-6 sm:space-y-8">
+            <WhyChooseEventHub/>
+            <RecentlyViewed/>
+            <PopularServices/>
+          </div>
+        </div>
       </main>
-      
     </div>
   );
 }
