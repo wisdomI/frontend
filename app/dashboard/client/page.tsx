@@ -23,7 +23,7 @@ export default function ClientDashboard() {
         <div className="space-y-4">
           <div className="border-b pb-4">
             <h3 className="font-medium">Wedding Photography</h3>
-            <p className="text-gray-600">John's Photography Studio</p>
+            <p className="text-gray-600">John&apos;s Photography Studio</p>
             <p className="text-sm text-gray-500">Date: March 15, 2024</p>
           </div>
           <div className="border-b pb-4">

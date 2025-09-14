@@ -204,7 +204,7 @@ const PopularServices: React.FC = () => {
       }`}>
         {/* Image Section */}
         <div className={`relative ${viewType === 'grid' ? 'w-full' : 'w-32 sm:w-40 md:w-48 flex-shrink-0'}`}>
-          <div className={`relative ${viewType === 'grid' ? 'h-48 w-full' : 'h-24 sm:h-28 md:h-32 w-full'}`}>
+          <div className={`relative ${viewType === 'grid' ? 'h-36 w-full' : 'h-20 sm:h-24 md:h-28 w-full'}`}>
             <Image
               src={images[current]}
               alt={service.title}

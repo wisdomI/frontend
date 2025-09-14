@@ -12,7 +12,7 @@ const QuickActions = () => {
         <div className="w-full">
           <PostServiceModal 
             trigger={
-              <Button className="bg-blue-900 text-white p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-full transition-all duration-200 shadow-md hover:shadow-lg w-full">
+              <Button className="bg-blue-900 text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-36 transition-all duration-200 shadow-md hover:shadow-lg w-full">
                 <PlusOutlined className="text-2xl mb-2 text-white" />
                 <span className="text-xs font-medium text-center leading-tight">
                   Post a Service Request
@@ -23,7 +23,7 @@ const QuickActions = () => {
         </div>
 
         {/* Manage all Posts Button */}
-        <Button className="bg-blue-900 text-white p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-full transition-all duration-200 shadow-md hover:shadow-lg">
+        <Button className="bg-blue-900 text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-36 transition-all duration-200 shadow-md hover:shadow-lg">
           <div className="relative">
             <FileSearchOutlined className="text-2xl mb-2 text-white" />
             {/* Notification Badge */}
@@ -37,7 +37,7 @@ const QuickActions = () => {
         </Button>
 
         {/* Manage all Bookings Button */}
-        <Button className="bg-blue-900 text-white p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-full transition-all duration-200 shadow-md hover:shadow-lg">
+        <Button className="bg-blue-900 text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-36 transition-all duration-200 shadow-md hover:shadow-lg">
           <CalendarOutlined className="text-2xl mb-2 text-white" />
           <span className="text-xs font-medium text-center leading-tight">
             Manage all Bookings
@@ -45,7 +45,7 @@ const QuickActions = () => {
         </Button>
 
         {/* View all Favourites Button */}
-        <Button className="bg-blue-900 text-white p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-full transition-all duration-200 shadow-md hover:shadow-lg">
+        <Button className="bg-blue-900 text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-36 transition-all duration-200 shadow-md hover:shadow-lg">
           <EyeFilled className="text-2xl mb-2 text-white" />
           <span className="text-xs font-medium text-center leading-tight">
             View all Favourites

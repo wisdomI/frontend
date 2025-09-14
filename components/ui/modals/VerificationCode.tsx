@@ -61,7 +61,7 @@ export default function CodeVerificationModal({
 
         {/* Resend Option */}
         <div className="flex justify-center items-center gap-2 mt-4">
-          <p className="text-sm text-gray-500">Didn't get code?</p>
+          <p className="text-sm text-gray-500">Didn&apos;t get code?</p>
           <button
             onClick={onResend}
             className="text-sm text-blue-700 font-medium hover:underline"

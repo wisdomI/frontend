@@ -9,8 +9,8 @@ import { BsHeart } from 'react-icons/bs'
 import { HiShare } from 'react-icons/hi2'
 import { HiOutlineLocationMarker } from 'react-icons/hi'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
-import vendorImage from '../../../../frontend/public/images/vendor-img1.jpg'
-import vendorImage2 from '../../../../frontend/public/images/vendor-img2.jpg'
+import vendorImage from '../../../public/images/vendor-img1.jpg'
+import vendorImage2 from '../../../public/images/vendor-img2.jpg'
 
 type VendorCardProps = {
   id: string
