@@ -14,9 +14,8 @@ export default function VendorLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
-  // Only apply vendor dashboard layout to the main vendor page (/vendor)
-  // Vendor profile pages (/vendor/[vendorId]) should use the main site layout
-  if (pathname === '/vendor') {
+  // Apply vendor dashboard layout to ALL vendor pages
+  if (pathname.startsWith('/vendor')) {
     return (
       <div className="flex min-h-screen bg-gray-50">
         {/* Mobile sidebar overlay */}
@@ -49,6 +48,6 @@ export default function VendorLayout({
     )
   }
   
-  // For vendor profile pages, just render children (they'll use main layout)
+  // Fallback for non-vendor pages
   return <>{children}</>
 }

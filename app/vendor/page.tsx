@@ -1,3 +1,5 @@
+'use client'
+
 import Sidebar from '@/components/vendors/VendorSidebar'
 import ProfileSetupSteps from '@/components/vendors/ProfileSetupSteps'
 import WelcomeBanner from '@/components/vendors/WelcomeBanner'

@@ -21,10 +21,10 @@ export default function RootLayout({
 }) {
   const pathname = usePathname()
   const isAuthPage = pathname?.startsWith('/auth')
-  const isVendorDashboardPage = pathname === '/vendor' // Only exclude the main vendor dashboard page
+  const isVendorDashboardPage = pathname?.startsWith('/vendor') // Exclude all vendor dashboard pages
   const isDashboardPage = pathname?.startsWith('/dashboard')
 
-  // For vendor dashboard page, render only the children (it has its own layout)
+  // For vendor dashboard pages, render only the children (they have their own layout)
   if (isVendorDashboardPage) {
     return (
       <html lang="en">

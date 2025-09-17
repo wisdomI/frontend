@@ -8,7 +8,7 @@ export default function BookingForm() {
         <select
           id="eventType"
           name="eventType"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"
         >
           <option value="">Select event type</option>
           <option value="wedding">Wedding</option>
@@ -27,7 +27,7 @@ export default function BookingForm() {
           id="guests"
           name="guests"
           placeholder="e.g., 100"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"
         />
       </div>
       
@@ -38,7 +38,7 @@ export default function BookingForm() {
         <select
           id="duration"
           name="duration"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"
         >
           <option value="">Select duration</option>
           <option value="2-4">2-4 hours</option>
@@ -57,7 +57,7 @@ export default function BookingForm() {
           id="location"
           name="location"
           placeholder="Enter venue address"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"
         />
       </div>
       
@@ -70,7 +70,7 @@ export default function BookingForm() {
           name="specialRequests"
           rows={3}
           placeholder="Any special requirements or requests..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-event-blue"
         />
       </div>
       

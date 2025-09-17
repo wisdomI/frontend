@@ -1,3 +1,5 @@
+'use client'
+
 const Availability = () => {
   const days = [
     { date: '27', day: 'Mon' },

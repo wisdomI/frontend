@@ -279,8 +279,8 @@ const PopularServicesPage: React.FC = () => {
                       y2="9.85713"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0" />
-                      <stop offset="1" stop-color="#FF6CE8" />
+                      <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
+                      <stop offset="1" stopColor="#FF6CE8" />
                     </linearGradient>
                     <linearGradient
                       id="paint1_linear_899_30759"
@@ -290,8 +290,8 @@ const PopularServicesPage: React.FC = () => {
                       y2="9.85713"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0" />
-                      <stop offset="1" stop-color="#FF6CE8" />
+                      <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
+                      <stop offset="1" stopColor="#FF6CE8" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -322,7 +322,7 @@ const PopularServicesPage: React.FC = () => {
               {/* View Details Button */}
               <div className="mt-4">
                 <button 
-                  className="w-full bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 cursor-pointer relative z-10"
+                  className="w-full bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-event-blue-hover transition-colors flex items-center justify-center space-x-2 cursor-pointer relative z-10"
                   onClick={() => {
                     console.log('Button clicked for service:', service.id);
                     router.push(`/vendor/${service.id}`);
@@ -373,8 +373,8 @@ const PopularServicesPage: React.FC = () => {
                         y2="9.85713"
                         gradientUnits="userSpaceOnUse"
                       >
-                        <stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0" />
-                        <stop offset="1" stop-color="#FF6CE8" />
+                        <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
+                        <stop offset="1" stopColor="#FF6CE8" />
                       </linearGradient>
                       <linearGradient
                         id="paint1_linear_899_30759"
@@ -384,8 +384,8 @@ const PopularServicesPage: React.FC = () => {
                         y2="9.85713"
                         gradientUnits="userSpaceOnUse"
                       >
-                        <stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0" />
-                        <stop offset="1" stop-color="#FF6CE8" />
+                        <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
+                        <stop offset="1" stopColor="#FF6CE8" />
                       </linearGradient>
                     </defs>
                   </svg>
@@ -416,7 +416,7 @@ const PopularServicesPage: React.FC = () => {
               {/* View Details Button for List View */}
               <div className="flex-shrink-0">
                 <button 
-                  className="bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 cursor-pointer relative z-10"
+                  className="bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-event-blue-hover transition-colors flex items-center space-x-2 cursor-pointer relative z-10"
                   onClick={() => {
                     console.log('Button clicked for service:', service.id);
                     router.push(`/vendor/${service.id}`);
@@ -471,7 +471,7 @@ const PopularServicesPage: React.FC = () => {
                   onClick={() => setViewType('list')}
                   className={`px-3 py-2 flex items-center space-x-1 transition-colors ${
                     viewType === 'list' 
-                      ? 'bg-blue-600 text-white' 
+                      ? 'bg-event-blue text-white' 
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -485,7 +485,7 @@ const PopularServicesPage: React.FC = () => {
                   onClick={() => setViewType('grid')}
                   className={`px-3 py-2 flex items-center space-x-1 transition-colors ${
                     viewType === 'grid' 
-                      ? 'bg-blue-600 text-white' 
+                      ? 'bg-event-blue text-white' 
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >

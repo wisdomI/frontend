@@ -31,7 +31,7 @@ export default function CodeVerificationModal({
         </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold mb-2 text-center text-blue-900">
+        <h2 className="text-2xl font-bold mb-2 text-center text-event-blue">
           Verification
         </h2>
         <p className="text-center text-gray-600 mb-4">
@@ -48,13 +48,13 @@ export default function CodeVerificationModal({
           maxLength={6}
           value={code}
           onChange={e => setCode(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg p-3 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full border border-gray-300 rounded-lg p-3 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-event-blue"
         />
 
         {/* Verify Button */}
         <button
           onClick={() => onVerify(code)}
-          className="w-full bg-blue-900 text-white py-3 rounded-lg mt-4 hover:bg-blue-800"
+          className="w-full bg-event-blue text-white py-3 rounded-lg mt-4 hover:bg-event-blue-hover"
         >
           Verify
         </button>
@@ -64,7 +64,7 @@ export default function CodeVerificationModal({
           <p className="text-sm text-gray-500">Didn&apos;t get code?</p>
           <button
             onClick={onResend}
-            className="text-sm text-blue-700 font-medium hover:underline"
+            className="text-sm text-event-blue font-medium hover:underline"
           >
             Resend
           </button>

@@ -1,9 +1,13 @@
+'use client'
+
 import { FC } from 'react'
 import { FaStar, FaEye } from 'react-icons/fa'
 import client from '../../public/images/client.png'
 import Image from 'next/image'
 
 interface ServiceRequestCardProps {
+  id?: number
+  status?: string
   clientName: string
   clientAvatar: string
   eventTitle: string
@@ -19,9 +23,12 @@ interface ServiceRequestCardProps {
   additionalInfo?: string
   onReject: () => void
   onAccept: () => void
+  onCounterOffer?: () => void
 }
 
 const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
+  id,
+  status,
   clientName,
   clientAvatar,
   eventTitle,
@@ -37,6 +44,7 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
   additionalInfo,
   onReject,
   onAccept,
+  onCounterOffer,
 }) => {
   return (
     <div className="bg-white border rounded-xl p-4 shadow-sm">
@@ -56,10 +64,27 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
               {clientName}
             </h3>
           </div>
-          <span className="text-sm text-gray-500">{sentTime}</span>
+          <div className="flex items-center gap-2">
+            {status === 'rejected' && (
+              <>
+                <span className="text-sm text-red-500 font-medium">Rejected 20/07/25</span>
+                <button className="bg-white border border-red-500 text-red-500 px-3 py-1 rounded text-sm font-medium">
+                  ✕ Rejected
+                </button>
+              </>
+            )}
+            {status === 'accepted' && (
+              <>
+                <span className="text-sm text-green-500 font-medium">Accepted 20/07/25</span>
+                <button className="bg-white border border-green-500 text-green-500 px-3 py-1 rounded text-sm font-medium">
+                  ✓ Accepted
+                </button>
+              </>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between">
-          <p className="font-bold text-lg font-asul">{eventTitle}</p>
+          <p className="font-bold text-lg text-event-blue">{eventTitle}</p>
           <div className="flex flex-col gap-1 text-right">
             {/* Rating */}
             <div className="flex items-center text-sm text-gray-600 mb-3">
@@ -108,21 +133,31 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <button
-          // onClick={onReject}
-          className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg font-semibold hover:bg-red-50"
-        >
-          ✕ Reject Offer
-        </button>
-        <button
-          // onClick={onAccept}
-          className="flex-1 flex items-center gap-1 justify-center bg-event-blue text-white py-2 rounded-lg font-semibold hover:bg-event-blue-dark"
-        >
-          <FaEye /> Accept Offer
-        </button>
-      </div>
+      {/* Action Buttons - Only show for active requests */}
+      {status === 'active' && (
+        <div className="flex gap-3">
+          <button
+            onClick={onReject}
+            className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors"
+          >
+            ✕ Reject Offer
+          </button>
+          <button
+            onClick={onAccept}
+            className="flex-1 flex items-center gap-1 justify-center bg-event-blue text-white py-2 rounded-lg font-semibold hover:bg-event-blue-hover transition-colors"
+          >
+            <FaEye /> Accept Offer
+          </button>
+          {onCounterOffer && (
+            <button
+              onClick={onCounterOffer}
+              className="flex-1 flex items-center gap-1 justify-center bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors"
+            >
+              📝 Counter Offer
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

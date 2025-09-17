@@ -24,7 +24,7 @@ export default function VerificationChoiceModal({
           <FaTimes />
         </button>
 
-        <h2 className="text-2xl font-bold mb-2 text-center text-blue-900">
+        <h2 className="text-2xl font-bold mb-2 text-center text-event-blue">
           Verification
         </h2>
         <p className="text-gray-600 text-center mb-6">
@@ -36,7 +36,7 @@ export default function VerificationChoiceModal({
           onClick={onEmail}
           role="button"
           tabIndex={0}
-          className="border border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer mb-4 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="border border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer mb-4 focus:outline-none focus:ring-2 focus:ring-event-blue"
         >
           <span className="bg-blue-100 p-3 rounded-full text-blue-700">
             <AiOutlineMail size={20} />
@@ -54,7 +54,7 @@ export default function VerificationChoiceModal({
           onClick={onPhone}
           role="button"
           tabIndex={0}
-          className="border border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="border border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-event-blue"
         >
           <span className="bg-blue-100 p-3 rounded-full text-blue-700">
             <AiOutlinePhone size={20} />

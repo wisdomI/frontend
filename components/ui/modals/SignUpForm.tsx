@@ -27,7 +27,7 @@ export default function SignUpModal({ onClose, onContinue }: SignUpModalProps) {
           <FaTimes />
         </button>
 
-        <h2 className="text-2xl font-bold text-center text-blue-900">
+        <h2 className="text-2xl font-bold text-center text-event-blue">
           Create an EventHub Account
         </h2>
         <p className="text-center text-gray-600 mt-1 mb-6">
@@ -119,7 +119,7 @@ export default function SignUpModal({ onClose, onContinue }: SignUpModalProps) {
           {/* Continue Button */}
           <button
             type="submit"
-            className="w-full bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800"
+            className="w-full bg-event-blue text-white py-2 rounded-lg hover:bg-event-blue-hover"
           >
             Continue
           </button>
@@ -128,7 +128,7 @@ export default function SignUpModal({ onClose, onContinue }: SignUpModalProps) {
         {/* Login Link */}
         <p className="text-center text-sm mt-4">
           Already have an Account?{' '}
-          <span className="text-blue-800 font-semibold cursor-pointer">
+          <span className="text-event-blue font-semibold cursor-pointer">
             Login
           </span>
         </p>

@@ -138,14 +138,14 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
               Kindly fill in your Event details
             </p>
             {vendorName && (
-              <p className="text-sm text-blue-600 mt-1 font-medium">
+              <p className="text-sm text-event-blue mt-1 font-medium">
                 Requesting service from {vendorName}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="bg-[#0B2E6F] h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
+            className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
           >
             ✕
           </button>
@@ -339,7 +339,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
               <div>
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    isDragOver ? 'border-[#0B2E6F] bg-blue-50' : 'border-gray-300'
+                    isDragOver ? 'border-event-blue bg-blue-50' : 'border-gray-300'
                   }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -351,7 +351,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[#0B2E6F] text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+                    className="bg-event-blue text-white px-6 py-2 rounded-lg hover:bg-event-blue-hover transition-colors"
                   >
                     Browse File
                   </button>
@@ -443,7 +443,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
               disabled={!isFormValid() || isSubmitting}
               className={`w-full max-w-md py-4 rounded-lg font-medium transition-colors ${
                 isFormValid() && !isSubmitting
-                  ? 'bg-[#0B2E6F] text-white hover:bg-blue-800'
+                  ? 'bg-event-blue text-white hover:bg-event-blue-hover'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >

@@ -1,3 +1,5 @@
+'use client'
+
 interface Meeting {
   time: string
   title: string

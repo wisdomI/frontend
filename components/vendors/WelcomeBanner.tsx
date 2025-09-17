@@ -1,3 +1,5 @@
+'use client'
+
 interface WelcomeBannerProps {
   businessName: string
   verified: boolean

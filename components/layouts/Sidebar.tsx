@@ -374,7 +374,7 @@ const Sidebar: React.FC = () => {
               {/* Right - Filter Icon */}
               <button 
                 onClick={() => setIsFilterModalOpen(true)}
-                className="bg-blue-900 text-white p-3 rounded-lg hover:bg-blue-800 transition-colors duration-200"
+                className="bg-event-blue text-white p-3 rounded-lg hover:bg-event-blue-hover transition-colors duration-200"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
@@ -394,8 +394,8 @@ const Sidebar: React.FC = () => {
                       <div
                         className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors cursor-pointer ${
                           active
-                            ? 'text-yellow-400 bg-blue-900' 
-                            : 'text-white hover:bg-blue-800'
+                            ? 'text-yellow-400 bg-event-blue' 
+                            : 'text-white hover:bg-event-blue-hover'
                         }`}
                         onClick={() => handleToggle(item.label)}
                       >
@@ -425,8 +425,8 @@ const Sidebar: React.FC = () => {
                                 href={sub.route}
                                 className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors ${
                                   isSubMenuActive(sub.route)
-                                    ? 'bg-blue-900 text-yellow-400'
-                                    : 'text-gray-200 hover:bg-blue-700 hover:text-white'
+                                    ? 'bg-event-blue text-yellow-400'
+                                    : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'
                                 }`}
                                 onClick={() => setIsMobileOpen(false)}
                               >

@@ -135,7 +135,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="bg-[#0B2E6F] h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
+            className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
           >
             ✕
           </button>
@@ -156,7 +156,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="eventTitle"
                   value={formData.eventTitle}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   placeholder="Enter Event Title"
                   required
                 />
@@ -171,7 +171,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   required
                 >
                   <option value="">Select</option>
@@ -196,7 +196,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                       name="startDate"
                       value={formData.startDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                       required
                     />
                     <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +214,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                       name="endDate"
                       value={formData.endDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                       required
                     />
                     <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="eventLocation"
                   value={formData.eventLocation}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   required
                 >
                   <option value="">Select State</option>
@@ -255,7 +255,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="eventCity"
                   value={formData.eventCity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   required
                 >
                   <option value="">Select City</option>
@@ -276,7 +276,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="servicesNeeded"
                   value={formData.servicesNeeded}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   required
                 >
                   <option value="">Select Services</option>
@@ -299,7 +299,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="numberOfGuests"
                   value={formData.numberOfGuests}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   placeholder="Enter no. of Guests"
                   min="1"
                   required
@@ -316,7 +316,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="budgetRange"
                   value={formData.budgetRange}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                   placeholder="e.g N100,000 - N200,000"
                   required
                 />
@@ -341,7 +341,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[#0B2E6F] text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+                    className="bg-event-blue text-white px-6 py-2 rounded-lg hover:bg-event-blue-hover transition-colors"
                   >
                     Browse File
                   </button>
@@ -387,7 +387,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   value={formData.additionalInformation}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent resize-none"
                   placeholder="Enter here"
                 />
               </div>
@@ -401,7 +401,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="eventPlanner"
                   value={formData.eventPlanner}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                 >
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
@@ -417,7 +417,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
                   name="aiSuggestion"
                   value={formData.aiSuggestion}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent"
                 >
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
@@ -433,7 +433,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
               disabled={!isFormValid()}
               className={`w-full max-w-md py-4 rounded-lg font-medium transition-colors ${
                 isFormValid()
-                  ? 'bg-[#0B2E6F] text-white hover:bg-blue-800'
+                  ? 'bg-event-blue text-white hover:bg-event-blue-hover'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
@@ -454,7 +454,7 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full bg-yellow-400 text-blue-900 font-semibold text-center py-2 md:py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-1 md:space-x-2 text-xs md:text-sm"
+          className="w-full bg-yellow-400 text-event-blue font-semibold text-center py-2 md:py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-1 md:space-x-2 text-xs md:text-sm"
         >
           <PlusIcon className="h-4 w-4 md:h-5 md:w-5" />
           <span className="hidden sm:inline">Post Service Request</span>
