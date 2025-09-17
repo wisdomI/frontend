@@ -1,3 +1,5 @@
+'use client'
+
 interface Notification {
   title: string
   time: string

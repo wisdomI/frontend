@@ -18,7 +18,7 @@ const HeroBanner = () => {
     
     customPaging: (i: number) => (
       <div className={`h-2 transition-all duration-300 ${
-        i === 0 ? 'bg-blue-900 w-6 rounded-full' : 'bg-white border border-gray-300 w-2 rounded-full'
+        i === 0 ? 'bg-event-blue w-6 rounded-full' : 'bg-white border border-gray-300 w-2 rounded-full'
       }`}></div>
     ),
     responsive: [

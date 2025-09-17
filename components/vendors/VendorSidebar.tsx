@@ -3,8 +3,19 @@
 import { Icon } from '@iconify/react'
 import Link from 'next/link'
 import Image from 'next/image'
-import dashboardOutline from '@iconify/icons-material-symbols/dashboard-outline'
+import { usePathname } from 'next/navigation'
 import { MessageOutlined } from '@ant-design/icons'
+import { 
+  FiGrid, 
+  FiClipboard, 
+  FiShoppingBag, 
+  FiCalendar, 
+  FiBarChart, 
+  FiUsers,
+  FiSettings,
+  FiHelpCircle
+} from 'react-icons/fi'
+import dashboardOutline from '@iconify/icons-material-symbols/dashboard-outline'
 import eventNoteOutline from '@iconify/icons-material-symbols/event-note-outline'
 import invoice from '@iconify/icons-material-symbols/post-add-rounded'
 import calendarMonthOutline from '@iconify/icons-mdi/calendar-multiselect-outline'
@@ -23,96 +34,121 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
+  const pathname = usePathname()
+  
   const menuItems = [
     {
       label: 'Dashboard',
       icon: <Icon icon={dashboardOutline} width="24" height="24" />,
       path: '/vendor',
-      isActive: true,
+      isActive: pathname === '/vendor',
+    },
+    {
+      label: 'Marketplace',
+      icon: <FiShoppingBag className="w-6 h-6" />,
+      path: '/vendor/marketplace',
+      isActive: pathname === '/vendor/marketplace',
     },
     {
       label: 'Service Requests',
-      icon: <Icon icon="material-symbols:assignment-outline" width="24" height="24" />,
+      icon: <FiClipboard className="w-6 h-6" />,
       path: '/vendor/service-requests',
-    },
-    {
-      label: 'Manage Clients',
-      icon: <Icon icon="material-symbols:group-outline" width="24" height="24" />,
-      path: '/vendor/manage-clients',
+      isActive: pathname === '/vendor/service-requests',
     },
     {
       label: 'Messages',
       icon: <MessageOutlined style={{ fontSize: 24 }} />,
-      path: '/messages',
+      path: '/vendor/messages',
       notificationCount: 3,
+      isActive: pathname === '/vendor/messages',
+    },
+    {
+      label: 'Manage Bookings',
+      icon: <FiCalendar className="w-6 h-6" />,
+      path: '/vendor/manage-bookings',
+      isActive: pathname === '/vendor/manage-bookings',
     },
     {
       label: 'Invoice Management',
       icon: <Icon icon={invoice} width="24" height="24" />,
       path: '/vendor/invoice-management',
+      isActive: pathname === '/vendor/invoice-management',
     },
     {
       label: 'Schedule Meetings',
       icon: <Icon icon={calendarMonthOutline} width="24" height="24" />,
-      path: '/schedule-meetings',
+      path: '/vendor/schedule-meetings',
+      isActive: pathname === '/vendor/schedule-meetings',
     },
     {
       label: 'My Earnings',
       icon: <Icon icon={paymentsOutline} width="24" height="24" />,
-      path: '/my-earnings',
+      path: '/vendor/my-earnings',
+      isActive: pathname === '/vendor/my-earnings',
     },
     {
       label: 'Manage Subscriptions',
       icon: <Icon icon={subscriptions} width="24" height="24" />,
-      path: '/manage-subscriptions',
+      path: '/vendor/manage-subscriptions',
+      isActive: pathname === '/vendor/manage-subscriptions',
     },
     {
       label: 'Performance Analytics',
-      icon: <Icon icon="material-symbols:bar-chart-outline" width="24" height="24" />,
-      path: '/performance-analytics',
+      icon: <FiBarChart className="w-6 h-6" />,
+      path: '/vendor/performance-analytics',
+      isActive: pathname === '/vendor/performance-analytics',
     },
     {
-      label: 'Manage Users',
-      icon: <Icon icon={personOutline} width="24" height="24" />,
-      path: '/manage-users',
+      label: 'Teams & Roles',
+      icon: <FiUsers className="w-6 h-6" />,
+      path: '/vendor/teams-roles',
+      isActive: pathname === '/vendor/teams-roles',
     },
     {
-      label: 'Rating & Reviews',
+      label: 'Rating & Review',
       icon: <Icon icon={reviewsOutline} width="24" height="24" />,
-      path: '/rating-reviews',
+      path: '/vendor/rating-reviews',
       notificationCount: 3,
+      isActive: pathname === '/vendor/rating-reviews',
+    },
+    {
+      label: 'Settings',
+      icon: <FiSettings className="w-6 h-6" />,
+      path: '/vendor/settings',
+      isActive: pathname === '/vendor/settings',
     },
   ]
 
   const bottomItems = [
     {
-      label: 'Profile',
-      icon: <Icon icon={personOutline} width="24" height="24" />,
-      path: '/profile',
-      notificationCount: 3,
+      label: 'Help & Support',
+      icon: <FiHelpCircle className="w-6 h-6" />,
+      path: '/vendor/help-support',
+      isActive: pathname === '/vendor/help-support',
     },
     {
-      label: 'Notifications',
+      label: 'Notification',
       icon: <Icon icon="material-symbols:notifications-outline" width="24" height="24" />,
-      path: '/notifications',
+      path: '/vendor/notifications',
       notificationCount: 1,
+      isActive: pathname === '/vendor/notifications',
     },
   ]
 
   return (
-    <aside className={`bg-blue-900 text-white h-full flex flex-col transition-all duration-300 ${
+    <aside className={`bg-event-blue text-white h-full flex flex-col transition-all duration-300 ${
       isCollapsed ? 'w-16' : 'w-64'
     }`}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-blue-800">
+        <div className="p-4 border-b border-event-blue">
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div className="text-white font-bold text-lg">Eh</div>
             )}
             <button
               onClick={onToggle}
-              className="text-white hover:text-gray-300 p-2 rounded-lg hover:bg-blue-800 transition-colors"
+              className="text-white hover:text-gray-300 p-2 rounded-lg hover:bg-event-blue-hover transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -128,18 +164,18 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
               <div key={item.label} className="relative">
                 <Link
                   href={item.path}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors group ${
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
                     item.isActive 
-                      ? 'bg-white text-blue-900' 
-                      : 'text-white hover:bg-blue-800'
+                      ? 'bg-white text-event-blue shadow-md' 
+                      : 'text-white hover:bg-event-blue-hover hover:scale-105 hover:shadow-lg hover:text-white'
                   }`}
                   onClick={onClose}
                 >
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
                     {item.icon}
                   </div>
                   {!isCollapsed && (
-                    <span className="text-sm font-medium truncate">{item.label}</span>
+                    <span className="text-sm font-medium truncate group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
                   )}
                 </Link>
                 
@@ -157,20 +193,24 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
         </nav>
 
         {/* Bottom Section */}
-        <div className="border-t border-blue-800 py-4">
+        <div className="border-t border-event-blue py-4">
           <div className="space-y-2 px-2">
             {bottomItems.map((item) => (
               <div key={item.label} className="relative">
                 <Link
                   href={item.path}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-white hover:bg-blue-800 group"
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
+                    item.isActive 
+                      ? 'bg-white text-event-blue shadow-md' 
+                      : 'text-white hover:bg-event-blue-hover hover:scale-105 hover:shadow-lg hover:text-white'
+                  }`}
                   onClick={onClose}
                 >
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
                     {item.icon}
                   </div>
                   {!isCollapsed && (
-                    <span className="text-sm font-medium truncate">{item.label}</span>
+                    <span className="text-sm font-medium truncate group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
                   )}
                 </Link>
                 

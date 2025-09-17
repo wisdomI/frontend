@@ -1,3 +1,5 @@
+'use client'
+
 interface Step {
   label: string
   completed: boolean

@@ -69,8 +69,8 @@ const AccountTypeModal: React.FC<Props> = ({ onSelect, onClose }) => {
                 onClick={() => handleSelect(option.id)}
                 className={`cursor-pointer flex flex-col items-center justify-center rounded-2xl p-6 border transition-all ${
                   isSelected
-                    ? 'bg-blue-900 text-white'
-                    : 'bg-white text-gray-800 border-gray-300 hover:border-blue-500 hover:bg-event-blue hover:text-white'
+                    ? 'bg-event-blue text-white'
+                    : 'bg-white text-gray-800 border-gray-300 hover:border-event-blue hover:bg-event-blue hover:text-white'
                 }`}
               >
                 <div

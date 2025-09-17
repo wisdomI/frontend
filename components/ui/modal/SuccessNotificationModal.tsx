@@ -11,7 +11,7 @@ export default function SuccessModal({ isOpen, onClose }: { isOpen: boolean; onC
        <div className="bg-white rounded-lg shadow-xl w-full max-w-xs sm:max-w-md p-4 sm:p-6 relative mx-2">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 text-blue-900 hover:text-blue-700 font-bold text-lg sm:text-xl"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 text-event-blue hover:text-event-blue-hover font-bold text-lg sm:text-xl"
         >
           ✕
         </button>
@@ -29,7 +29,7 @@ export default function SuccessModal({ isOpen, onClose }: { isOpen: boolean; onC
           <p className="text-sm sm:text-base text-gray-500">Your Service Request has been posted successfully</p>
           <button
             onClick={onClose}
-            className="w-full bg-blue-900 text-white py-2.5 sm:py-3 rounded-full font-medium hover:bg-blue-800 transition-colors text-sm sm:text-base"
+            className="w-full bg-event-blue text-white py-2.5 sm:py-3 rounded-full font-medium hover:bg-event-blue-hover transition-colors text-sm sm:text-base"
           >
             Done
           </button>
