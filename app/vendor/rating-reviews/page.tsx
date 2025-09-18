@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function RatingReviewsPage() {
   const [activeTab, setActiveTab] = useState('all')
@@ -186,10 +187,12 @@ export default function RatingReviewsPage() {
           <div key={review.id} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
-                <img
+                <Image
                   className="h-12 w-12 rounded-full"
                   src={review.clientAvatar}
                   alt={review.clientName}
+                  width={48}
+                  height={48}
                 />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -251,7 +254,7 @@ export default function RatingReviewsPage() {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews</h3>
-          <p className="text-gray-500">You don't have any {activeTab} reviews.</p>
+          <p className="text-gray-500">You don&apos;t have any {activeTab} reviews.</p>
         </div>
       )}
     </div>

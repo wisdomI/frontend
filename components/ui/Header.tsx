@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import SignUpFlow from './modals/SignUpFlow'
 
 const locations = [
@@ -51,9 +52,11 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
             <a href="/" className="flex items-center">
-              <img 
+              <Image 
                 src="/images/primary-logo 3.png" 
                 alt="EventHub" 
+                width={120}
+                height={24}
                 className="h-6 w-30"
               />
             </a>
@@ -233,9 +236,11 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <a href="/" className="flex items-center">
-              <img 
+              <Image 
                 src="/images/primary-logo 3.png" 
                 alt="EventHub" 
+                width={80}
+                height={24}
                 className="h-6 w-20"
               />
             </a>

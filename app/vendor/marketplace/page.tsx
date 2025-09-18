@@ -145,7 +145,7 @@ const MarketplacePage = () => {
     }
   ]
 
-  const handleOpenBid = (serviceRequest) =>  {
+  const handleOpenBid = (serviceRequest: any) => {
     setSelectedServiceRequest(serviceRequest)
     setIsModalOpen(true)
   }

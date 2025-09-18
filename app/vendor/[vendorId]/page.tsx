@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { 
   ChevronDownIcon,
   HeartIcon,
@@ -215,10 +216,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                 <div className="flex gap-4">
                   {/* Main Image */}
                   <div className="flex-1 relative">
-                    <img 
+                    <Image 
                       src={vendorData.mainImage} 
                       alt={vendorData.vendorName}
-                      className="w-full h-96 object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                     {vendorData.verified && (
                       <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full flex items-center space-x-1">
@@ -250,10 +252,12 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                   {/* Thumbnail Images */}
                   <div className="flex flex-col space-y-2">
                     {vendorData.portfolioImages.map((image, index) => (
-                      <img 
+                      <Image 
                         key={index}
                         src={image} 
                         alt={`Portfolio ${index + 1}`}
+                        width={96}
+                        height={96}
                         className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -327,10 +331,12 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             {/* Portfolio Grid */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               {portfolioData.images.map((image, index) => (
-                <img 
+                <Image 
                   key={index}
                   src={image} 
                   alt={`Portfolio ${index + 1}`}
+                  width={200}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg"
                 />
               ))}
@@ -351,9 +357,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {servicesData.map((service) => (
                 <div key={service.id} className="space-y-4">
-                  <img 
+                  <Image 
                     src={service.image} 
                     alt={service.title}
+                    width={300}
+                    height={160}
                     className="w-full h-40 object-cover rounded-lg"
                   />
                   <div>
@@ -381,9 +389,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
               {reviewsData.map((review) => (
                 <div key={review.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center space-x-3 mb-3">
-                    <img 
+                    <Image 
                       src={review.avatar} 
                       alt={review.reviewer}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
@@ -413,9 +423,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
               {recommendationsData.map((item) => (
                 <div key={item.id} className="space-y-4">
                   <div className="relative">
-                    <img 
+                    <Image 
                       src={item.image} 
                       alt={item.title}
+                      width={300}
+                      height={160}
                       className="w-full h-40 object-cover rounded-lg"
                     />
                     {item.verified && (

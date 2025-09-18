@@ -6,19 +6,25 @@ import { FiX, FiCheck } from 'react-icons/fi'
 interface SuccessModalProps {
   isOpen: boolean
   onClose: () => void
-  type: 'withdrawal' | 'bank-update'
+  type: 'withdrawal' | 'bank-update' | 'account-creation'
   withdrawalData?: {
     amount: string
     recipientName: string
     bankInfo: string
   }
+  message?: string
+  onLogin?: () => void
+  verificationType?: string
 }
 
 export default function SuccessModal({ 
   isOpen, 
   onClose, 
   type,
-  withdrawalData
+  withdrawalData,
+  message,
+  onLogin,
+  verificationType
 }: SuccessModalProps) {
   if (!isOpen) return null
 
@@ -34,6 +40,12 @@ export default function SuccessModal({
         title: 'Successful',
         message: 'You have successfully updated your Bank details',
         details: ''
+      }
+    } else if (type === 'account-creation') {
+      return {
+        title: 'Account Created!',
+        message: message || 'Your account has been successfully created!',
+        details: verificationType ? `Please verify your ${verificationType.toLowerCase()}` : ''
       }
     }
     return { title: '', message: '', details: '' }
@@ -69,6 +81,18 @@ export default function SuccessModal({
               <p className="text-sm font-semibold text-blue-600">{content.details}</p>
             )}
           </div>
+          
+          {/* Login Button for Account Creation */}
+          {type === 'account-creation' && onLogin && (
+            <div className="mt-6">
+              <button
+                onClick={onLogin}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Login to Your Account
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

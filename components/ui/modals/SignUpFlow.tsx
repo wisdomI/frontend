@@ -76,6 +76,8 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
       )}
       {step === 'success' && (
         <SuccessModal
+          isOpen={true}
+          type="account-creation"
           message="Your account has been successfully created!"
           onLogin={handleLogin}
           onClose={onClose}

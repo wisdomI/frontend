@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import {
   StarIcon,
   ShareIcon,
@@ -63,10 +64,11 @@ const EnhancedServiceCard: React.FC<EnhancedServiceCardProps> = ({
 
       {/* Image */}
       <div className="w-full h-32 md:h-40 rounded-xl overflow-hidden mb-2 md:mb-3 relative">
-        <img
+        <Image
           src={images[0]}
           alt={title}
-          className="w-full h-full object-cover rounded-xl"
+          fill
+          className="object-cover rounded-xl"
         />
         {/* Carousel indicators */}
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 md:space-x-2">
