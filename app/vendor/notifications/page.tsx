@@ -239,7 +239,7 @@ export default function NotificationsPage() {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-          <p className="text-gray-500">You don't have any {activeTab} notifications.</p>
+          <p className="text-gray-500">You don&apos;t have any {activeTab} notifications.</p>
         </div>
       )}
     </div>

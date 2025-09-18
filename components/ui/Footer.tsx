@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaXTwitter, FaTiktok, FaYoutube } from "react-icons/fa6";
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -10,9 +11,11 @@ export default function Footer() {
           {/* Brand & Description */}
           <div className="md:col-span-1">
             <div className="mb-4">
-              <img 
+              <Image 
                 src="/images/primary-logo 3.png" 
                 alt="EventHub" 
+                width={120}
+                height={24}
                 className="h-6 w-30"
               />
             </div>

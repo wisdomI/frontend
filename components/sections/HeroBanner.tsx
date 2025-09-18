@@ -2,6 +2,7 @@ import QuickActions from '@/components/layouts/QuickActions';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Image from 'next/image';
 
 const HeroBanner = () => {
   // Slider settings for responsiveness
@@ -152,10 +153,11 @@ const HeroBanner = () => {
               {slides.map((slide, index) => (
                 <div key={index} className="relative">
                   <div className="relative h-64 md:h-80 lg:h-96 xl:h-[400px]">
-                    <img 
+                    <Image 
                       src={slide.image}
                       alt={slide.title} 
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </div>
                 </div>
