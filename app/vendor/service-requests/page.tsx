@@ -177,30 +177,30 @@ export default function ServiceRequestsPage() {
   return (
     <div>
       {/* Header with Filter Toggle */}
-      <div className="flex items-center justify-between p-4 py-2 pt-4">
-        <h2 className="font-bold text-3xl text-gray-600">
+      <div className="flex items-center justify-between p-3 sm:p-4 py-2 pt-3 sm:pt-4">
+        <h2 className="font-bold text-lg sm:text-2xl lg:text-3xl text-gray-600">
           Service Request
         </h2>
         <button
           onClick={() => setShowFilter(!showFilter)}
-          className="lg:hidden flex items-center gap-2 px-4 py-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors"
+          className="lg:hidden flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors"
           aria-label={showFilter ? "Hide filter" : "Show filter"}
         >
-          <FiFilter className="w-4 h-4" />
-          <span className="text-sm font-medium">
+          <FiFilter className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm font-medium">
             {showFilter ? 'Hide Filter' : 'Show Filter'}
           </span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="px-4 pb-2">
-        <div className="flex border-b border-gray-200">
+      <div className="px-3 sm:px-4 pb-2">
+        <div className="flex border-b border-gray-200 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-xs sm:text-sm border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-event-blue text-event-blue'
                   : 'border-transparent text-gray-500 hover:text-gray-700'

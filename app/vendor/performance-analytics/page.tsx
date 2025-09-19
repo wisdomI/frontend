@@ -49,8 +49,8 @@ export default function PerformanceAnalyticsPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Performance Analytics</h1>
-        <p className="text-gray-600">Track your business performance and growth metrics</p>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2">Performance Analytics</h1>
+        <p className="text-sm sm:text-base text-gray-600">Track your business performance and growth metrics</p>
       </div>
 
       {/* Period Selector */}

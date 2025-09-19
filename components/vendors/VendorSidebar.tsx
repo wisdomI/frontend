@@ -26,6 +26,7 @@ import reviewsOutline from '@iconify/icons-material-symbols/reviews-outline'
 import settingsOutline from '@iconify/icons-material-symbols/settings-outline'
 import { IoHelpCircleOutline } from 'react-icons/io5'
 import logo from "../../public/images/primary-logo 3.png"
+import iconLogo from "../../public/images/icon-1.png"
 
 interface SidebarProps {
   onClose?: () => void
@@ -87,12 +88,6 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       isActive: pathname === '/vendor/my-earnings',
     },
     {
-      label: 'Manage Subscriptions',
-      icon: <Icon icon={subscriptions} width="24" height="24" />,
-      path: '/vendor/manage-subscriptions',
-      isActive: pathname === '/vendor/manage-subscriptions',
-    },
-    {
       label: 'Performance Analytics',
       icon: <FiBarChart className="w-6 h-6" />,
       path: '/vendor/performance-analytics',
@@ -112,6 +107,12 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       isActive: pathname === '/vendor/rating-reviews',
     },
     {
+      label: 'Manage Subscriptions',
+      icon: <Icon icon={subscriptions} width="24" height="24" />,
+      path: '/vendor/manage-subscriptions',
+      isActive: pathname === '/vendor/manage-subscriptions',
+    },
+    {
       label: 'Settings',
       icon: <FiSettings className="w-6 h-6" />,
       path: '/vendor/settings',
@@ -126,13 +127,6 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       path: '/vendor/help-support',
       isActive: pathname === '/vendor/help-support',
     },
-    {
-      label: 'Notification',
-      icon: <Icon icon="material-symbols:notifications-outline" width="24" height="24" />,
-      path: '/vendor/notifications',
-      notificationCount: 1,
-      isActive: pathname === '/vendor/notifications',
-    },
   ]
 
   return (
@@ -141,24 +135,38 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
     }`}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-event-blue">
-          <div className="flex items-center justify-between">
+        <div className="p-4 border-b border-event-blue flex-shrink-0">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
             {!isCollapsed && (
-              <div className="text-white font-bold text-lg">Eh</div>
+              <div className="text-white font-bold text-lg">
+                <span className="text-white">Event</span>
+                <span className="text-yellow-400">hub</span>
+              </div>
             )}
             <button
               onClick={onToggle}
               className="text-white hover:text-gray-300 p-2 rounded-lg hover:bg-event-blue-hover transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {isCollapsed ? (
+                <Image 
+                  src={iconLogo} 
+                  alt="Event Hub" 
+                  width={40} 
+                  height={40}
+                  className="drop-shadow-lg"
+                  style={{ filter: 'brightness(1.2) contrast(1.1)' }}
+                />
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto scrollbar-hide">
           <div className="space-y-2 px-2">
             {menuItems.map((item, index) => (
               <div key={item.label} className="relative">
@@ -180,11 +188,11 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
                 </Link>
                 
                 {/* Notification Badge */}
-                {item.notificationCount && (
+                {'notificationCount' in item && (item as any).notificationCount && (
                   <div className={`absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center ${
                     isCollapsed ? 'top-1 right-1' : ''
                   }`}>
-                    {item.notificationCount}
+                    {(item as any).notificationCount}
                   </div>
                 )}
               </div>
@@ -193,7 +201,7 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
         </nav>
 
         {/* Bottom Section */}
-        <div className="border-t border-event-blue py-4">
+        <div className="border-t border-event-blue py-4 flex-shrink-0">
           <div className="space-y-2 px-2">
             {bottomItems.map((item) => (
               <div key={item.label} className="relative">
@@ -215,11 +223,11 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
                 </Link>
                 
                 {/* Notification Badge */}
-                {item.notificationCount && (
+                {'notificationCount' in item && (item as any).notificationCount && (
                   <div className={`absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center ${
                     isCollapsed ? 'top-1 right-1' : ''
                   }`}>
-                    {item.notificationCount}
+                    {(item as any).notificationCount}
                   </div>
                 )}
               </div>

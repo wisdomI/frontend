@@ -17,7 +17,7 @@ export default function VendorLayout({
   // Apply vendor dashboard layout to ALL vendor pages
   if (pathname.startsWith('/vendor')) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex h-screen bg-gray-50">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div 
@@ -30,7 +30,7 @@ export default function VendorLayout({
         <div className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
-          lg:translate-x-0 lg:static lg:inset-0
+          lg:translate-x-0 lg:static lg:inset-0 lg:h-full
         `}>
           <Sidebar 
             onClose={() => setSidebarOpen(false)}
@@ -40,9 +40,9 @@ export default function VendorLayout({
         </div>
         
         {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
-          <main className="flex-1 overflow-auto">{children}</main>
+          <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>
     )

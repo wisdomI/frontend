@@ -84,7 +84,7 @@ const HeroBanner = () => {
     <>
       <style jsx global>{`
         .slick-dots-custom .slick-active div {
-          background-color: #1e3a8a !important;
+          background-color: #032D71 !important;
           width: 24px !important;
           height: 8px !important;
           border-radius: 4px !important;
@@ -157,6 +157,7 @@ const HeroBanner = () => {
                       src={slide.image}
                       alt={slide.title} 
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
                       className="object-cover rounded-xl"
                     />
                   </div>

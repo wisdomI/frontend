@@ -3,7 +3,7 @@
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import '../styles/globals.css'
-import { Raleway, Mooli } from 'next/font/google'
+import { Raleway, Asul } from 'next/font/google'
 import Header from '@/components/ui/Header'
 import Footer from '@/components/ui/Footer'
 import Providers from '@/components/providers/Providers'
@@ -12,7 +12,7 @@ import NotificationBreadcrumbWrapper from '@/components/ui/NotificationBreadcrum
 import Sidebar from '@/components/layouts/Sidebar'
 
 const raleway = Raleway({ subsets: ['latin'] })
-const mooli = Mooli({ subsets: ['latin'], weight: '400' })
+const asul = Asul({ subsets: ['latin'], weight: '400' })
 
 export default function RootLayout({
   children,
@@ -28,7 +28,7 @@ export default function RootLayout({
   if (isVendorDashboardPage) {
     return (
       <html lang="en">
-        <body className={`${mooli.className}`} style={{'--font-raleway': raleway.style.fontFamily, '--font-mooli': mooli.style.fontFamily} as React.CSSProperties}>
+        <body className={`${asul.className}`} style={{'--font-raleway': raleway.style.fontFamily, '--font-asul': asul.style.fontFamily} as React.CSSProperties}>
           <Providers>
             {children}
           </Providers>
@@ -41,7 +41,7 @@ export default function RootLayout({
   if (isDashboardPage) {
     return (
       <html lang="en">
-        <body className={`${mooli.className}`} style={{'--font-raleway': raleway.style.fontFamily, '--font-mooli': mooli.style.fontFamily} as React.CSSProperties}>
+        <body className={`${asul.className}`} style={{'--font-raleway': raleway.style.fontFamily, '--font-asul': asul.style.fontFamily} as React.CSSProperties}>
           <Providers>
             {children}
           </Providers>
@@ -52,7 +52,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${mooli.className} flex flex-col min-h-screen`} style={{'--font-raleway': raleway.style.fontFamily, '--font-mooli': mooli.style.fontFamily} as React.CSSProperties}>
+      <body className={`${asul.className} flex flex-col min-h-screen`} style={{'--font-raleway': raleway.style.fontFamily, '--font-asul': asul.style.fontFamily} as React.CSSProperties}>
         <Providers>
           <Header />
           <NotificationBreadcrumbWrapper />

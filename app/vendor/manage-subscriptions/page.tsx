@@ -104,21 +104,22 @@ export default function ManageSubscriptionsPage() {
       <div className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Manage Subscriptions</h1>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Manage Subscriptions</h1>
           <button 
             onClick={handleViewPricing}
-            className="px-4 py-2 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 text-white font-medium rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-sm"
             style={{ backgroundColor: '#032D71' }}
           >
-            <FiEye className="w-4 h-4" />
-            View Subscription Pricing
+            <FiEye className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">View Subscription Pricing</span>
+            <span className="sm:hidden">View Pricing</span>
           </button>
         </div>
 
         {/* Subscription Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Subscription Card */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white relative overflow-hidden">
+          <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-4 right-4 w-20 h-20 border border-white rounded-full"></div>
@@ -193,12 +194,6 @@ export default function ManageSubscriptionsPage() {
                 <span className="font-medium text-gray-900">Deactivate Subscription</span>
               </button>
               
-              <button className="w-full p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <FiPause className="w-5 h-5 text-yellow-600" />
-                </div>
-                <span className="font-medium text-gray-900">Pause Subscription</span>
-              </button>
             </div>
           </div>
         </div>

@@ -9,8 +9,13 @@ import UpcomingMeetings from '@/components/vendors/UpcomingMeetings'
 import Availability from '@/components/vendors/Availability'
 import ServiceRequestCard from '@/components/vendors/ServiceRequestCard'
 import NotificationsPanel from '@/components/vendors/Notifications'
+import Link from 'next/link'
+import { FiArrowRight } from 'react-icons/fi'
+import { useProfileCompletion } from '@/hooks/useProfileCompletion'
 
 const DashboardPage = () => {
+  const { profileStatus } = useProfileCompletion()
+  
   const serviceRequestsData = [
     {
       clientName: 'Daniel Adebayo',
@@ -94,46 +99,63 @@ const DashboardPage = () => {
     },
   ]
   return (
-    <div className="flex">
-      <main className="flex-1 bg-gray-50 p-4 lg:p-6">
-        <ProfileSetupSteps />
+    <div className="min-h-screen bg-gray-50">
+      <main className="p-2 sm:p-3 lg:p-6 max-w-full overflow-x-hidden">
+        {!profileStatus.isCompleted && <ProfileSetupSteps />}
         <WelcomeBanner businessName="UK Cakes & Cream" verified={false} />
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 my-3 sm:my-4 lg:my-6">
           <StatsCard label="Active Bookings" value={1} change={2.5} />
           <StatsCard label="Pending Bookings" value={1} change={-2.5} />
           <StatsCard label="Completed Bookings" value={1} change={2.5} />
         </div>
 
         {/* Chart + Right Sidebar */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2"> 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          <div className="lg:col-span-2"> 
             <EarningsPaymentChart />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
             <UpcomingMeetings />
             <Availability />
           </div>
         </div>
 
         {/* Service Requests + Notifications */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
-          <div className="xl:col-span-2">
-            {serviceRequestsData.map((req, idx) => (
-              <ServiceRequestCard
-                key={idx}
-                {...req}
-                onReject={() =>
-                  console.log(`Offer rejected for ${req.eventTitle}`)
-                }
-                onAccept={() =>
-                  console.log(`Offer accepted for ${req.eventTitle}`)
-                }
-              />
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
+          <div className="lg:col-span-2">
+            {/* Service Requests Header */}
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <Link 
+                href="/vendor/service-requests"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                <h2 className="text-lg sm:text-xl font-semibold">Service Requests</h2>
+                <FiArrowRight className="w-4 h-4" />
+              </Link>
+              <Link 
+                href="/vendor/service-requests"
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+              >
+                See more
+              </Link>
+            </div>
+            
+            {/* Single Service Request Card */}
+            <ServiceRequestCard
+              {...serviceRequestsData[0]}
+              onReject={() =>
+                console.log(`Offer rejected for ${serviceRequestsData[0].eventTitle}`)
+              }
+              onAccept={() =>
+                console.log(`Offer accepted for ${serviceRequestsData[0].eventTitle}`)
+              }
+            />
           </div>
-          <NotificationsPanel />
+          <div className="lg:col-span-1">
+            <NotificationsPanel />
+          </div>
         </div>
       </main>
     </div>
