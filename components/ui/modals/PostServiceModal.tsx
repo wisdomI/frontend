@@ -166,7 +166,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="eventTitle"
                   value={formData.eventTitle}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   placeholder="Enter Event Title"
                   required
                 />
@@ -181,7 +181,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   required
                 >
                   <option value="">Select</option>
@@ -206,7 +206,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                       name="startDate"
                       value={formData.startDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                       required
                     />
                     <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +224,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                       name="endDate"
                       value={formData.endDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                       required
                     />
                     <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="eventLocation"
                   value={formData.eventLocation}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   required
                 >
                   <option value="">Select State</option>
@@ -265,7 +265,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="eventCity"
                   value={formData.eventCity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   required
                 >
                   <option value="">Select City</option>
@@ -286,7 +286,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="servicesNeeded"
                   value={formData.servicesNeeded}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   required
                 >
                   <option value="">Select Services</option>
@@ -309,7 +309,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="numberOfGuests"
                   value={formData.numberOfGuests}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   placeholder="Enter no. of Guests"
                   min="1"
                   required
@@ -329,7 +329,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="budgetRange"
                   value={formData.budgetRange}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                   placeholder="e.g N100,000 - N200,000"
                   required
                 />
@@ -397,7 +397,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   value={formData.additionalInformation}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent resize-none"
                   placeholder="Enter here"
                 />
               </div>
@@ -411,7 +411,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="eventPlanner"
                   value={formData.eventPlanner}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                 >
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
@@ -427,7 +427,7 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
                   name="aiSuggestion"
                   value={formData.aiSuggestion}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B2E6F] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
                 >
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>

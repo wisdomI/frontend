@@ -113,7 +113,7 @@ export default function TeamsRolesPage() {
     <div className="p-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Teams & Roles</h1>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Teams & Roles</h1>
         </div>
 
         {/* Tabs */}
@@ -149,11 +149,12 @@ export default function TeamsRolesPage() {
                   </p>
                   <button
                     onClick={handleProfileStaff}
-                    className="px-6 py-3 text-white font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                    className="px-4 sm:px-6 py-2 sm:py-3 text-white font-medium rounded-lg transition-colors flex items-center gap-1 sm:gap-2 mx-auto text-sm"
                     style={{ backgroundColor: '#032D71' }}
                   >
-                    <FiPlus className="w-5 h-5" />
-                    Add Team Members
+                    <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Add Team Members</span>
+                    <span className="sm:hidden">Add Members</span>
                   </button>
                 </div>
               </>
@@ -163,14 +164,15 @@ export default function TeamsRolesPage() {
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Team Members</h3>
                       <button
                         onClick={handleProfileStaff}
-                        className="px-4 py-2 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                        className="px-3 sm:px-4 py-2 text-white font-medium rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-sm"
                         style={{ backgroundColor: '#032D71' }}
                       >
-                        <FiPlus className="w-4 h-4" />
-                        Add Team Member
+                        <FiPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Add Team Member</span>
+                        <span className="sm:hidden">Add</span>
                       </button>
                     </div>
                   </div>

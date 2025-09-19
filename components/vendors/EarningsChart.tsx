@@ -19,7 +19,7 @@ export default function EarningsPaymentsChart() {
       {
         label: 'Subscription',
         data: [1.4, 1.3, 1.4, 1.3, 1.2, 0.8, 1.2],
-        backgroundColor: '#002D72', // dark blue
+        backgroundColor: '#032D71', // dark blue
       },
       {
         label: 'Earnings',
@@ -74,7 +74,7 @@ export default function EarningsPaymentsChart() {
   }
 
   return (
-    <div className="p-4 rounded-lg border shadow-md bg-white">
+    <div className="p-3 sm:p-4 rounded-lg border shadow-md bg-white">
       <Bar data={data} options={options} />
     </div>
   )

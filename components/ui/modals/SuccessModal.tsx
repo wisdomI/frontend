@@ -6,7 +6,7 @@ import { FiX, FiCheck } from 'react-icons/fi'
 interface SuccessModalProps {
   isOpen: boolean
   onClose: () => void
-  type: 'withdrawal' | 'bank-update' | 'account-creation'
+  type: 'withdrawal' | 'bank-update' | 'account-creation' | 'profile-completion'
   withdrawalData?: {
     amount: string
     recipientName: string
@@ -46,6 +46,12 @@ export default function SuccessModal({
         title: 'Account Created!',
         message: message || 'Your account has been successfully created!',
         details: verificationType ? `Please verify your ${verificationType.toLowerCase()}` : ''
+      }
+    } else if (type === 'profile-completion') {
+      return {
+        title: 'Profile Complete!',
+        message: message || 'Your profile setup has been completed successfully!',
+        details: 'Redirecting to dashboard...'
       }
     }
     return { title: '', message: '', details: '' }

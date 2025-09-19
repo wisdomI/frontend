@@ -36,6 +36,19 @@ module.exports = {
           900: '#032D71',
           950: '#1e1b4b',
         },
+        // Override default blue colors to use #032D71
+        blue: {
+          50: '#f0f4ff',
+          100: '#e0e9ff',
+          200: '#c7d6ff',
+          300: '#a5b8ff',
+          400: '#8191ff',
+          500: '#5d6aff',
+          600: '#032D71',
+          700: '#032D71',
+          800: '#032D71',
+          900: '#032D71',
+        },
         'event-blue': '#032D71',
         'event-blue-hover': 'rgba(3, 45, 113, 0.8)',
         'event-blue-light': 'rgba(3, 45, 113, 0.1)',
@@ -43,8 +56,8 @@ module.exports = {
       },
       fontFamily: {
         raleway: ['var(--font-raleway)', 'sans-serif'],
-        mooli: ['var(--font-mooli)', 'sans-serif'],
-        sans: ['var(--font-mooli)', 'sans-serif'],
+        asul: ['var(--font-asul)', 'sans-serif'],
+        sans: ['var(--font-asul)', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -62,5 +75,20 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          /* IE and Edge */
+          '-ms-overflow-style': 'none',
+          /* Firefox */
+          'scrollbar-width': 'none',
+          /* Safari and Chrome */
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }
+      })
+    }
+  ],
 }
