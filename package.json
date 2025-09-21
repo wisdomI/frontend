@@ -48,8 +48,8 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "@iconify-icon/react": "^3.0.0",
-    "@iconify/react": "^6.0.0",
+    "@iconify-icon/react": "^3.0.1",
+    "@iconify/react": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8",
