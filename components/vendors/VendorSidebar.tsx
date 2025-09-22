@@ -13,7 +13,8 @@ import {
   FiBarChart, 
   FiUsers,
   FiSettings,
-  FiHelpCircle
+  FiHelpCircle,
+  FiList
 } from 'react-icons/fi'
 import dashboardOutline from '@iconify/icons-material-symbols/dashboard-outline'
 import eventNoteOutline from '@iconify/icons-material-symbols/event-note-outline'
@@ -65,7 +66,25 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
     },
     {
       label: 'Manage Bookings',
-      icon: <FiCalendar className="w-6 h-6" />,
+      icon: (
+        <div className="w-6 h-6">
+          {pathname === '/vendor/manage-bookings' ? (
+            <img 
+              src="/images/tabler_brand-booking.svg" 
+              alt="Manage Bookings" 
+              width="24" 
+              height="24"
+            />
+          ) : (
+            <img 
+              src="/images/tabler_brand-booking-inactive.svg" 
+              alt="Manage Bookings" 
+              width="24" 
+              height="24"
+            />
+          )}
+        </div>
+      ),
       path: '/vendor/manage-bookings',
       isActive: pathname === '/vendor/manage-bookings',
     },

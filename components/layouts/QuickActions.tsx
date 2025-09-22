@@ -1,7 +1,7 @@
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import PostServiceModal from '@/components/ui/modal/ServiceRequestmodal';
-import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled } from '@ant-design/icons';
+import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled, UnorderedListOutlined } from '@ant-design/icons';
 
 const QuickActions = () => {
   return (
@@ -38,7 +38,13 @@ const QuickActions = () => {
 
         {/* Manage all Bookings Button */}
         <Button className="bg-blue-900 text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-36 transition-all duration-200 shadow-md hover:shadow-lg">
-          <CalendarOutlined className="text-2xl mb-2 text-white" />
+          <img 
+            src="/images/tabler_brand-booking-inactive.svg" 
+            alt="Manage Bookings" 
+            width="24" 
+            height="24" 
+            className="mb-2"
+          />
           <span className="text-xs font-medium text-center leading-tight">
             Manage all Bookings
           </span>
