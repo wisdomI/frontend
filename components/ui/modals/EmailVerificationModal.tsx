@@ -155,7 +155,7 @@ export default function EmailVerificationModal({
           {/* Resend Section */}
           <div className="text-center">
             <p className="text-gray-600 text-sm">
-              Didn't get code?{' '}
+              Didn&apos;t get code?{' '}
               <button
                 onClick={handleResend}
                 disabled={timeLeft > 0 || isResending}

@@ -1,5 +1,6 @@
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import Image from 'next/image';
 import PostServiceModal from '@/components/ui/modal/ServiceRequestmodal';
 import { PlusOutlined, FileSearchOutlined, CalendarOutlined, EyeFilled, UnorderedListOutlined } from '@ant-design/icons';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -68,11 +69,11 @@ const QuickActions = () => {
 
         {/* Manage all Bookings Button */}
         <Button className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg">
-          <img 
+          <Image 
             src="/images/tabler_brand-booking-inactive.svg" 
             alt="Manage Bookings" 
-            width="24" 
-            height="24" 
+            width={24}
+            height={24}
             className="mb-2"
           />
           <span className="text-xs font-medium text-center leading-tight px-2">

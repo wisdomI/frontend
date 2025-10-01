@@ -17,7 +17,11 @@ export class FileUploadValidator {
 
   constructor(options: FileUploadOptions = {}) {
     if (options.configKey) {
-      this.config = FILE_UPLOAD_CONFIGS[options.configKey]
+      const config = FILE_UPLOAD_CONFIGS[options.configKey]
+      this.config = {
+        ...config,
+        allowedTypes: [...config.allowedTypes]
+      }
     } else {
       this.config = {
         maxSize: options.maxSize || 10 * 1024 * 1024, // 10MB default

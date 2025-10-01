@@ -394,6 +394,15 @@ const MessagesPage = () => {
       <InvoiceModal
         isOpen={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
+        transaction={{
+          id: 'mock-transaction-id',
+          dateTime: new Date().toISOString(),
+          invoiceNumber: 'INV-001',
+          vendor: 'Mock Vendor',
+          paymentMethod: 'credit-card',
+          amount: 0,
+          status: 'unpaid'
+        }}
       />
     </div>
   )

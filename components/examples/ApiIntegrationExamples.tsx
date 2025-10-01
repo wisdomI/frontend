@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
 import { useMessaging } from '@/hooks/useMessaging'
 import { useServiceRequests } from '@/hooks/useServiceRequests'
@@ -180,8 +181,8 @@ export const FileUploadExample: React.FC = () => {
       </div>
 
       {preview && (
-        <div>
-          <img src={preview} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+        <div className="relative w-32 h-32">
+          <Image src={preview} alt="Preview" fill className="object-cover rounded-lg" />
         </div>
       )}
 
@@ -221,7 +222,11 @@ export const ServiceRequestExample: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = await createRequest(formData)
+    const formDataToSubmit = new FormData()
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSubmit.append(key, value as string)
+    })
+    const success = await createRequest(formDataToSubmit)
     if (success) {
       console.log('Service request created successfully!')
     }
@@ -349,11 +354,11 @@ export const ServiceRequestExample: React.FC = () => {
 export const MessagingExample: React.FC = () => {
   const {
     conversations,
-    currentConversation,
+    messages,
     unreadCount,
     sendMessage,
-    getConversations,
-    getConversation,
+    fetchConversations,
+    fetchMessages,
     loading,
     error
   } = useMessaging()
@@ -362,18 +367,14 @@ export const MessagingExample: React.FC = () => {
   const [messageText, setMessageText] = useState('')
 
   useEffect(() => {
-    getConversations()
-  }, [getConversations])
+    fetchConversations()
+  }, [fetchConversations])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedRecipient || !messageText.trim()) return
 
-    const success = await sendMessage({
-      recipientId: selectedRecipient,
-      message: messageText,
-      messageType: 'text'
-    })
+    const success = await sendMessage(selectedRecipient, messageText, 'text')
 
     if (success) {
       setMessageText('')
@@ -393,7 +394,7 @@ export const MessagingExample: React.FC = () => {
                 const recipient = conversation.participants.find(p => p.id !== 'current-user-id')
                 if (recipient) {
                   setSelectedRecipient(recipient.id)
-                  getConversation(recipient.id)
+                  fetchMessages(recipient.id)
                 }
               }}
               className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
@@ -421,7 +422,7 @@ export const MessagingExample: React.FC = () => {
         {selectedRecipient ? (
           <>
             <div className="flex-1 p-4 overflow-y-auto">
-              {currentConversation.map((message) => (
+              {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`mb-4 ${
@@ -484,7 +485,7 @@ export const PaginationExample: React.FC = () => {
   const pagination = usePagination({ initialPage: 1, initialLimit: 10 })
   const [items, setItems] = useState<any[]>([])
 
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     try {
       // Simulate API call with pagination
       const response = await fetch(`/api/items?page=${pagination.params.page}&limit=${pagination.params.limit}`)
@@ -494,11 +495,11 @@ export const PaginationExample: React.FC = () => {
     } catch (error) {
       console.error('Failed to load items:', error)
     }
-  }
+  }, [pagination])
 
   useEffect(() => {
     loadItems()
-  }, [pagination.params.page, pagination.params.limit])
+  }, [pagination.params.page, pagination.params.limit, loadItems])
 
   return (
     <div className="space-y-4">

@@ -1,6 +1,12 @@
 import OnlineStatusIndicator from './OnlineStatusIndicator'
+import { Conversation, Message } from '@/types/api'
 
-export default function ChatWindow() {
+interface ChatWindowProps {
+  conversation: Conversation
+  onSendMessage: (recipientId: string, message: string, messageType?: 'text' | 'image' | 'file') => Promise<Message>
+}
+
+export default function ChatWindow({ conversation, onSendMessage }: ChatWindowProps) {
   return (
     <div className="bg-white rounded-lg shadow border h-96 flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">

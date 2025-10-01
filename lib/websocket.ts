@@ -205,7 +205,7 @@ export function useWebSocket(
     return () => {
       wsManagerRef.current?.disconnect()
     }
-  }, [url, JSON.stringify(handlers), JSON.stringify(options)])
+  }, [url, handlers, options])
 
   const send = useCallback((data: any): boolean => {
     return wsManagerRef.current?.send(data) ?? false

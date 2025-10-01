@@ -59,9 +59,9 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
                 </h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <ul className="list-disc list-inside space-y-1">
-                    <li>You'll be redirected to the login page</li>
+                    <li>You&apos;ll be redirected to the login page</li>
                     <li>Your session will be cleared</li>
-                    <li>You'll need to sign in again to access your account</li>
+                    <li>You&apos;ll need to sign in again to access your account</li>
                   </ul>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { serviceRequestAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { ServiceRequest } from '@/types/api'
@@ -21,7 +21,7 @@ export default function ServiceRequestManager({ viewType = 'all' }: ServiceReque
   const [selectedStatus, setSelectedStatus] = useState<string>('')
 
   // Fetch service requests based on view type
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -50,11 +50,11 @@ export default function ServiceRequestManager({ viewType = 'all' }: ServiceReque
     } finally {
       setLoading(false)
     }
-  }
+  }, [viewType])
 
   useEffect(() => {
     fetchRequests()
-  }, [viewType])
+  }, [viewType, fetchRequests])
 
   // Delete service request
   const handleDelete = async (requestId: string) => {

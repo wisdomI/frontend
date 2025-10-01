@@ -45,7 +45,7 @@ export default function ChatPage() {
                      conversation.participants.find(p => p.id !== user?.id)?.lastName || 'Unknown User'}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {conversation.lastMessage?.content || 'No messages yet'}
+                    {conversation.lastMessage?.message || 'No messages yet'}
                   </p>
                   <p className="text-xs text-gray-400">
                     {conversation.lastMessage?.createdAt ? 

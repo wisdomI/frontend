@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { portfolioAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Portfolio } from '@/types/api'
@@ -20,7 +21,7 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
   const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(null)
 
   // Fetch portfolios
-  const fetchPortfolios = async () => {
+  const fetchPortfolios = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -40,11 +41,11 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
     } finally {
       setLoading(false)
     }
-  }
+  }, [isOwnPortfolio, userId])
 
   useEffect(() => {
     fetchPortfolios()
-  }, [userId, isOwnPortfolio])
+  }, [userId, isOwnPortfolio, fetchPortfolios])
 
   // Delete portfolio
   const handleDelete = async (portfolioId: string) => {
@@ -126,10 +127,11 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
               {/* Portfolio Media */}
               <div className="aspect-video bg-gray-100 relative">
                 {portfolio.mediaUrl && portfolio.mediaUrl.length > 0 ? (
-                  <img 
+                  <Image 
                     src={portfolio.mediaUrl[0]} 
                     alt={portfolio.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">

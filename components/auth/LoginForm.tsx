@@ -64,7 +64,7 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         }, 500)
       }, 100)
     }
-  }, [justLoggedIn, user, router])
+  }, [justLoggedIn, user, router, isAuthenticated])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target

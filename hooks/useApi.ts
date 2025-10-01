@@ -26,7 +26,7 @@ export function useApi<T = any>(
     
     try {
       const response = await apiFunction(...args)
-      const data = response.data.data || response.data
+      const data = (response as any).data.data || (response as any).data
       setState({ data, loading: false, error: null })
       return data
     } catch (error: any) {

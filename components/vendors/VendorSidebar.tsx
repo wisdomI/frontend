@@ -69,18 +69,18 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: (
         <div className="w-6 h-6">
           {pathname === '/vendor/manage-bookings' ? (
-            <img 
+            <Image 
               src="/images/tabler_brand-booking.svg" 
               alt="Manage Bookings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
             />
           ) : (
-            <img 
+            <Image 
               src="/images/tabler_brand-booking-inactive.svg" 
               alt="Manage Bookings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
             />
           )}
         </div>
@@ -105,19 +105,19 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: (
         <div className="w-6 h-6">
           {pathname === '/vendor/my-earnings' ? (
-            <img 
+            <Image 
               src="/images/VendorEarning&expenses-active.svg" 
               alt="My Earnings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6"
             />
           ) : (
-            <img 
+            <Image 
               src="/images/Vendorearningandexpenses-inactive.svg" 
               alt="My Earnings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6 filter saturate-0 brightness-0 invert"
             />
           )}
@@ -143,19 +143,19 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: (
         <div className="w-6 h-6">
           {pathname === '/vendor/rating-reviews' ? (
-            <img 
+            <Image 
               src="/images/VendorReview&ratings-active.svg" 
               alt="Rating & Review" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6"
             />
           ) : (
-            <img 
+            <Image 
               src="/images/VendorRating&Review-inactive.svg" 
               alt="Rating & Review" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6 filter saturate-0 brightness-0 invert"
             />
           )}
@@ -185,19 +185,19 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: (
         <div className="w-6 h-6">
           {pathname === '/vendor/help-support' ? (
-            <img 
+            <Image 
               src="/images/VendorHelp&Support-active.svg" 
               alt="Help & Support" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6"
             />
           ) : (
-            <img 
+            <Image 
               src="/images/VendorHelp&support-inactive.svg" 
               alt="Help & Support" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
               className="w-6 h-6 filter saturate-0 brightness-0 invert"
             />
           )}

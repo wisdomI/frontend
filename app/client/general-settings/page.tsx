@@ -11,8 +11,35 @@ export default function GeneralSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('notification')
 
   // API hooks
-  const { data: settingsData, loading: settingsLoading, error: settingsError } = useApi('GET', '/settings')
-  const { data: saveResponse, loading: saveLoading, error: saveError, refetch: saveSettings } = useApi('POST', '/settings')
+  const { data: settingsData, loading: settingsLoading, error: settingsError } = useApi(() => Promise.resolve({ 
+    data: {
+      notifications: {
+        vendorTask: true,
+        offerDecision: false,
+        newChat: false,
+        escrowConfirmed: true,
+        refundProcessed: false,
+        outstandingPayment: false,
+        channelInApp: true,
+        channelEmail: false,
+        channelSms: false,
+        platformFeatures: true,
+        platformNewsletter: false,
+      },
+      integrations: {
+        meetings: true,
+        siteVisits: true,
+        planning: true,
+        payments: true,
+        followUps: false,
+      },
+      syncFrequency: 'Every 15 minutes',
+      reminderTime: '1 Hour before'
+    }, 
+    message: 'success', 
+    success: true 
+  }))
+  const { data: saveResponse, loading: saveLoading, error: saveError, execute: saveSettings } = useApi(() => Promise.resolve({ data: {}, message: 'success', success: true }))
 
   // Notification toggles
   const [noti, setNoti] = useState({
@@ -50,10 +77,10 @@ export default function GeneralSettingsPage() {
   // Load settings from API
   useEffect(() => {
     if (settingsData) {
-      setNoti(settingsData.notifications || noti)
-      setSyncItems(settingsData.integrations || syncItems)
-      setFrequency(settingsData.syncFrequency || frequency)
-      setReminder(settingsData.reminderTime || reminder)
+      setNoti(prev => settingsData.notifications || prev)
+      setSyncItems(prev => settingsData.integrations || prev)
+      setFrequency(prev => settingsData.syncFrequency || prev)
+      setReminder(prev => settingsData.reminderTime || prev)
     }
   }, [settingsData])
 

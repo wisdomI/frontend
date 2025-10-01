@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { FiEye, FiX, FiShare2, FiMapPin, FiStar, FiCheck } from 'react-icons/fi'
 
 interface Offer {
@@ -51,7 +52,7 @@ export default function ViewAllOffers({
       {/* Debug Info */}
       <div className="p-4 bg-blue-100 border border-blue-400 rounded-lg">
         <p className="text-sm text-blue-800">
-          ViewAllOffers Debug: serviceTitle = "{serviceTitle}", offers.length = {offers.length}
+          ViewAllOffers Debug: serviceTitle = &quot;{serviceTitle}&quot;, offers.length = {offers.length}
         </p>
         {offers.length > 0 && (
           <p className="text-sm text-blue-800 mt-1">
@@ -108,12 +109,13 @@ export default function ViewAllOffers({
 
             {/* Service Image */}
             <div className="mb-4">
-              <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden">
-                <img 
+              <div className="relative w-full h-48 bg-gray-200 rounded-lg overflow-hidden">
+                <Image 
                   src={offer.serviceImage} 
                   alt="Service offering" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
+                  fill
+                  className="object-cover"
+                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                     e.currentTarget.src = '/images/placeholder-service.jpg'
                   }}
                 />

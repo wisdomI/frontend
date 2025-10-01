@@ -354,6 +354,15 @@ export const categoryAPI = {
   getSubcategories: (parentId: string) => api.get<ApiResponse<Category[]>>(`/categories/${parentId}/subcategories`),
 }
 
+// Customer Management API
+export const customerAPI = {
+  getAll: (options?: any) => api.get<ApiResponse<any[]>>('/customers/', { params: options }),
+  getById: (id: string) => api.get<ApiResponse<any>>(`/customers/${id}`),
+  create: (data: any) => api.post<ApiResponse<any>>('/customers/', data),
+  update: (id: string, data: any) => api.patch<ApiResponse<any>>(`/customers/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse>(`/customers/${id}`),
+}
+
 // Additional missing endpoints from documentation
 
 // Resend Verification Code (missing from authAPI)

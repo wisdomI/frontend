@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { FiX } from 'react-icons/fi'
 
@@ -117,9 +118,11 @@ export default function ClientSidebar({ onClose }: ClientSidebarProps) {
               onClick={onClose}
             >
               {'iconActiveSrc' in item ? (
-                <img 
+                <Image 
                   src={pathname === item.href ? (item as any).iconActiveSrc : (item as any).iconInactiveSrc} 
                   alt={`${item.label} icon`} 
+                  width={20}
+                  height={20}
                   className="w-5 h-5" 
                 />
               ) : (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import LoginForm from '@/components/auth/LoginForm'
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
 
@@ -54,7 +54,9 @@ export default function LoginPage() {
             </div>
           </div>
           
-          <LoginForm accountType={selectedAccountType} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm accountType={selectedAccountType} />
+          </Suspense>
           
           <div className="flex items-center justify-between text-sm">
             <a href="/auth/register" className="text-event-blue hover:opacity-80 transition-all">

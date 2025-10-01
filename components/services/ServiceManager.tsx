@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { serviceAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { ServiceOffering } from '@/types/api'
-import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiDollarSign, FiClock, FiToggleOn, FiToggleOff } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiDollarSign, FiClock, FiToggleLeft, FiToggleRight } from 'react-icons/fi'
 
 interface ServiceManagerProps {
   userId?: string
@@ -20,7 +21,7 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
   const [editingService, setEditingService] = useState<ServiceOffering | null>(null)
 
   // Fetch services
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -41,11 +42,11 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
     } finally {
       setLoading(false)
     }
-  }
+  }, [isOwnServices, userId])
 
   useEffect(() => {
     fetchServices()
-  }, [userId, isOwnServices])
+  }, [userId, isOwnServices, fetchServices])
 
   // Delete service
   const handleDelete = async (serviceId: string) => {
@@ -141,10 +142,11 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
               {/* Service Media */}
               <div className="aspect-video bg-gray-100 relative">
                 {service.mediaUrl && service.mediaUrl.length > 0 ? (
-                  <img 
+                  <Image 
                     src={service.mediaUrl[0]} 
                     alt={service.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
@@ -172,9 +174,9 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
                       title={service.isActive ? 'Deactivate' : 'Activate'}
                     >
                       {service.isActive ? (
-                        <FiToggleOn className="w-4 h-4 text-green-600" />
+                        <FiToggleRight className="w-4 h-4 text-green-600" />
                       ) : (
-                        <FiToggleOff className="w-4 h-4 text-gray-600" />
+                        <FiToggleLeft className="w-4 h-4 text-gray-600" />
                       )}
                     </button>
                     <button

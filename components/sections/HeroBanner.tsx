@@ -321,11 +321,11 @@ const HeroBanner = () => {
             {/* Manage all Bookings Button */}
             <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
               <Button className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full">
-                <img 
+                <Image 
                   src="/images/tabler_brand-booking-inactive.svg" 
                   alt="Manage Bookings" 
-                  width="20" 
-                  height="20"
+                  width={20}
+                  height={20}
                   className="mb-1"
                 />
                 <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
@@ -416,7 +416,7 @@ const HeroBanner = () => {
 
                   {/* Manage Bookings */}
                   <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800">
-                    <img src="/images/tabler_brand-booking-inactive.svg" alt="" width="18" height="18" className="mr-2" />
+                    <Image src="/images/tabler_brand-booking-inactive.svg" alt="" width={18} height={18} className="mr-2" />
                     <span className="text-sm font-medium">Bookings</span>
                   </div>
 

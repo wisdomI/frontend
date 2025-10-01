@@ -15,7 +15,7 @@ export default function ServiceRequestsPage() {
   const [showFilter, setShowFilter] = useState(false)
 
   // API hooks
-  const { vendorRequests: apiServiceRequests, loading: serviceRequestsLoading, error: serviceRequestsError, getVendorRequests: refetchServiceRequests } = useServiceRequests()
+  const { requests: apiServiceRequests, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests()
   
   // Transform API data to component format
   const transformServiceRequest = (request: any) => ({

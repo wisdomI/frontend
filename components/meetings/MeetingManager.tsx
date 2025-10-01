@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { meetingAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Meeting } from '@/types/api'
@@ -20,7 +20,7 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
   const [stats, setStats] = useState<any>(null)
 
   // Fetch meetings based on view type
-  const fetchMeetings = async () => {
+  const fetchMeetings = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -46,22 +46,22 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
     } finally {
       setLoading(false)
     }
-  }
+  }, [viewType])
 
   // Fetch meeting stats
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await meetingAPI.getStats()
       setStats(response.data.data)
     } catch (err) {
       console.error('Error fetching meeting stats:', err)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchMeetings()
     fetchStats()
-  }, [viewType])
+  }, [viewType, fetchMeetings, fetchStats])
 
   // Delete meeting
   const handleDelete = async (meetingId: string) => {
@@ -88,7 +88,7 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
   }
 
   // Respond to meeting invitation
-  const handleRespondToMeeting = async (meetingId: string, attendeeId: string, response: string) => {
+  const handleRespondToMeeting = async (meetingId: string, attendeeId: string, response: 'accepted' | 'declined' | 'tentative') => {
     try {
       await meetingAPI.respond(meetingId, attendeeId, { response })
       await fetchMeetings() // Refresh the list
@@ -199,7 +199,6 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                   <div className="flex items-center text-sm text-gray-600">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       meeting.status === 'scheduled' ? 'bg-green-100 text-green-800' :
-                      meeting.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
                       meeting.status === 'completed' ? 'bg-gray-100 text-gray-800' :
                       meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                       'bg-yellow-100 text-yellow-800'
@@ -318,7 +317,12 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-600">Response:</span>
                     <select
-                      onChange={(e) => handleRespondToMeeting(meeting.id, user?.id || '', e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value as 'accepted' | 'declined' | 'tentative'
+                        if (value) {
+                          handleRespondToMeeting(meeting.id, user?.id || '', value)
+                        }
+                      }}
                       className="text-xs border border-gray-300 rounded px-2 py-1"
                     >
                       <option value="">Respond</option>
@@ -529,7 +533,7 @@ function CreateEditMeetingModal({ meeting, onClose, onSuccess, onCheckConflicts 
               </label>
               <select
                 value={formData.meetingType}
-                onChange={(e) => setFormData({...formData, meetingType: e.target.value})}
+                onChange={(e) => setFormData({...formData, meetingType: e.target.value as 'video' | 'phone' | 'in-person'})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
@@ -606,7 +610,7 @@ function CreateEditMeetingModal({ meeting, onClose, onSuccess, onCheckConflicts 
                     </label>
                     <select
                       value={formData.recurrencePattern}
-                      onChange={(e) => setFormData({...formData, recurrencePattern: e.target.value})}
+                      onChange={(e) => setFormData({...formData, recurrencePattern: e.target.value as 'daily' | 'weekly' | 'monthly'})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="daily">Daily</option>

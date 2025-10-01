@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { profileAPI } from '@/lib/api'
 import { FiUser, FiLogOut, FiBell, FiMessageCircle } from 'react-icons/fi'
@@ -105,17 +106,23 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* Mobile: Icon logo */}
-          <img 
-            src="/images/icon-1.png" 
-            alt="EventHub" 
-            className="h-8 w-8 lg:hidden"
-          />
+          <div className="relative h-8 w-8 lg:hidden">
+            <Image 
+              src="/images/icon-1.png" 
+              alt="EventHub" 
+              fill
+              className="object-contain"
+            />
+          </div>
           {/* Desktop: Full logo */}
-          <img 
-            src="/images/primary-logo 3.png" 
-            alt="EventHub" 
-            className="h-8 w-auto hidden lg:block"
-          />
+          <div className="relative h-8 w-32 hidden lg:block">
+            <Image 
+              src="/images/primary-logo 3.png" 
+              alt="EventHub" 
+              fill
+              className="object-contain"
+            />
+          </div>
         </Link>
       </div>
 
@@ -181,12 +188,13 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
 
         {/* Profile Picture */}
         <Link href="/client/my-profile" className="relative">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden relative">
             {profilePicture ? (
-              <img 
+              <Image 
                 src={profilePicture} 
                 alt="Profile" 
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (user?.firstName || user?.businessName || user?.displayName) ? (
               <span className="text-gray-600 font-medium text-sm">

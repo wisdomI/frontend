@@ -23,7 +23,7 @@ export default function ScheduleMeetingsPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date('2024-07-19'))
 
   // API hooks
-  const { data: meetingsData, loading: meetingsLoading, error: meetingsError, createMeeting } = useMeetings()
+  const { meetings: meetingsData, loading: meetingsLoading, error: meetingsError, createMeeting } = useMeetings()
 
   // Transform API data to component format
   const transformMeeting = (meeting: any): Meeting => ({

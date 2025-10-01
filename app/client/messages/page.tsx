@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { FiSearch, FiVideo, FiPhone, FiMoreHorizontal, FiPaperclip, FiSmile, FiCamera, FiMic, FiSend } from 'react-icons/fi'
 import ClientPageHeader from '@/components/client/ClientPageHeader'
 
@@ -185,11 +186,12 @@ const ClientMessagesPage = () => {
               >
                 <div className="flex items-center space-x-3">
                   <div className="relative">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-200">
-                      <img
+                    <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-200">
+                      <Image
                         src={conversation.avatar}
                         alt={conversation.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                     <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-white ${
@@ -229,11 +231,12 @@ const ClientMessagesPage = () => {
               <div className="bg-white border-b border-gray-200 p-3 sm:p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="relative">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-gray-200">
-                      <img
+                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-gray-200">
+                      <Image
                         src={currentConversation.avatar}
                         alt={currentConversation.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                     <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-white ${

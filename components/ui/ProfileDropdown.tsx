@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { signOutUser } from '@/lib/auth-simple'
@@ -88,12 +89,13 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
       >
         {/* Profile Picture with Online Status */}
         <div className="relative">
-          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+          <div className="relative w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
             {user.avatar ? (
-              <img
+              <Image
                 src={user.avatar}
                 alt={user.name}
-                className="w-10 h-10 rounded-full object-cover"
+                fill
+                className="rounded-full object-cover"
               />
             ) : (
               <span className="text-gray-600 font-medium">
@@ -127,12 +129,13 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
           {/* Profile Settings Header */}
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+              <div className="relative w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                 {user.avatar ? (
-                  <img
+                  <Image
                     src={user.avatar}
                     alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    fill
+                    className="rounded-full object-cover"
                   />
                 ) : (
                   <span className="text-gray-600 font-medium">

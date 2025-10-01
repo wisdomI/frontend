@@ -47,7 +47,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         {/* Content */}
         <div className="p-6">
           <p className="text-sm text-gray-600 mb-4">
-            Are you sure you want to delete the service request <strong>"{serviceTitle}"</strong>? 
+            Are you sure you want to delete the service request <strong>&quot;{serviceTitle}&quot;</strong>? 
             This action cannot be undone and will permanently remove the request and all associated data.
           </p>
           

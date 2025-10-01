@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { messageAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Message, Conversation } from '@/types/api'
-import { FiSend, FiPaperclip, FiSearch, FiMoreVertical, FiEdit, FiTrash2, FiCheck, FiCheckCheck } from 'react-icons/fi'
+import { FiSend, FiPaperclip, FiSearch, FiMoreVertical, FiEdit, FiTrash2, FiCheck } from 'react-icons/fi'
 
 interface MessageManagerProps {
   selectedRecipientId?: string
@@ -50,7 +50,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   }
 
   // Fetch messages for a conversation
-  const fetchMessages = async (recipientId: string) => {
+  const fetchMessages = useCallback(async (recipientId: string) => {
     try {
       const response = await messageAPI.getConversation(recipientId)
       setMessages(response.data.data || [])
@@ -64,7 +64,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
       setError('Failed to fetch messages')
       console.error('Error fetching messages:', err)
     }
-  }
+  }, [])
 
   // Send message
   const sendMessage = async (e: React.FormEvent) => {
@@ -72,8 +72,16 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
     if (!newMessage.trim() || !selectedConversation) return
 
     try {
+      // Get the recipient ID from participants (assuming current user is not the recipient)
+      const currentUserId = user?.id
+      const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
+      if (!recipient) {
+        setError('Could not identify recipient')
+        return
+      }
+      
       const response = await messageAPI.send({
-        recipientId: selectedConversation.recipientId,
+        recipientId: recipient.id,
         message: newMessage,
         messageType: 'text'
       })
@@ -143,13 +151,15 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
 
   useEffect(() => {
     if (selectedRecipientId) {
-      const conversation = conversations.find(c => c.recipientId === selectedRecipientId)
+      const conversation = conversations.find(c => 
+        c.participants.some(p => p.id === selectedRecipientId)
+      )
       if (conversation) {
         setSelectedConversation(conversation)
         fetchMessages(selectedRecipientId)
       }
     }
-  }, [selectedRecipientId, conversations])
+  }, [selectedRecipientId, conversations, fetchMessages])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -203,19 +213,31 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
           ) : (
             <div className="divide-y divide-gray-200">
               {conversations
-                .filter(conv => 
-                  conv.recipientName.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-                .map((conversation) => (
+                .filter(conv => {
+                  const currentUserId = user?.id
+                  const recipient = conv.participants.find(p => p.id !== currentUserId)
+                  return recipient && (
+                    recipient.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    recipient.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    recipient.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    recipient.email.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                })
+                .map((conversation) => {
+                  const currentUserId = user?.id
+                  const recipient = conversation.participants.find(p => p.id !== currentUserId)
+                  return (
                 <div
-                  key={conversation.recipientId}
+                  key={conversation.id}
                   onClick={() => {
                     setSelectedConversation(conversation)
-                    fetchMessages(conversation.recipientId)
-                    onRecipientSelect?.(conversation.recipientId)
+                    if (recipient) {
+                      fetchMessages(recipient.id)
+                    }
+                    onRecipientSelect?.(recipient?.id || '')
                   }}
                   className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedConversation?.recipientId === conversation.recipientId 
+                    selectedConversation?.id === conversation.id 
                       ? 'bg-blue-50 border-r-2 border-blue-600' 
                       : ''
                   }`}
@@ -224,12 +246,12 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                         <span className="text-gray-600 font-medium text-sm">
-                          {conversation.recipientName.charAt(0).toUpperCase()}
+                          {(recipient?.firstName?.charAt(0) || recipient?.businessName?.charAt(0) || recipient?.email?.charAt(0) || 'U').toUpperCase()}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-900 truncate">
-                          {conversation.recipientName}
+                          {recipient?.businessName || `${recipient?.firstName || ''} ${recipient?.lastName || ''}`.trim() || recipient?.email}
                         </h4>
                         <p className="text-sm text-gray-500 truncate">
                           {conversation.lastMessage?.message || 'No messages yet'}
@@ -251,7 +273,8 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                     </div>
                   </div>
                 </div>
-              ))}
+                  )
+                })}
             </div>
           )}
         </div>
@@ -266,15 +289,27 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                   <span className="text-gray-600 font-medium text-sm">
-                    {selectedConversation.recipientName.charAt(0).toUpperCase()}
+                    {(() => {
+                      const currentUserId = user?.id
+                      const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
+                      return (recipient?.firstName?.charAt(0) || recipient?.businessName?.charAt(0) || recipient?.email?.charAt(0) || 'U').toUpperCase()
+                    })()}
                   </span>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">
-                    {selectedConversation.recipientName}
+                    {(() => {
+                      const currentUserId = user?.id
+                      const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
+                      return recipient?.businessName || `${recipient?.firstName || ''} ${recipient?.lastName || ''}`.trim() || recipient?.email
+                    })()}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    {selectedConversation.recipientEmail}
+                    {(() => {
+                      const currentUserId = user?.id
+                      const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
+                      return recipient?.email
+                    })()}
                   </p>
                 </div>
               </div>
@@ -339,11 +374,11 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                             {message.senderId === user?.id && (
                               <div className="flex items-center space-x-1">
                                 {message.isRead ? (
-                                  <FiCheckCheck className="w-3 h-3" />
+                                  <FiCheck className="w-3 h-3" />
                                 ) : (
                                   <FiCheck className="w-3 h-3" />
                                 )}
-                                {message.isEdited && (
+                                {(message as any).isEdited && (
                                   <span className="text-xs opacity-75">edited</span>
                                 )}
                               </div>

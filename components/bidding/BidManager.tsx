@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { bidAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Bid } from '@/types/api'
@@ -21,7 +21,7 @@ export default function BidManager({ viewType = 'all', serviceRequestId }: BidMa
   const [stats, setStats] = useState<any>(null)
 
   // Fetch bids based on view type
-  const fetchBids = async () => {
+  const fetchBids = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -41,22 +41,22 @@ export default function BidManager({ viewType = 'all', serviceRequestId }: BidMa
     } finally {
       setLoading(false)
     }
-  }
+  }, [viewType])
 
   // Fetch bid stats
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await bidAPI.getStats()
       setStats(response.data.data)
     } catch (err) {
       console.error('Error fetching bid stats:', err)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchBids()
     fetchStats()
-  }, [viewType, serviceRequestId])
+  }, [viewType, serviceRequestId, fetchBids, fetchStats])
 
   // Delete bid
   const handleDelete = async (bidId: string) => {

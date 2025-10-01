@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { FiEye, FiEdit2, FiTrash2, FiChevronRight, FiChevronLeft, FiX } from 'react-icons/fi'
 import EditServiceRequestModal from '@/components/ui/modals/EditServiceRequestModal'
 import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal'
@@ -14,7 +15,7 @@ export default function ClientDashboardPage() {
   const [activeTab, setActiveTab] = useState('service-request-posts')
   
   // API hooks
-  const { requests: serviceRequestsData, loading: serviceRequestsLoading, error: serviceRequestsError, getMyRequests: refetchServiceRequests } = useServiceRequests()
+  const { requests: serviceRequestsData, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests()
   const { data: dashboardStats, loading: statsLoading } = useApi(() => serviceRequestAPI.getStats().then(res => res.data))
   
   // Transform API data to component format
@@ -199,8 +200,8 @@ export default function ClientDashboardPage() {
                 <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
                   {/* Image */}
                   <div className="lg:w-48 flex-shrink-0">
-                    <div className="w-full h-24 sm:h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                      <img src={request.image} alt={request.title} className="w-full h-full object-cover" />
+                    <div className="relative w-full h-24 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
+                      <Image src={request.image} alt={request.title} fill className="object-cover" />
                     </div>
                   </div>
                   {/* Content */}

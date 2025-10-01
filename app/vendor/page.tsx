@@ -26,7 +26,7 @@ const DashboardPage = () => {
   const router = useRouter()
   
   // API hooks
-  const { vendorRequests, loading: serviceRequestsLoading, error: serviceRequestsError } = useServiceRequests()
+  const { requests: vendorRequests, loading: serviceRequestsLoading, error: serviceRequestsError } = useServiceRequests()
   const { meetings, loading: meetingsLoading } = useMeetings()
   const { data: dashboardStats, loading: statsLoading } = useApi(() => serviceRequestAPI.getStats().then(res => res.data))
   

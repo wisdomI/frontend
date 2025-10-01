@@ -55,7 +55,7 @@ export function useAuth(): AuthState & AuthActions {
     
     try {
       const response = await authAPI.login(credentials)
-      const authData = response.data.data || response.data as AuthResponse
+      const authData = response.data.data || response.data
       
       localStorage.setItem('accessToken', authData.accessToken)
       localStorage.setItem('refreshToken', authData.refreshToken)
@@ -198,17 +198,33 @@ export function useAuth(): AuthState & AuthActions {
 
 // Hook for specific auth operations
 export function useLogin() {
-  return useApiMutation<AuthResponse, LoginRequest>(authAPI.login)
+  const wrappedLogin = async (credentials: LoginRequest) => {
+    const response = await authAPI.login(credentials)
+    return response.data
+  }
+  return useApiMutation<AuthResponse, LoginRequest>(wrappedLogin)
 }
 
 export function useRegister() {
-  return useApiMutation<AuthResponse, RegisterRequest>(authAPI.register)
+  const wrappedRegister = async (userData: RegisterRequest) => {
+    const response = await authAPI.register(userData)
+    return response.data
+  }
+  return useApiMutation<AuthResponse, RegisterRequest>(wrappedRegister)
 }
 
 export function useEmailVerification() {
-  return useApiMutation<{}, { email: string; verificationCode: string }>(authAPI.verifyEmail)
+  const wrappedVerifyEmail = async (data: { email: string; verificationCode: string }) => {
+    const response = await authAPI.verifyEmail(data.email, data.verificationCode)
+    return response.data
+  }
+  return useApiMutation<{}, { email: string; verificationCode: string }>(wrappedVerifyEmail)
 }
 
 export function usePasswordReset() {
-  return useApiMutation<{}, { email: string }>(authAPI.resetPassword)
+  const wrappedResetPassword = async (data: { email: string }) => {
+    const response = await authAPI.resetPassword({ email: data.email })
+    return response.data
+  }
+  return useApiMutation<{}, { email: string }>(wrappedResetPassword)
 }

@@ -48,7 +48,7 @@ export default function VendorLayout({
       //   return
       // }
     }
-  }, [isAuthenticated, loading, profileStatus.isCompleted, pathname, router])
+  }, [isAuthenticated, loading, profileStatus, pathname, router, user?.accountType])
 
   // Show loading state while checking authentication
   if (loading) {

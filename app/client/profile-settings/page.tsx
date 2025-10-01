@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiCamera, FiSave, FiEdit2, FiX, FiCreditCard, FiTrash2, FiCheck } from 'react-icons/fi'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { profileAPI } from '@/lib/api'
@@ -270,7 +271,7 @@ export default function ProfileSettingsPage() {
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                   </div>
                 ) : profileImage ? (
-                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  <Image src={profileImage} alt="Profile" fill className="object-cover" />
                 ) : (user?.firstName || user?.businessName || user?.displayName) ? (
                   <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-600">
                     {(user?.firstName || user?.businessName || user?.displayName || 'U').charAt(0).toUpperCase()}
