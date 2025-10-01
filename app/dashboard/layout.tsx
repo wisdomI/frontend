@@ -10,7 +10,7 @@ export default function DashboardLayout({
         <nav>
           <ul className="space-y-2">
             <li>
-              <a href="/dashboard/client" className="block py-2 px-4 rounded hover:bg-gray-700">
+              <a href="/client" className="block py-2 px-4 rounded hover:bg-gray-700">
                 Client Dashboard
               </a>
             </li>

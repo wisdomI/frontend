@@ -196,23 +196,7 @@ export default function ManageBookingsPage() {
               </button>
               
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-yellow-400">
-                <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="currentColor">
-                  {/* Support Agent - Better headset with microphone */}
-                  {/* Head */}
-                  <circle cx="12" cy="10" r="3"/>
-                  {/* Eyes */}
-                  <circle cx="10.5" cy="9" r="0.8"/>
-                  <circle cx="13.5" cy="9" r="0.8"/>
-                  {/* Headset band over head */}
-                  <path d="M8 10 Q12 8 16 10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                  {/* Left earcup */}
-                  <circle cx="7" cy="12" r="2.5"/>
-                  {/* Right earcup */}
-                  <circle cx="17" cy="12" r="2.5"/>
-                  {/* Microphone boom */}
-                  <line x1="19" y1="12" x2="22" y2="14" stroke="currentColor" strokeWidth="1.5"/>
-                  <circle cx="22" cy="14" r="0.8"/>
-                </svg>
+                <Image src="/images/VendorHelp&Support-active.svg" alt="Help & Support" width={16} height={16} className="w-4 h-4 brightness-0" />
               </button>
             </div>
           </div>

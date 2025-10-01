@@ -69,18 +69,18 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: (
         <div className="w-6 h-6">
           {pathname === '/vendor/manage-bookings' ? (
-            <img 
+            <Image 
               src="/images/tabler_brand-booking.svg" 
               alt="Manage Bookings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
             />
           ) : (
-            <img 
+            <Image 
               src="/images/tabler_brand-booking-inactive.svg" 
               alt="Manage Bookings" 
-              width="24" 
-              height="24"
+              width={24}
+              height={24}
             />
           )}
         </div>
@@ -102,7 +102,27 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
     },
     {
       label: 'My Earnings',
-      icon: <Icon icon={paymentsOutline} width="24" height="24" />,
+      icon: (
+        <div className="w-6 h-6">
+          {pathname === '/vendor/my-earnings' ? (
+            <Image 
+              src="/images/VendorEarning&expenses-active.svg" 
+              alt="My Earnings" 
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          ) : (
+            <Image 
+              src="/images/Vendorearningandexpenses-inactive.svg" 
+              alt="My Earnings" 
+              width={24}
+              height={24}
+              className="w-6 h-6 filter saturate-0 brightness-0 invert"
+            />
+          )}
+        </div>
+      ),
       path: '/vendor/my-earnings',
       isActive: pathname === '/vendor/my-earnings',
     },
@@ -120,7 +140,27 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
     },
     {
       label: 'Rating & Review',
-      icon: <Icon icon={reviewsOutline} width="24" height="24" />,
+      icon: (
+        <div className="w-6 h-6">
+          {pathname === '/vendor/rating-reviews' ? (
+            <Image 
+              src="/images/VendorReview&ratings-active.svg" 
+              alt="Rating & Review" 
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          ) : (
+            <Image 
+              src="/images/VendorRating&Review-inactive.svg" 
+              alt="Rating & Review" 
+              width={24}
+              height={24}
+              className="w-6 h-6 filter saturate-0 brightness-0 invert"
+            />
+          )}
+        </div>
+      ),
       path: '/vendor/rating-reviews',
       notificationCount: 3,
       isActive: pathname === '/vendor/rating-reviews',
@@ -142,7 +182,27 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
   const bottomItems = [
     {
       label: 'Help & Support',
-      icon: <FiHelpCircle className="w-6 h-6" />,
+      icon: (
+        <div className="w-6 h-6">
+          {pathname === '/vendor/help-support' ? (
+            <Image 
+              src="/images/VendorHelp&Support-active.svg" 
+              alt="Help & Support" 
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          ) : (
+            <Image 
+              src="/images/VendorHelp&support-inactive.svg" 
+              alt="Help & Support" 
+              width={24}
+              height={24}
+              className="w-6 h-6 filter saturate-0 brightness-0 invert"
+            />
+          )}
+        </div>
+      ),
       path: '/vendor/help-support',
       isActive: pathname === '/vendor/help-support',
     },

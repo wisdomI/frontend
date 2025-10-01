@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Chart } from 'react-google-charts'
 
 export default function PerformanceAnalyticsPage() {
   const [activePeriod, setActivePeriod] = useState('monthly')
@@ -31,6 +32,23 @@ export default function PerformanceAnalyticsPage() {
     { month: 'May', bookings: 19, revenue: 48000 },
     { month: 'Jun', bookings: 25, revenue: 62000 }
   ]
+
+  // 3D PieChart data for Bookings Trend
+  const bookingsPieData: (string | number)[][] = [
+    ['Month', 'Bookings'],
+    ...chartData.map(d => [d.month, d.bookings])
+  ]
+
+  const bookingsColors: string[] = ['#10B981', '#22C55E', '#84CC16', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899']
+
+  const bookingsPieOptions = {
+    is3D: true,
+    backgroundColor: 'transparent',
+    legend: 'none' as const,
+    chartArea: { left: 10, top: 10, width: '100%', height: '90%' },
+    colors: bookingsColors,
+    pieSliceText: 'value' as const,
+  }
 
   const topServices = [
     { name: 'Wedding Planning', bookings: 15, revenue: 45000, rating: 4.9 },
@@ -423,22 +441,36 @@ export default function PerformanceAnalyticsPage() {
           </div>
         </div>
 
-        {/* Bookings Chart */}
+        {/* Bookings Chart - 3D Pie */}
         <div className="bg-white rounded-lg shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 group-hover:text-green-600 transition-colors duration-300">Bookings Trend</h3>
-          <div className="h-64 flex items-end justify-between space-x-2">
-            {chartData.map((data, index) => (
-              <div key={index} className="flex flex-col items-center flex-1 group/chart">
-                <div 
-                  className="w-full bg-green-500 rounded-t transition-all duration-500 hover:bg-green-600 hover:shadow-lg cursor-pointer transform hover:scale-105"
-                  style={{ 
-                    height: `${(data.bookings / Math.max(...chartData.map(d => d.bookings))) * 200}px`,
-                    animationDelay: `${index * 100}ms`
-                  }}
-                ></div>
-                <span className="text-xs text-gray-500 mt-2 group-hover/chart:text-gray-700 transition-colors duration-300">{data.month}</span>
-              </div>
-            ))}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center">
+            <div className="w-full lg:w-[70%] h-72 lg:h-64">
+              <Chart
+                chartType="PieChart"
+                data={bookingsPieData}
+                options={bookingsPieOptions}
+                width="100%"
+                height="100%"
+                loader={<div className="text-sm text-gray-500">Loading chart...</div>}
+              />
+            </div>
+            <div className="w-full lg:w-[30%] lg:pl-4 mt-4 lg:mt-0 max-h-72 overflow-y-auto">
+              <ul className="space-y-2 text-sm text-gray-700">
+                {chartData.map((d, idx) => (
+                  <li key={d.month} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span
+                        className="inline-block h-3 w-3 rounded-sm"
+                        style={{ backgroundColor: bookingsColors[idx % bookingsColors.length] }}
+                      />
+                      <span>{d.month}</span>
+                    </div>
+                    <span className="font-medium text-gray-900">{d.bookings}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>

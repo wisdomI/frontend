@@ -5,14 +5,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/booking', '/chat']
+  const protectedRoutes = ['/dashboard', '/booking', '/chat', '/vendor', '/client']
   
   
   // Vendor-only routes
-  const vendorRoutes = ['/dashboard/vendor']
+  const vendorRoutes = ['/vendor']
   
   // Client-only routes
-  const clientRoutes = ['/dashboard/client']
+  const clientRoutes = ['/client']
 
   // Check if the current path is protected
   const isProtectedRoute = protectedRoutes.some(route => 
@@ -22,6 +22,14 @@ export function middleware(request: NextRequest) {
   // Get auth token from cookies or headers
   const authToken = request.cookies.get('authToken')?.value || 
                    request.headers.get('authorization')?.replace('Bearer ', '')
+
+  // Debug logging
+  console.log('Middleware:', {
+    pathname,
+    isProtectedRoute,
+    hasAuthToken: !!authToken,
+    userRole: request.cookies.get('userRole')?.value
+  })
 
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !authToken) {
@@ -36,14 +44,30 @@ export function middleware(request: NextRequest) {
     // For now, we'll assume the role is stored in a cookie
     const userRole = request.cookies.get('userRole')?.value
 
-    // Check vendor routes
-    if (vendorRoutes.some(route => pathname.startsWith(route)) && userRole !== 'vendor') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
+    console.log('Middleware role check:', {
+      pathname,
+      userRole,
+      isVendorRoute: vendorRoutes.some(route => pathname.startsWith(route)),
+      isClientRoute: clientRoutes.some(route => pathname.startsWith(route)),
+      allCookies: request.cookies.getAll().map(c => `${c.name}=${c.value}`)
+    })
 
-    // Check client routes
-    if (clientRoutes.some(route => pathname.startsWith(route)) && userRole !== 'client') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+    // Skip role-based redirects if user role is not set (during login process)
+    if (!userRole) {
+      console.log('Middleware: No user role set, allowing access during login process')
+      // Don't do any role-based redirects, allow the request to proceed
+    } else {
+      // Check vendor routes
+      if (vendorRoutes.some(route => pathname.startsWith(route)) && userRole !== 'vendor') {
+        console.log('Middleware: Redirecting non-vendor from vendor route to client dashboard')
+        return NextResponse.redirect(new URL('/client/dashboard', request.url))
+      }
+
+      // Check client routes
+      if (clientRoutes.some(route => pathname.startsWith(route)) && userRole !== 'client') {
+        console.log('Middleware: Redirecting non-client from client route to vendor dashboard')
+        return NextResponse.redirect(new URL('/vendor', request.url))
+      }
     }
   }
 
@@ -55,7 +79,7 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+    "default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://localhost:3000 https://localhost:3001 ws://localhost:3000 ws://localhost:3001 wss://localhost:3000 wss://localhost:3001 https://backend-a3nd.onrender.com wss://backend-a3nd.onrender.com; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src-elem 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: https:; font-src 'self' data:;"
   )
 
   return response

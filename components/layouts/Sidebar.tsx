@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import PostServiceModal from '../ui/modal/ServiceRequestmodal'
 import FilterModal from '../ui/modals/FilterModal'
+import { useFilterContext } from '@/contexts/FilterContext'
 import {
   CakeIcon,
   UserGroupIcon,
@@ -43,24 +44,37 @@ const menuItems = [
     label: 'Catering & Drinks',
     icon: icons.catering,
     route: '/services/catering',
+    categoryKey: 'catering',
     subMenu: [
       {
         label: 'Local/Continental Dishes',
         route: '/categories/catering/local-continental',
+        subCategoryKey: 'local-continental',
       },
-      { label: 'Small Chops', route: '/categories/catering/small-chops' },
+      { 
+        label: 'Small Chops', 
+        route: '/categories/catering/small-chops',
+        subCategoryKey: 'small-chops',
+      },
       {
         label: 'Cocktails & Traditional Drinks',
         route: '/categories/catering/cocktails',
+        subCategoryKey: 'cocktails',
       },
       {
         label: 'Palm Wine & Traditional Drinks',
         route: '/categories/catering/palm-wine',
+        subCategoryKey: 'palm-wine',
       },
-      { label: 'Cakes', route: '/categories/catering/cakes' },
+      { 
+        label: 'Cakes', 
+        route: '/categories/catering/cakes',
+        subCategoryKey: 'cakes',
+      },
       {
         label: 'Dessert/Candy Table Setup',
         route: '/categories/catering/dessert',
+        subCategoryKey: 'dessert',
       },
     ],
   },
@@ -68,21 +82,37 @@ const menuItems = [
     label: 'Entertainment',
     icon: icons.entertainment,
     route: '/services/entertainment',
+    categoryKey: 'entertainment',
     subMenu: [
-      { label: 'DJs', route: '/categories/entertainment/djs' },
-      { label: 'MCs/Hosts/Comedians', route: '/categories/entertainment/mcs' },
+      { 
+        label: 'DJs', 
+        route: '/categories/entertainment/djs',
+        subCategoryKey: 'djs',
+      },
+      { 
+        label: 'MCs/Hosts/Comedians', 
+        route: '/categories/entertainment/mcs',
+        subCategoryKey: 'mcs',
+      },
       {
         label: 'Live Bands & Musicians',
         route: '/categories/entertainment/live-bands',
+        subCategoryKey: 'live-bands',
       },
       {
         label: 'Cultural Dance Troupes',
         route: '/categories/entertainment/dance-troupes',
+        subCategoryKey: 'dance-troupes',
       },
-      { label: 'Hype Men/Women', route: '/categories/entertainment/hype-men' },
+      { 
+        label: 'Hype Men/Women', 
+        route: '/categories/entertainment/hype-men',
+        subCategoryKey: 'hype-men',
+      },
       {
         label: 'Fireworks/Special Effects',
         route: '/categories/entertainment/fireworks',
+        subCategoryKey: 'fireworks',
       },
     ],
   },
@@ -90,27 +120,37 @@ const menuItems = [
     label: 'Rentals & Equipment',
     icon: icons.rentals,
     route: '/services/rentals',
+    categoryKey: 'rentals',
     subMenu: [
       {
         label: 'Chairs/Tables/Tents',
         route: '/categories/rentals/chairs-tables',
+        subCategoryKey: 'chairs-tables',
       },
       {
         label: 'Cooling/Ventilation Systems',
         route: '/categories/rentals/cooling',
+        subCategoryKey: 'cooling',
       },
       {
         label: 'Sound Systems/Speakers',
         route: '/categories/rentals/sound-systems',
+        subCategoryKey: 'sound-systems',
       },
       {
         label: 'Lighting & LED Screens',
         route: '/categories/rentals/lighting',
+        subCategoryKey: 'lighting',
       },
-      { label: 'Stage/Backdrops', route: '/categories/rentals/stage' },
+      { 
+        label: 'Stage/Backdrops', 
+        route: '/categories/rentals/stage',
+        subCategoryKey: 'stage',
+      },
       {
         label: 'Generators/Power Supply',
         route: '/categories/rentals/generators',
+        subCategoryKey: 'generators',
       },
     ],
   },
@@ -118,19 +158,27 @@ const menuItems = [
     label: 'Decoration and Setup',
     icon: icons.decoration,
     route: '/services/decoration',
+    categoryKey: 'decoration',
     subMenu: [
       {
         label: 'Balloon Decor Artists',
         route: '/categories/decoration/balloon',
+        subCategoryKey: 'balloon',
       },
-      { label: 'Floral Designers', route: '/categories/decoration/floral' },
+      { 
+        label: 'Floral Designers', 
+        route: '/categories/decoration/floral',
+        subCategoryKey: 'floral',
+      },
       {
         label: 'Event Stylists (e.g., themed parties)',
         route: '/categories/decoration/stylists',
+        subCategoryKey: 'stylists',
       },
       {
         label: 'Aisle & Backdrop Creators',
         route: '/categories/decoration/aisle-backdrop',
+        subCategoryKey: 'aisle-backdrop',
       },
     ],
   },
@@ -138,16 +186,27 @@ const menuItems = [
     label: 'Media & Content',
     icon: icons.media,
     route: '/services/media',
+    categoryKey: 'media',
     subMenu: [
-      { label: 'Photographers', route: '/categories/media/photographers' },
-      { label: 'Videographers', route: '/categories/media/videographers' },
+      { 
+        label: 'Photographers', 
+        route: '/categories/media/photographers',
+        subCategoryKey: 'photographers',
+      },
+      { 
+        label: 'Videographers', 
+        route: '/categories/media/videographers',
+        subCategoryKey: 'videographers',
+      },
       {
         label: 'Photo Booths Services',
         route: '/categories/media/photo-booths',
+        subCategoryKey: 'photo-booths',
       },
       {
         label: 'Instant Photo Printing (polaroid-style)',
         route: '/categories/media/instant-printing',
+        subCategoryKey: 'instant-printing',
       },
     ],
   },
@@ -155,18 +214,22 @@ const menuItems = [
     label: 'Beauty & Grooming',
     icon: icons.beauty,
     route: '/services/beauty',
+    categoryKey: 'beauty',
     subMenu: [
       {
         label: 'Makeup Artists/Hairstylists',
         route: '/categories/beauty/makeup-hairstylists',
+        subCategoryKey: 'makeup-hairstylists',
       },
       {
         label: 'Henna/Tattoo Artists',
         route: '/categories/beauty/henna-tattoo',
+        subCategoryKey: 'henna-tattoo',
       },
       {
         label: 'Spa/Pamper Mobile Services',
         route: '/categories/beauty/spa-mobile',
+        subCategoryKey: 'spa-mobile',
       },
     ],
   },
@@ -174,19 +237,27 @@ const menuItems = [
     label: 'Event Support Services',
     icon: icons.support,
     route: '/services/support',
+    categoryKey: 'support',
     subMenu: [
-      { label: 'Ushers/Hostesses', route: '/categories/support/ushers' },
+      { 
+        label: 'Ushers/Hostesses', 
+        route: '/categories/support/ushers',
+        subCategoryKey: 'ushers',
+      },
       {
         label: 'Bouncers/Security Services',
         route: '/categories/support/bouncers',
+        subCategoryKey: 'bouncers',
       },
       {
         label: 'Cleaners/Waste Management',
         route: '/categories/support/cleaners',
+        subCategoryKey: 'cleaners',
       },
       {
         label: 'Protocol & Usher Services',
         route: '/categories/support/protocol',
+        subCategoryKey: 'protocol',
       },
     ],
   },
@@ -194,12 +265,22 @@ const menuItems = [
     label: 'Fashion & Styling',
     icon: icons.fashion,
     route: '/services/fashion',
+    categoryKey: 'fashion',
     subMenu: [
-      { label: 'Tailors/Seamstresses', route: '/categories/fashion/tailors' },
-      { label: 'Fashion Designers', route: '/categories/fashion/designers' },
+      { 
+        label: 'Tailors/Seamstresses', 
+        route: '/categories/fashion/tailors',
+        subCategoryKey: 'tailors',
+      },
+      { 
+        label: 'Fashion Designers', 
+        route: '/categories/fashion/designers',
+        subCategoryKey: 'designers',
+      },
       {
         label: 'Accessories Vendors (beads, jewelry)',
         route: '/categories/fashion/accessories',
+        subCategoryKey: 'accessories',
       },
     ],
   },
@@ -207,27 +288,37 @@ const menuItems = [
     label: 'Logistics & Miscellaneous',
     icon: icons.logistics,
     route: '/services/logistics',
+    categoryKey: 'logistics',
     subMenu: [
       {
         label: 'Event Planners/Coordinators',
         route: '/categories/logistics/planners',
+        subCategoryKey: 'planners',
       },
       {
         label: 'Vendor Transport/Logistics Services',
         route: '/categories/logistics/transport',
+        subCategoryKey: 'transport',
       },
       {
         label: 'On-the-day Coordinators/Day Managers',
         route: '/categories/logistics/day-managers',
+        subCategoryKey: 'day-managers',
       },
-      { label: 'Chauffer Services', route: '/categories/logistics/chauffer' },
+      { 
+        label: 'Chauffer Services', 
+        route: '/categories/logistics/chauffer',
+        subCategoryKey: 'chauffer',
+      },
       {
         label: 'Caravan/Marquee Rentals',
         route: '/categories/logistics/caravan',
+        subCategoryKey: 'caravan',
       },
       {
         label: 'Custom Gift Makers',
         route: '/categories/logistics/custom-gifts',
+        subCategoryKey: 'custom-gifts',
       },
     ],
   },
@@ -235,13 +326,27 @@ const menuItems = [
     label: 'Venue Providers',
     icon: icons.venue,
     route: '/services/venue',
+    categoryKey: 'venue',
     subMenu: [
-      { label: 'Event Venues', route: '/categories/venue/venues' },
-      { label: 'Event Halls', route: '/categories/venue/halls' },
-      { label: 'Outdoor Spaces', route: '/categories/venue/outdoor' },
+      { 
+        label: 'Event Venues', 
+        route: '/categories/venue/venues',
+        subCategoryKey: 'venues',
+      },
+      { 
+        label: 'Event Halls', 
+        route: '/categories/venue/halls',
+        subCategoryKey: 'halls',
+      },
+      { 
+        label: 'Outdoor Spaces', 
+        route: '/categories/venue/outdoor',
+        subCategoryKey: 'outdoor',
+      },
       {
         label: 'Banquet & Conference Rooms',
         route: '/categories/venue/banquet',
+        subCategoryKey: 'banquet',
       },
     ],
   },
@@ -249,15 +354,22 @@ const menuItems = [
     label: 'Event Materials',
     icon: icons.materials,
     route: '/services/materials',
+    categoryKey: 'materials',
     subMenu: [
-      { label: 'Fabric Sellers', route: '/categories/materials/fabric' },
+      { 
+        label: 'Fabric Sellers', 
+        route: '/categories/materials/fabric',
+        subCategoryKey: 'fabric',
+      },
       {
         label: 'Party Favors/Souvenirs',
         route: '/categories/materials/party-favors',
+        subCategoryKey: 'party-favors',
       },
       {
         label: 'Invitation Cards/Design & Print',
         route: '/categories/materials/invitations',
+        subCategoryKey: 'invitations',
       },
     ],
   },
@@ -265,16 +377,27 @@ const menuItems = [
     label: 'Kids & Special Fun Vendors',
     icon: icons.kids,
     route: '/services/kids',
+    categoryKey: 'kids',
     subMenu: [
       {
         label: 'Bouncy Castles/Inflatables',
         route: '/categories/kids/bouncy-castles',
+        subCategoryKey: 'bouncy-castles',
       },
-      { label: 'Clowns/Magicians', route: '/categories/kids/clowns' },
-      { label: 'Games Coordinators', route: '/categories/kids/games' },
+      { 
+        label: 'Clowns/Magicians', 
+        route: '/categories/kids/clowns',
+        subCategoryKey: 'clowns',
+      },
+      { 
+        label: 'Games Coordinators', 
+        route: '/categories/kids/games',
+        subCategoryKey: 'games',
+      },
       {
         label: 'Cotton Candy/Popcorn Machines',
         route: '/categories/kids/candy-machines',
+        subCategoryKey: 'candy-machines',
       },
     ],
   },
@@ -282,17 +405,28 @@ const menuItems = [
     label: 'Content Creators',
     icon: icons.content,
     route: '/services/content',
+    categoryKey: 'content',
     subMenu: [
-      { label: 'Bloggers', route: '/categories/content/bloggers' },
+      { 
+        label: 'Bloggers', 
+        route: '/categories/content/bloggers',
+        subCategoryKey: 'bloggers',
+      },
       {
         label: 'Social Media Influencers',
         route: '/categories/content/social-media',
+        subCategoryKey: 'social-media',
       },
       {
         label: 'Video Producers',
         route: '/categories/content/video-producers',
+        subCategoryKey: 'video-producers',
       },
-      { label: 'Podcasters', route: '/categories/content/podcasters' },
+      { 
+        label: 'Podcasters', 
+        route: '/categories/content/podcasters',
+        subCategoryKey: 'podcasters',
+      },
     ],
   },
 ]
@@ -302,12 +436,24 @@ const Sidebar: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const pathname = usePathname()
+  const { setSelectedCategory, setSelectedSubCategory } = useFilterContext()
 
   const handleToggle = (label: string) => {
     setOpenMenus(prev => ({
       ...Object.fromEntries(Object.entries(prev).map(([k, v]) => [k, false])), // Close others
       [label]: !prev[label],
     }))
+  }
+
+  const handleCategoryClick = (categoryKey: string) => {
+    setSelectedCategory(categoryKey)
+    setSelectedSubCategory(null)
+    setIsMobileOpen(false)
+  }
+
+  const handleSubCategoryClick = (subCategoryKey: string) => {
+    setSelectedSubCategory(subCategoryKey)
+    setIsMobileOpen(false)
   }
 
   const toggleMobileSidebar = () => {
@@ -397,7 +543,12 @@ const Sidebar: React.FC = () => {
                             ? 'text-yellow-400 bg-event-blue' 
                             : 'text-white hover:bg-event-blue-hover'
                         }`}
-                        onClick={() => handleToggle(item.label)}
+                        onClick={() => {
+                          handleToggle(item.label)
+                          if (item.categoryKey) {
+                            handleCategoryClick(item.categoryKey)
+                          }
+                        }}
                       >
                         <div className="flex items-center space-x-2 md:space-x-3">
                           <div className={`${active ? 'text-yellow-400' : 'text-white'}`}>
@@ -428,7 +579,12 @@ const Sidebar: React.FC = () => {
                                     ? 'bg-event-blue text-yellow-400'
                                     : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'
                                 }`}
-                                onClick={() => setIsMobileOpen(false)}
+                                onClick={() => {
+                                  setIsMobileOpen(false)
+                                  if (sub.subCategoryKey) {
+                                    handleSubCategoryClick(sub.subCategoryKey)
+                                  }
+                                }}
                               >
                                 {sub.label}
                               </Link>

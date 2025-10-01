@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FiArrowLeft, FiCheck } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import { useProfileCompletion } from '@/hooks/useProfileCompletion'
+import { useAuthContext } from '@/contexts/AuthContext'
 import AddPortfolioModal from '@/components/ui/modals/AddPortfolioModal'
 import AddServiceOfferingModal from '@/components/ui/modals/AddServiceOfferingModal'
 import AddTravelInfoModal from '@/components/ui/modals/AddTravelInfoModal'
@@ -20,10 +21,35 @@ interface Step {
 const ProfileSetupPage = () => {
   const router = useRouter()
   const { profileStatus, updateProfileCompletion, markProfileComplete } = useProfileCompletion()
+  const { user, isAuthenticated, loading } = useAuthContext()
   const [activeStep, setActiveStep] = useState('business-details')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [completedSteps, setCompletedSteps] = useState(profileStatus.completedSteps.length > 0 ? profileStatus.completedSteps : ['business-details'])
+
+  // Check authentication
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/auth/login?redirect=' + encodeURIComponent('/vendor/profile-setup'))
+    }
+  }, [loading, isAuthenticated, router])
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null
+  }
 
   const steps: Step[] = [
     { id: 'business-details', label: 'Business Details', completed: completedSteps.includes('business-details'), active: activeStep === 'business-details' },
@@ -104,7 +130,13 @@ const ProfileSetupPage = () => {
         {/* Business Display Picture */}
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-gray-500 text-sm">FRESH & DELICIOUS Bakery</span>
+            {(user?.businessName || user?.firstName || user?.displayName) ? (
+              <span className="text-gray-600 text-sm font-semibold">
+                {(user?.businessName || user?.firstName || user?.displayName || 'V').charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <span className="text-gray-500 text-sm">Business Logo</span>
+            )}
           </div>
           <button className="text-blue-600 hover:text-blue-700 text-sm">
             Edit
@@ -116,8 +148,31 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
           <input
             type="text"
-            defaultValue="Adeboye Daniel"
+            defaultValue={user?.businessName || user?.firstName || ''}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your business name"
+          />
+        </div>
+
+        {/* First Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+          <input
+            type="text"
+            defaultValue={user?.firstName || ''}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your first name"
+          />
+        </div>
+
+        {/* Last Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+          <input
+            type="text"
+            defaultValue={user?.lastName || ''}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your last name"
           />
         </div>
 
@@ -126,7 +181,7 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
           <input
             type="email"
-            defaultValue="info@royaltyhomes.com"
+            defaultValue={user?.email || ''}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -140,6 +195,7 @@ const ProfileSetupPage = () => {
             </select>
             <input
               type="tel"
+              defaultValue={user?.phoneNumber || ''}
               placeholder="Phone number"
               className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -167,6 +223,7 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
           <input
             type="text"
+            defaultValue={user?.businessAddress || ''}
             placeholder="Enter Address"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaStar, FaRegStar } from 'react-icons/fa'
@@ -8,6 +8,7 @@ import { BsHeart } from 'react-icons/bs'
 import { HiShare } from 'react-icons/hi2'
 import { HiOutlineLocationMarker } from 'react-icons/hi'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
+import { useFilterContext } from '@/contexts/FilterContext'
 // Using string paths for Next.js Image component
 const vendorImage = '/images/vendor-img1.jpg'
 const vendorImage2 = '/images/vendor-img2.jpg'
@@ -21,7 +22,9 @@ const services = [
     rating: 3,
     reviews: 120,
     location: "Abuja, Nigeria",
-    status: "Top Rated"
+    status: "Top Rated",
+    category: "beauty",
+    subCategory: "makeup-hairstylists"
   },
   {
     id: "opes-event-decor",
@@ -31,7 +34,9 @@ const services = [
     rating: 4,
     reviews: 20,
     location: "Victoria Island, Lagos",
-    status: "Most Booked"
+    status: "Most Booked",
+    category: "decoration",
+    subCategory: "aisle-backdrop"
   },
   {
     id: "uk-cakes-cream",
@@ -41,7 +46,9 @@ const services = [
     rating: 5,
     reviews: 50,
     location: "Victoria Island, Lagos",
-    status: "Best Valued"
+    status: "Best Valued",
+    category: "catering",
+    subCategory: "cakes"
   },
   {
     id: "elite-photography",
@@ -51,7 +58,9 @@ const services = [
     rating: 4,
     reviews: 85,
     location: "Ikoyi, Lagos",
-    status: "Rising Star"
+    status: "Rising Star",
+    category: "media",
+    subCategory: "photographers"
   },
   {
     id: "royal-catering",
@@ -61,7 +70,9 @@ const services = [
     rating: 5,
     reviews: 150,
     location: "Victoria Island, Lagos",
-    status: "Top Rated"
+    status: "Top Rated",
+    category: "catering",
+    subCategory: "local-continental"
   },
   {
     id: "sound-system-pro",
@@ -71,7 +82,9 @@ const services = [
     rating: 4,
     reviews: 75,
     location: "Surulere, Lagos",
-    status: "Most Booked"
+    status: "Most Booked",
+    category: "rentals",
+    subCategory: "sound-systems"
   },
   {
     id: "floral-designs",
@@ -81,7 +94,9 @@ const services = [
     rating: 5,
     reviews: 95,
     location: "Garki, Abuja",
-    status: "Best Valued"
+    status: "Best Valued",
+    category: "decoration",
+    subCategory: "floral"
   },
   {
     id: "luxury-transport",
@@ -91,7 +106,9 @@ const services = [
     rating: 4,
     reviews: 60,
     location: "Maitama, Abuja",
-    status: "Rising Star"
+    status: "Rising Star",
+    category: "logistics",
+    subCategory: "chauffer"
   },
   {
     id: "event-planning",
@@ -101,7 +118,9 @@ const services = [
     rating: 5,
     reviews: 200,
     location: "Victoria Island, Lagos",
-    status: "Top Rated"
+    status: "Top Rated",
+    category: "logistics",
+    subCategory: "planners"
   },
   {
     id: "dj-services",
@@ -111,7 +130,9 @@ const services = [
     rating: 4,
     reviews: 110,
     location: "Lekki, Lagos",
-    status: "Most Booked"
+    status: "Most Booked",
+    category: "entertainment",
+    subCategory: "djs"
   },
   {
     id: "venue-rental",
@@ -121,7 +142,9 @@ const services = [
     rating: 5,
     reviews: 180,
     location: "Asokoro, Abuja",
-    status: "Best Valued"
+    status: "Best Valued",
+    category: "venue",
+    subCategory: "venues"
   },
   {
     id: "security-services",
@@ -131,7 +154,9 @@ const services = [
     rating: 4,
     reviews: 45,
     location: "Wuse 2, Abuja",
-    status: "Rising Star"
+    status: "Rising Star",
+    category: "support",
+    subCategory: "bouncers"
   },
   {
     id: "videography",
@@ -141,7 +166,9 @@ const services = [
     rating: 5,
     reviews: 130,
     location: "Victoria Island, Lagos",
-    status: "Top Rated"
+    status: "Top Rated",
+    category: "media",
+    subCategory: "videographers"
   },
   {
     id: "decorations",
@@ -151,7 +178,9 @@ const services = [
     rating: 4,
     reviews: 90,
     location: "Ikeja, Lagos",
-    status: "Most Booked"
+    status: "Most Booked",
+    category: "decoration",
+    subCategory: "stylists"
   },
   {
     id: "catering-services",
@@ -161,13 +190,33 @@ const services = [
     rating: 5,
     reviews: 160,
     location: "Garki, Abuja",
-    status: "Best Valued"
+    status: "Best Valued",
+    category: "catering",
+    subCategory: "small-chops"
   }
 ];
 
 const PopularServices: React.FC = () => {
   const router = useRouter();
   const [viewType, setViewType] = useState<'list' | 'grid'>('grid');
+  const { selectedCategory, selectedSubCategory, clearFilters } = useFilterContext();
+
+  // Filter services based on selected category and subcategory
+  const filteredServices = useMemo(() => {
+    if (!selectedCategory && !selectedSubCategory) {
+      return services;
+    }
+
+    return services.filter(service => {
+      if (selectedSubCategory) {
+        return service.subCategory === selectedSubCategory;
+      }
+      if (selectedCategory) {
+        return service.category === selectedCategory;
+      }
+      return true;
+    });
+  }, [selectedCategory, selectedSubCategory]);
 
   const handleSeeMore = () => {
     router.push('/services/popular');
@@ -209,7 +258,7 @@ const PopularServices: React.FC = () => {
               src={images[current]}
               alt={service.title}
               fill
-              className={`object-cover ${viewType === 'grid' ? 'rounded-t-2xl' : 'rounded-l-2xl'}`}
+              className={`object-cover ${viewType === 'grid' ? 'rounded-t-2xl' : 'rounded-t-2xl'}`}
               priority
             />
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
@@ -268,10 +317,10 @@ const PopularServices: React.FC = () => {
 
         {/* Content Section */}
         <div className={`flex gap-3 p-4 w-full ${
-          viewType === 'grid' ? 'flex-col' : 'flex-row items-start'
+          viewType === 'grid' ? 'flex-col' : 'flex-col'
         }`}>
           {viewType === 'grid' ? (
-            // Grid View Layout
+            // Grid View Layout - Original vertical layout
             <>
               <div className="flex gap-2 items-center justify-between">
                 <h3 className="text-lg font-bold">{service.title}</h3>
@@ -364,7 +413,7 @@ const PopularServices: React.FC = () => {
               </div>
             </>
           ) : (
-            // List View Layout
+            // List View Layout - Original vertical layout
             <>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
@@ -538,15 +587,33 @@ const PopularServices: React.FC = () => {
       </div>
 
       {/* Services Grid */}
-      <div className={`${
-        viewType === 'grid' 
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' 
-          : 'flex flex-col gap-4'
-      }`}>
-        {services.slice(0, 3).map((service) => (
-          <ServiceCard key={service.id} service={service} viewType={viewType} />
-        ))}
-      </div>
+      {filteredServices.length > 0 ? (
+        <div className={`${
+          viewType === 'grid' 
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' 
+            : 'flex flex-col gap-4'
+        }`}>
+          {filteredServices.slice(0, 3).map((service) => (
+            <ServiceCard key={service.id} service={service} viewType={viewType} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="mb-4">
+            <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.5-.9-6.1-2.4l-.7.7A8.962 8.962 0 0012 16c2.34 0 4.5-.9 6.1-2.4l-.7-.7z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Nothing in this category</h3>
+          <p className="text-gray-500 mb-4">No services found for the selected category. Try selecting a different category or clear the filter.</p>
+          <button
+            onClick={clearFilters}
+            className="bg-event-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Clear Filter
+          </button>
+        </div>
+      )}
 
     </div>
   );
