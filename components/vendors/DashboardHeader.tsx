@@ -8,14 +8,19 @@ import { FaArrowDown, FaChevronDown } from 'react-icons/fa6'
 import { ArrowDownIcon } from '@heroicons/react/20/solid'
 import { useState, useRef, useEffect } from 'react'
 import { FiUser, FiLogOut, FiSettings } from 'react-icons/fi'
+import LogoutConfirmationModal from '@/components/ui/modals/LogoutConfirmationModal'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showMessages, setShowMessages] = useState(false)
   const [showLogoutDropdown, setShowLogoutDropdown] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const notificationRef = useRef<HTMLDivElement>(null)
   const messageRef = useRef<HTMLDivElement>(null)
   const logoutRef = useRef<HTMLDivElement>(null)
+  const { user, logout } = useAuthContext()
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -43,10 +48,24 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
     setShowLogoutDropdown(false)
   }
 
-  const handleLogout = () => {
-    // In a real app, this would log the user out
-    console.log('Logging out')
+  const handleLogoutClick = () => {
     setShowLogoutDropdown(false)
+    setShowLogoutModal(true)
+  }
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout error:', error)
+      setIsLoggingOut(false)
+    }
+  }
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false)
+    setIsLoggingOut(false)
   }
 
   const notifications = [
@@ -221,8 +240,21 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
         </div>
 
         {/* User Profile - Hidden on mobile */}
-        <div className="hidden lg:block px-2 sm:px-3 py-1 sm:py-2">
-          <p className="text-xs sm:text-sm font-medium text-gray-700">UK Cakes & Cream</p>
+        <div className="hidden lg:flex items-center space-x-3 px-2 sm:px-3 py-1 sm:py-2">
+          {/* Display Picture */}
+          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+            {(user?.businessName || user?.firstName || user?.displayName) ? (
+              <span className="text-gray-600 font-medium text-sm">
+                {(user?.businessName || user?.firstName || user?.displayName || 'V').charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <FiUser className="w-4 h-4 text-gray-600" />
+            )}
+          </div>
+          {/* Business Name */}
+          <p className="text-xs sm:text-sm font-medium text-gray-700">
+            {user?.businessName || user?.firstName || 'Vendor'}
+          </p>
         </div>
         
         {/* Logout Dropdown */}
@@ -248,7 +280,7 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
                   Switch to Client Profile
                 </button>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   className="flex items-center w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <FiLogOut className="mr-2 sm:mr-3 w-3 h-3 sm:w-4 sm:h-4" />
@@ -259,6 +291,14 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        isLoggingOut={isLoggingOut}
+      />
     </header>
   )
 }

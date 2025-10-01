@@ -107,27 +107,43 @@ const ResponseModal: React.FC<ResponseModalProps> = ({ isOpen, onClose, onSubmit
 
         {/* Response Form */}
         <div className="p-4 sm:p-6">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Response
-            </label>
-            <textarea
-              value={response}
-              onChange={(e) => setResponse(e.target.value)}
-              placeholder="Write a professional response to this review..."
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent resize-none text-sm sm:text-base"
-              rows={4}
-              maxLength={500}
-            />
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-gray-500">
-                Keep your response professional and helpful
+          {review.response ? (
+            // Show existing response (read-only)
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Response
+              </label>
+              <div className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base text-gray-700">
+                {review.response}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Responses cannot be edited once submitted
               </p>
-              <span className="text-xs text-gray-400">
-                {response.length}/500 characters
-              </span>
             </div>
-          </div>
+          ) : (
+            // Show response form for new responses
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Response
+              </label>
+              <textarea
+                value={response}
+                onChange={(e) => setResponse(e.target.value)}
+                placeholder="Write a professional response to this review..."
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-event-blue focus:border-transparent resize-none text-sm sm:text-base"
+                rows={4}
+                maxLength={500}
+              />
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-xs text-gray-500">
+                  Keep your response professional and helpful
+                </p>
+                <span className="text-xs text-gray-400">
+                  {response.length}/500 characters
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-end gap-3">
@@ -135,16 +151,18 @@ const ResponseModal: React.FC<ResponseModalProps> = ({ isOpen, onClose, onSubmit
               onClick={onClose}
               className="w-full sm:w-auto px-4 sm:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
             >
-              Cancel
+              {review.response ? 'Close' : 'Cancel'}
             </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!response.trim() || isSubmitting}
-              className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-6 py-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-            >
-              <FiSend className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span>{isSubmitting ? 'Sending...' : 'Send Response'}</span>
-            </button>
+            {!review.response && (
+              <button
+                onClick={handleSubmit}
+                disabled={!response.trim() || isSubmitting}
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-6 py-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+              >
+                <FiSend className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>{isSubmitting ? 'Sending...' : 'Send Response'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

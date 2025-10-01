@@ -8,11 +8,11 @@ export default function NotificationContainer() {
   if (state.notifications.length === 0) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-[520px] w-[520px]">
       {state.notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${notification.type === 'success' ? 'border-l-4 border-green-500' :
+          className={`w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${notification.type === 'success' ? 'border-l-4 border-green-500' :
             notification.type === 'error' ? 'border-l-4 border-red-500' :
               notification.type === 'warning' ? 'border-l-4 border-yellow-500' :
                 'border-l-4 border-blue-500'

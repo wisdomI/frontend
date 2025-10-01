@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="md:col-span-1">
             <div className="mb-4">
               <Image 
-                src="/images/primary-logo 3.png" 
+                src="/images/FooterLogo.png" 
                 alt="EventHub" 
                 width={120}
                 height={24}

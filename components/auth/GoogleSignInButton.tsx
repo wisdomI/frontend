@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { signInWithGoogle } from '@/lib/auth'
+import { signInWithGoogle } from '@/lib/auth-simple'
 import { useApp } from '@/contexts/AppContext'
 
-export default function GoogleSignInButton() {
+export default function GoogleSignInButton({ expectedRole }: { expectedRole?: 'client' | 'vendor' }) {
   const [loading, setLoading] = useState(false)
   const { addNotification } = useApp()
 
@@ -12,7 +12,7 @@ export default function GoogleSignInButton() {
     setLoading(true)
     
     try {
-      const result = await signInWithGoogle()
+      const result = await signInWithGoogle(expectedRole)
       
       if (result.error) {
         addNotification({

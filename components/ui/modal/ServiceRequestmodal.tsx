@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { PlusIcon, CloudArrowUpIcon, TrashIcon } from '@heroicons/react/24/solid'
 import SuccessModal from './SuccessNotificationModal'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function PostServiceModal({ trigger }: { trigger?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -12,10 +14,28 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { isAuthenticated, loading } = useAuthContext()
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const handleOpenModal = () => {
+    if (!isAuthenticated) {
+      // Redirect to login with a return URL
+      router.push('/auth/login?redirect=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+    
+    // TODO: Add role-based check here
+    // if (user?.role !== 'client') {
+    //   alert('Only clients can post service requests.');
+    //   return;
+    // }
+    
+    setIsOpen(true)
+  }
 
   const [formData, setFormData] = useState({
     eventTitle: '',
@@ -448,12 +468,12 @@ export default function PostServiceModal({ trigger }: { trigger?: React.ReactNod
   return (
     <>
       {trigger ? (
-        <div onClick={() => setIsOpen(true)}>
+        <div onClick={handleOpenModal}>
           {trigger}
         </div>
       ) : (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpenModal}
           className="w-full bg-yellow-400 text-event-blue font-semibold text-center py-2 md:py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-1 md:space-x-2 text-xs md:text-sm"
         >
           <PlusIcon className="h-4 w-4 md:h-5 md:w-5" />

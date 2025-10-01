@@ -15,14 +15,16 @@ interface Review {
   date: string
   response?: string
   responseDate?: string
+  vendorRating?: number
+  vendorReview?: string
+  vendorReviewDate?: string
 }
 
 export default function RatingReviewsPage() {
   const [activeTab, setActiveTab] = useState('all')
   const [showResponseModal, setShowResponseModal] = useState(false)
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
-
-  const reviews: Review[] = [
+  const [reviews, setReviews] = useState<Review[]>([
     {
       id: 1,
       clientName: 'Sarah Johnson',
@@ -32,7 +34,10 @@ export default function RatingReviewsPage() {
       review: 'Absolutely amazing! The cake was exactly what I envisioned and tasted incredible. Sarah went above and beyond to make our wedding day special.',
       date: '2024-01-15',
       response: 'Thank you so much, Sarah! It was a pleasure working with you on your special day. Wishing you both a lifetime of happiness!',
-      responseDate: '2024-01-16'
+      responseDate: '2024-01-16',
+      vendorRating: 5,
+      vendorReview: 'Sarah was an absolute pleasure to work with. Clear communication, flexible with changes, and very appreciative. Highly recommend!',
+      vendorReviewDate: '2024-01-16'
     },
     {
       id: 2,
@@ -41,7 +46,10 @@ export default function RatingReviewsPage() {
       service: 'Corporate Event Planning',
       rating: 4,
       review: 'Great service overall. The event went smoothly and everyone was impressed. Minor communication issues but nothing major.',
-      date: '2024-01-12'
+      date: '2024-01-12',
+      vendorRating: 4,
+      vendorReview: 'Mike was professional and organized. The event went well, though there were some last-minute changes that could have been communicated earlier.',
+      vendorReviewDate: '2024-01-13'
     },
     {
       id: 3,
@@ -52,7 +60,10 @@ export default function RatingReviewsPage() {
       review: 'Stunning photos! The photographer was professional and captured every important moment. Highly recommend!',
       date: '2024-01-10',
       response: 'Thank you, Emma! Your kind words mean the world to us. We\'re thrilled you love the photos!',
-      responseDate: '2024-01-11'
+      responseDate: '2024-01-11',
+      vendorRating: 5,
+      vendorReview: 'Emma was fantastic to work with. Very clear about her vision, punctual, and very appreciative of our work.',
+      vendorReviewDate: '2024-01-11'
     },
     {
       id: 4,
@@ -61,7 +72,10 @@ export default function RatingReviewsPage() {
       service: 'Birthday Party Setup',
       rating: 3,
       review: 'Service was okay but there were some delays. The final result was good but could have been better with better communication.',
-      date: '2024-01-08'
+      date: '2024-01-08',
+      vendorRating: 3,
+      vendorReview: 'John was okay to work with, but there were some communication challenges and last-minute changes that affected the timeline.',
+      vendorReviewDate: '2024-01-09'
     },
     {
       id: 5,
@@ -70,7 +84,10 @@ export default function RatingReviewsPage() {
       service: 'Anniversary Dinner',
       rating: 5,
       review: 'Perfect evening! The food was delicious and the service was impeccable. Will definitely book again for future events.',
-      date: '2024-01-05'
+      date: '2024-01-05',
+      vendorRating: 5,
+      vendorReview: 'Lisa was wonderful! Very clear about her expectations, easy to work with, and very appreciative. Would love to work with her again.',
+      vendorReviewDate: '2024-01-06'
     },
     {
       id: 6,
@@ -79,15 +96,19 @@ export default function RatingReviewsPage() {
       service: 'Graduation Party',
       rating: 2,
       review: 'Disappointed with the service. Food was cold when it arrived and the setup was not as discussed. Expected better quality.',
-      date: '2024-01-03'
+      date: '2024-01-03',
+      vendorRating: 2,
+      vendorReview: 'David was difficult to work with. Unclear expectations, last-minute changes, and unrealistic demands. Would not recommend.',
+      vendorReviewDate: '2024-01-04'
     }
-  ]
+  ])
 
   const tabs = [
     { id: 'all', label: 'All Reviews', count: reviews.length },
     { id: 'responded', label: 'Responded', count: reviews.filter(r => r.response).length },
     { id: 'unresponded', label: 'Need Response', count: reviews.filter(r => !r.response).length },
-    { id: 'low-rating', label: 'Low Ratings (1-2)', count: reviews.filter(r => r.rating <= 2).length }
+    { id: 'low-rating', label: 'Low Ratings (1-2)', count: reviews.filter(r => r.rating <= 2).length },
+    { id: 'vendor-rated', label: 'Vendor Rated', count: reviews.filter(r => r.vendorRating).length }
   ]
 
   const filteredReviews = activeTab === 'all' 
@@ -98,6 +119,8 @@ export default function RatingReviewsPage() {
     ? reviews.filter(r => !r.response)
     : activeTab === 'low-rating'
     ? reviews.filter(r => r.rating <= 2)
+    : activeTab === 'vendor-rated'
+    ? reviews.filter(r => r.vendorRating)
     : reviews
 
   const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
@@ -131,8 +154,26 @@ export default function RatingReviewsPage() {
 
   const handleResponseSubmit = (response: string) => {
     if (selectedReview) {
-      // In a real app, this would update the review with the response
+      // Update the review with the response
+      const updatedReviews = reviews.map(review => 
+        review.id === selectedReview.id 
+          ? { 
+              ...review, 
+              response: response,
+              responseDate: new Date().toISOString().split('T')[0]
+            }
+          : review
+      )
+      
+      // Update the reviews state to show the response immediately
+      setReviews(updatedReviews)
+      
+      // In a real app, this would make an API call to update the review
       console.log('Response submitted:', { reviewId: selectedReview.id, response })
+      
+      // Show success message
+      alert('Response submitted successfully!')
+      
       setShowResponseModal(false)
       setSelectedReview(null)
     }
@@ -207,6 +248,12 @@ export default function RatingReviewsPage() {
               <span className="text-xs sm:text-sm text-gray-600">Pending Responses</span>
               <span className="text-xs sm:text-sm font-medium text-orange-600">
                 {reviews.filter(r => !r.response).length}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs sm:text-sm text-gray-600">Vendor Ratings Given</span>
+              <span className="text-xs sm:text-sm font-medium text-green-600">
+                {reviews.filter(r => r.vendorRating).length}
               </span>
             </div>
           </div>
@@ -285,6 +332,25 @@ export default function RatingReviewsPage() {
                       <p className="text-sm sm:text-base text-gray-700">{review.response}</p>
                     </div>
                   )}
+
+                  {/* Vendor Rating Section */}
+                  {review.vendorRating && review.vendorReview && (
+                    <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-3 sm:p-4 mt-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-900">Your Rating of {review.clientName}</h4>
+                        <span className="text-xs text-gray-500">
+                          {review.vendorReviewDate && formatDate(review.vendorReviewDate)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className="flex">
+                          {renderStars(review.vendorRating)}
+                        </div>
+                        <span className="text-xs sm:text-sm text-gray-600">({review.vendorRating}/5)</span>
+                      </div>
+                      <p className="text-sm sm:text-base text-gray-700">{review.vendorReview}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col sm:flex-col space-y-2 sm:ml-4">
@@ -301,8 +367,8 @@ export default function RatingReviewsPage() {
                     onClick={() => handleRespond(review)}
                     className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
                   >
-                    <FiEdit2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>Edit Response</span>
+                    <FiMessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span>View Response</span>
                   </button>
                 )}
                 <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 text-gray-400 hover:text-red-600 transition-colors text-sm">

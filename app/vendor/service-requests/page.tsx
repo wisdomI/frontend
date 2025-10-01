@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ServiceRequestCard from '@/components/vendors/ServiceRequestCard'
 import FilterCard from '@/components/vendors/FilterCard'
 import CounterOfferModal from '@/components/vendors/CounterOfferModal'
 import { FiFilter } from 'react-icons/fi'
+import { useServiceRequests } from '@/hooks/useServiceRequests'
+import { useApi } from '@/hooks/useApi'
 
 export default function ServiceRequestsPage() {
   const [activeTab, setActiveTab] = useState<'active' | 'rejected' | 'accepted'>('rejected')
@@ -12,134 +14,29 @@ export default function ServiceRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
   const [showFilter, setShowFilter] = useState(false)
 
-  const serviceRequestsData = [
-    {
-      id: 1,
-      status: 'active',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      rating: 4,
-      totalBookings: 5,
-      sentTime: 'Sent 17 hours ago',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      budget: '₦100,000 - ₦199,000',
-      additionalInfo:
-        'We need milky flavoured cake and some Cherry as toppings',
-    },
-    {
-      id: 2,
-      status: 'active',
-      clientName: 'Amaka Obi',
-      clientAvatar: '/images/avatar2.jpg',
-      eventTitle: 'Traditional Wedding Reception',
-      rating: 5,
-      totalBookings: 12,
-      sentTime: 'Sent 2 days ago',
-      eventType: 'Wedding Ceremony',
-      eventDate: '22nd June, 2025',
-      eventLocation: 'Enugu, Enugu State',
-      guests: 150,
-      servicesNeeded: 'Full Catering, Live Band, Decor',
-      budget: '₦800,000 - ₦1,200,000',
-      additionalInfo:
-        'Decor should be traditional Igbo style with palm wine service.',
-    },
-    {
-      id: 3,
-      status: 'rejected',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      rating: 3,
-      totalBookings: 5,
-      sentTime: 'Sent 17 hours ago',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      budget: '₦100,000 - ₦199,000',
-      additionalInfo:
-        'We need milky flavoured cake and some Cherry as toppings',
-    },
-    {
-      id: 6,
-      status: 'rejected',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      rating: 3,
-      totalBookings: 5,
-      sentTime: 'Sent 17 hours ago',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      budget: '₦100,000 - ₦199,000',
-      additionalInfo:
-        'We need milky flavoured cake and some Cherry as toppings',
-    },
-    {
-      id: 7,
-      status: 'rejected',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      rating: 3,
-      totalBookings: 5,
-      sentTime: 'Sent 17 hours ago',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      budget: '₦100,000 - ₦199,000',
-      additionalInfo:
-        'We need milky flavoured cake and some Cherry as toppings',
-    },
-    {
-      id: 4,
-      status: 'accepted',
-      clientName: 'Fatima Bello',
-      clientAvatar: '/images/avatar4.jpg',
-      eventTitle: 'Naming Ceremony for Baby Aisha',
-      rating: 4,
-      totalBookings: 3,
-      sentTime: 'Sent 3 days ago',
-      eventType: 'Naming Ceremony',
-      eventDate: '8th September, 2025',
-      eventLocation: 'Kano, Kano State',
-      guests: 50,
-      servicesNeeded: 'Small Chops, Photographer',
-      budget: '₦150,000 - ₦250,000',
-      additionalInfo:
-        'Photographer should deliver both soft copies and an album.',
-    },
-    {
-      id: 5,
-      status: 'accepted',
-      clientName: 'John Peters',
-      clientAvatar: '/images/avatar5.jpg',
-      eventTitle: 'Silver Jubilee Anniversary',
-      rating: 5,
-      totalBookings: 20,
-      sentTime: 'Sent 1 week ago',
-      eventType: 'Anniversary Celebration',
-      eventDate: '1st October, 2025',
-      eventLocation: 'Abuja, FCT',
-      guests: 300,
-      servicesNeeded: 'Catering, Live Band, Sound System, Lighting',
-      budget: '₦3,500,000 - ₦5,000,000',
-      additionalInfo:
-        'Event should have elegant white-and-gold theme with fireworks.',
-    },
-  ]
+  // API hooks
+  const { vendorRequests: apiServiceRequests, loading: serviceRequestsLoading, error: serviceRequestsError, getVendorRequests: refetchServiceRequests } = useServiceRequests()
+  
+  // Transform API data to component format
+  const transformServiceRequest = (request: any) => ({
+    id: request.id,
+    status: request.status,
+    clientName: request.client?.firstName + ' ' + request.client?.lastName || 'Unknown Client',
+    clientAvatar: request.client?.profilePicture || '/images/avatar1.jpg',
+    eventTitle: request.eventTitle,
+    rating: request.client?.rating || 4,
+    totalBookings: request.client?.totalBookings || 0,
+    sentTime: `Sent ${new Date(request.createdAt).toLocaleDateString()}`,
+    eventType: request.eventType,
+    eventDate: new Date(request.eventStartDate).toLocaleDateString(),
+    eventLocation: request.eventLocation,
+    guests: request.numberOfGuests,
+    servicesNeeded: request.servicesNeeded?.join(', ') || 'Various Services',
+    budget: request.budgetRange,
+    additionalInfo: request.additionalInfo || '',
+  })
+
+  const serviceRequestsData = apiServiceRequests?.map(transformServiceRequest) || []
 
   const filteredRequests = serviceRequestsData.filter(request => {
     if (activeTab === 'active') return request.status === 'active'
@@ -148,14 +45,46 @@ export default function ServiceRequestsPage() {
     return true
   })
 
-  const handleReject = (requestId: number) => {
-    console.log(`Offer rejected for request ${requestId}`)
-    // Update request status to rejected
+  const handleReject = async (requestId: number) => {
+    try {
+      const response = await fetch(`/api/v1/vendor-service-requests/${requestId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+      
+      if (response.ok) {
+        refetchServiceRequests()
+        console.log(`Offer rejected for request ${requestId}`)
+      } else {
+        console.error('Failed to reject request')
+      }
+    } catch (error) {
+      console.error('Error rejecting request:', error)
+    }
   }
 
-  const handleAccept = (requestId: number) => {
-    console.log(`Offer accepted for request ${requestId}`)
-    // Update request status to accepted
+  const handleAccept = async (requestId: number) => {
+    try {
+      const response = await fetch(`/api/v1/vendor-service-requests/${requestId}/accept`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+      
+      if (response.ok) {
+        refetchServiceRequests()
+        console.log(`Offer accepted for request ${requestId}`)
+      } else {
+        console.error('Failed to accept request')
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error)
+    }
   }
 
   const handleCounterOffer = (request: any) => {
@@ -169,9 +98,9 @@ export default function ServiceRequestsPage() {
   }
 
   const tabs = [
-    { id: 'active', label: 'Client Requests', count: serviceRequestsData.filter(r => r.status === 'active').length },
-    { id: 'rejected', label: 'Rejected Requests', count: serviceRequestsData.filter(r => r.status === 'rejected').length },
-    { id: 'accepted', label: 'Accepted Requests', count: serviceRequestsData.filter(r => r.status === 'accepted').length },
+    { id: 'active', label: 'Client Requests', count: serviceRequestsData.filter((r: any) => r.status === 'active').length },
+    { id: 'rejected', label: 'Rejected Requests', count: serviceRequestsData.filter((r: any) => r.status === 'rejected').length },
+    { id: 'accepted', label: 'Accepted Requests', count: serviceRequestsData.filter((r: any) => r.status === 'accepted').length },
   ]
 
   return (
@@ -215,8 +144,17 @@ export default function ServiceRequestsPage() {
       <div className="flex flex-col lg:flex-row w-full p-4 gap-4">
         {/* Service requests list */}
         <div className="flex flex-col gap-3 flex-1 max-h-[calc(100vh-180px)] overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-event-blue scrollbar-thumb-rounded-full hover:scrollbar-thumb-event-blue-hover lg:scrollbar lg:scrollbar-thin lg:scrollbar-track-gray-100 lg:scrollbar-thumb-event-blue lg:scrollbar-thumb-rounded-full lg:hover:scrollbar-thumb-event-blue-hover">
-          {filteredRequests.length > 0 ? (
-            filteredRequests.map((req, idx) => (
+          {serviceRequestsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading service requests...</p>
+            </div>
+          ) : serviceRequestsError ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Failed to load service requests</p>
+            </div>
+          ) : filteredRequests.length > 0 ? (
+            filteredRequests.map((req: any, idx: any) => (
               <ServiceRequestCard
                 key={req.id}
                 id={req.id}

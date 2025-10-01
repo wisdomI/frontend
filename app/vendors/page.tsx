@@ -16,6 +16,7 @@ type CardView = 'grid' | 'list'
 export default function VendorsPage() {
   const { showNotification } = useNotificationBreadcrumb()
   const [view, setView] = useState<CardView>('grid')
+  
 
   useEffect(() => {
     showNotification({
@@ -27,6 +28,8 @@ export default function VendorsPage() {
       autoHide: false,
     })
   }, [showNotification])
+
+  
   return (
     <div className="flex min-h-screen flex-1">
       <div className="flex-1 container mx-auto px-4 py-8">
@@ -46,7 +49,7 @@ export default function VendorsPage() {
                 : 'flex flex-col gap-4 py-4'
             }
           >
-            {vendorsData.map((vendor, index) => (
+            {vendorsData.map((vendor) => (
               <VendorCard 
                 id={vendor.id}
                 verified={vendor.verified}

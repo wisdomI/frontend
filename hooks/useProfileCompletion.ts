@@ -59,6 +59,10 @@ export const useProfileCompletion = () => {
     const percentage = Math.round((steps.length / totalSteps) * 100)
     const isCompleted = steps.length === totalSteps
 
+    console.log('updateProfileCompletion called with steps:', steps)
+    console.log('Total steps:', totalSteps, 'Completed steps:', steps.length)
+    console.log('Is completed:', isCompleted, 'Percentage:', percentage)
+
     setProfileStatus({
       isCompleted,
       completedSteps: steps,
@@ -67,8 +71,11 @@ export const useProfileCompletion = () => {
   }
 
   const markProfileComplete = () => {
+    console.log('markProfileComplete called')
     const allSteps = ['business-details', 'service-offering', 'verification', 'payment-setup']
+    console.log('Setting all steps as completed:', allSteps)
     updateProfileCompletion(allSteps)
+    console.log('Profile marked as complete')
   }
 
   const resetProfileCompletion = () => {

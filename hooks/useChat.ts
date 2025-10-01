@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
-import { chatAPI } from '@/lib/api'
+// Local chat API placeholder to satisfy original interface
+const chatAPI = {
+  getConversations: async () => ({ data: [] as any[] }),
+  getMessages: async (_conversationId: string) => ({ data: [] as any[] }),
+  sendMessage: async (_conversationId: string, _content: string) => ({ data: { id: Date.now().toString(), content: _content } }),
+}
 
 interface Conversation {
   id: string
@@ -73,8 +78,15 @@ export const useMessages = (conversationId: string) => {
   const sendMessage = async (content: string) => {
     try {
       const response = await chatAPI.sendMessage(conversationId, content)
-      setMessages(prev => [...prev, response.data])
-      return response.data
+      const newMsg: Message = {
+        id: response.data.id,
+        senderId: 'me',
+        content: content,
+        timestamp: new Date(),
+        read: false,
+      }
+      setMessages(prev => [...prev, newMsg])
+      return newMsg
     } catch (err: any) {
       setError(err.message || 'Failed to send message')
       throw err

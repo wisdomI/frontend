@@ -1,8 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useApp } from '@/contexts/AppContext'
 import SignUpFlow from './modals/SignUpFlow'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { FiUser, FiLogOut, FiBell, FiMessageSquare } from 'react-icons/fi'
+import LogoutConfirmationModal from '@/components/ui/modals/LogoutConfirmationModal'
 
 const locations = [
   'New York, NY',
@@ -32,7 +38,20 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState('Location')
   const [searchQuery, setSearchQuery] = useState('')
-    const [showSignUpFlow, setShowSignUpFlow] = useState(false)
+  const [showSignUpFlow, setShowSignUpFlow] = useState(false)
+  const { user, isAuthenticated, loading, logout } = useAuthContext()
+  const [showLogout, setShowLogout] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const router = useRouter()
+  const { state: appState } = useApp()
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null
+    if (saved) {
+      document.documentElement.classList.toggle('dark', saved === 'dark')
+    }
+  }, [])
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location)
@@ -51,7 +70,7 @@ export default function Header() {
         <div className="hidden lg:flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <Image 
                 src="/images/primary-logo 3.png" 
                 alt="EventHub" 
@@ -59,7 +78,7 @@ export default function Header() {
                 height={24}
                 className="h-6 w-30"
               />
-            </a>
+            </Link>
           </div>
 
           {/* Center Section - Location Dropdown and Search */}
@@ -146,26 +165,79 @@ export default function Header() {
             </form>
           </div>
 
-          {/* Right Section - Login and Get Started */}
-          <div className="flex items-center gap-5 min-w-[200px] justify-end">
-            <a
-              href="/auth/login"
-              className="text-gray-700 hover:text-event-blue transition-colors text-sm font-medium px-2"
-            >
-              Login
-            </a>
-            {/* <a 
-              href="/auth/register" 
-              className="bg-event-blue text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-sm font-medium"
-            >
-              Get Started
-            </a> */}
-            <button
-              onClick={() => setShowSignUpFlow(true)}
-              className="block w-full text-center bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue-hover transition-colors font-medium"
-            >
-              Get Started
-            </button>
+          {/* Right Section - User Actions */}
+          <div className="flex items-center gap-4 min-w-[200px] justify-end">
+            {/* Theme Toggle removed */}
+            {isAuthenticated && user ? (
+              <>
+                {/* Notifications */}
+                <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Notifications">
+                  <FiBell className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    3
+                  </span>
+                </button>
+
+                {/* Messages */}
+                <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Messages">
+                  <FiMessageSquare className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                    2
+                  </span>
+                </button>
+
+                {/* Profile Picture - Navigate to My Profile */}
+                <Link href="/client/my-profile" className="relative">
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    {(() => {
+                      const displayName = user?.displayName || 
+                        (user?.accountType === 'vendor' ? user?.businessName : 
+                         `${user?.firstName || ''} ${user?.lastName || ''}`.trim());
+                      return displayName ? (
+                        <span className="text-gray-600 font-medium">
+                          {displayName.charAt(0).toUpperCase()}
+                        </span>
+                      ) : (
+                        <FiUser className="w-5 h-5 text-gray-400" />
+                      );
+                    })()}
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                </Link>
+
+                {/* User Name */}
+                <span className="text-gray-700 font-medium">
+                  {user?.displayName || 
+                   (user?.accountType === 'vendor' ? user?.businessName : 
+                    `${user?.firstName || ''} ${user?.lastName || ''}`.trim()) || 
+                   'User'}
+                </span>
+
+                {/* Logout Button */}
+                <button
+                  onClick={() => setShowLogout(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <FiLogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/auth/login"
+                  className="text-gray-700 hover:text-event-blue transition-colors text-sm font-medium px-2"
+                >
+                  Login
+                </a>
+                <button
+                  onClick={() => setShowSignUpFlow(true)}
+                  className="bg-event-blue text-white px-6 py-3 rounded-lg hover:bg-event-blue-hover transition-colors text-sm font-medium"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
 
             {/* Modals */}
             {showSignUpFlow && (
@@ -178,9 +250,7 @@ export default function Header() {
         <div className="hidden md:flex lg:hidden items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="text-xl font-bold text-event-blue">
-              EventHub
-            </a>
+            <Link href="/" className="text-xl font-bold text-event-blue">EventHub</Link>
           </div>
 
           {/* Simplified Search */}
@@ -237,11 +307,11 @@ export default function Header() {
           <div className="flex items-center">
             <a href="/" className="flex items-center">
               <Image 
-                src="/images/primary-logo 3.png" 
+                src="/images/icon-1.png" 
                 alt="EventHub" 
-                width={80}
-                height={24}
-                className="h-6 w-20"
+                width={32}
+                height={32}
+                className="h-8 w-8"
               />
             </a>
           </div>
@@ -278,7 +348,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="md:hidden border-t border-gray-200 py-4 bg-white relative z-50">
             {/* Mobile Search */}
             <div className="px-4 mb-4">
               <form onSubmit={handleSearch} className="flex">
@@ -357,19 +427,79 @@ export default function Header() {
             </div>
 
             {/* Mobile Navigation Links */}
-            <div className="px-4 space-y-2">
-              <a
-                href="/auth/login"
-                className="block w-full text-center py-3 text-gray-700 hover:text-event-blue transition-colors font-medium"
-              >
-                Login
-              </a>
-              <a
-                href="/auth/register"
-                className="block w-full text-center bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue-hover transition-colors font-medium"
-              >
-                Get Started
-              </a>
+            <div className="px-4 space-y-3">
+              {isAuthenticated && user ? (
+                <>
+                  {/* User summary */}
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                      {(() => {
+                        const displayName = user?.displayName || 
+                          (user?.accountType === 'vendor' ? user?.businessName : 
+                           `${user?.firstName || ''} ${user?.lastName || ''}`.trim());
+                        return displayName ? (
+                          <span className="text-gray-600 font-medium">
+                            {displayName.charAt(0).toUpperCase()}
+                          </span>
+                        ) : (
+                          <FiUser className="w-5 h-5 text-gray-400" />
+                        );
+                      })()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user?.displayName || 
+                         (user?.accountType === 'vendor' ? user?.businessName : 
+                          `${user?.firstName || ''} ${user?.lastName || ''}`.trim()) || 
+                         'User'}
+                      </p>
+                      <p className="text-xs text-gray-500">Logged in</p>
+                    </div>
+                  </div>
+
+                  {/* Quick actions */}
+                  <div className="flex items-center gap-3">
+                    <button className="relative flex-1 p-3 text-gray-600 hover:text-event-blue transition-colors border border-gray-200 rounded-lg" aria-label="Notifications">
+                      <FiBell className="w-5 h-5 mx-auto" />
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+                    <button className="relative flex-1 p-3 text-gray-600 hover:text-event-blue transition-colors border border-gray-200 rounded-lg" aria-label="Messages">
+                      <FiMessageSquare className="w-5 h-5 mx-auto" />
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
+                    </button>
+                  </div>
+
+                  <Link href="/client/my-profile" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center py-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium">My Profile</Link>
+
+                  <button
+                    onClick={() => setShowLogout(true)}
+                    className="block w-full text-center bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    type="button"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block w-full text-center py-3 text-gray-700 hover:text-event-blue transition-colors font-medium"
+                  >
+                    Login
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      router.push('/auth/register')
+                    }}
+                    className="block w-full text-center bg-event-blue text-white py-3 rounded-lg hover:bg-event-blue-hover transition-colors font-medium touch-manipulation"
+                    type="button"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -378,13 +508,31 @@ export default function Header() {
       {/* Overlay to close dropdowns when clicking outside */}
       {(isLocationDropdownOpen || isMobileMenuOpen) && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-30"
           onClick={() => {
             setIsLocationDropdownOpen(false)
             setIsMobileMenuOpen(false)
           }}
         />
       )}
+      {/* Logout Modal */}
+      <LogoutConfirmationModal
+        isOpen={showLogout}
+        isLoggingOut={loggingOut}
+        onClose={() => setShowLogout(false)}
+        onConfirm={async () => {
+          try {
+            setLoggingOut(true)
+            await logout()
+            setShowLogout(false)
+            setIsMobileMenuOpen(false)
+          } catch (e) {
+            console.error(e)
+          } finally {
+            setLoggingOut(false)
+          }
+        }}
+      />
     </header>
   )
 }
