@@ -37,7 +37,7 @@ export default function VendorsPage() {
         <WhyChooseEventHub />
         <div className="mx-auto py-8">
           <div className="flex items-center gap-5 py-4">
-            <h1 className="text-xl text-light-gray font-bold">
+            <h1 className="text-xl text-light-gray font-bold font-asul">
               Popular Services
             </h1>
             <CardViewToggle view={view} onChange={setView} />

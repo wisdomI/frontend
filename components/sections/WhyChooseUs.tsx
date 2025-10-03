@@ -1,18 +1,51 @@
 import React from 'react';
+import Image from 'next/image';
 
 const WhyChooseEventHub = () => {
     return (
-      <section className="bg-blue-100 p-3 md:p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between text-blue-800 text-sm gap-2 sm:gap-0">
-        <div className="flex items-center">
-          {/* Info Icon (triangle with !; use SVG or Heroicons) */}
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="font-medium">Why Choose EventHub</span>
-        </div>
-        <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4">
-          <a href="/safe-payments" className="hover:underline text-xs sm:text-sm">Safe Payments</a>
-          <a href="/data-privacy" className="hover:underline text-xs sm:text-sm">Data Privacy</a>
+      <section className="bg-blue-100 rounded-t-lg p-4 md:p-6">
+        <div className="flex flex-col md:flex-row items-center justify-between text-gray-700 space-y-4 md:space-y-0">
+          {/* Left Container - Why Choose EventHub */}
+          <div className="flex items-center space-x-3">
+            {/* Integration/Hub Icon */}
+            <Image 
+              src="/images/file-icons_reasonstudios-alt.png" 
+              alt="Why Choose EventHub" 
+              width={24} 
+              height={24} 
+              className="flex-shrink-0"
+            />
+            <span className="font-medium text-sm md:text-base">Why Choose EventHub</span>
+          </div>
+
+          {/* Right Container - Safe Payments and Data Privacy */}
+          <div className="flex items-center space-x-6">
+            {/* Safe Payments Section */}
+            <div className="flex items-center space-x-3">
+              {/* Safe Lock Icon */}
+              <Image 
+                src="/images/mingcute_safe-lock-fill.png" 
+                alt="Safe Payments" 
+                width={24} 
+                height={24} 
+                className="flex-shrink-0"
+              />
+              <span className="font-medium text-sm md:text-base">Safe Payments</span>
+            </div>
+
+            {/* Data Privacy Section */}
+            <div className="flex items-center space-x-3">
+              {/* Privacy Icon */}
+              <Image 
+                src="/images/wpf_privacy.png" 
+                alt="Data Privacy" 
+                width={24} 
+                height={24} 
+                className="flex-shrink-0"
+              />
+              <span className="font-medium text-sm md:text-base">Data Privacy</span>
+            </div>
+          </div>
         </div>
       </section>
     );

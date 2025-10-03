@@ -147,6 +147,8 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
       let middlewareRole = userData.accountType
       if (userData.accountType === 'individual' || userData.accountType === 'business') {
         middlewareRole = 'client'
+      } else if (userData.accountType === 'vendor') {
+        middlewareRole = 'vendor'
       }
       
       document.cookie = `userRole=${middlewareRole}; path=/; max-age=3600; SameSite=Lax`
@@ -168,7 +170,7 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
           const payload = JSON.parse(atob(accessToken.split('.')[1]))
           userData = {
             id: payload.id,
-            accountType: payload.accountType || 'vendor',
+            accountType: payload.accountType || accountType,
             email: payload.email || formData.email,
             isEmailVerified: true,
             createdAt: new Date(payload.iat * 1000).toISOString(),
@@ -178,6 +180,15 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         } catch (tokenError) {
           console.error('LoginForm: Failed to decode token:', tokenError)
           throw new Error('Failed to extract user information from token')
+        }
+      }
+      
+      // Override account type based on user selection if needed
+      if (accountType === 'vendor' && userData.accountType !== 'vendor') {
+        console.log('LoginForm: Overriding account type to vendor based on user selection')
+        userData = {
+          ...userData,
+          accountType: 'vendor'
         }
       }
       

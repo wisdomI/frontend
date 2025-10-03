@@ -120,7 +120,7 @@ export default function ClientDashboardPage() {
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-8">
       {/* Welcome Header */}
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 font-asul">
           Welcome back, {user?.firstName || user?.businessName || 'Client'}!
         </h1>
         <p className="text-gray-600 mt-2">
@@ -208,7 +208,7 @@ export default function ClientDashboardPage() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
-                        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">{request.title}</h3>
+                        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 font-asul">{request.title}</h3>
                         <p className="text-xs sm:text-sm text-gray-500">{request.postedTime}</p>
                       </div>
                       <div className="flex space-x-1 sm:space-x-2">

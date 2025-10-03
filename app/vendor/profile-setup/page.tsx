@@ -5,6 +5,7 @@ import { FiArrowLeft, FiCheck } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import { useProfileCompletion } from '@/hooks/useProfileCompletion'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { profileAPI } from '@/lib/api'
 import AddPortfolioModal from '@/components/ui/modals/AddPortfolioModal'
 import AddServiceOfferingModal from '@/components/ui/modals/AddServiceOfferingModal'
 import AddTravelInfoModal from '@/components/ui/modals/AddTravelInfoModal'
@@ -20,12 +21,26 @@ interface Step {
 
 const ProfileSetupPage = () => {
   const router = useRouter()
-  const { profileStatus, updateProfileCompletion, markProfileComplete } = useProfileCompletion()
+  const { profileStatus, loading: profileLoading, error: profileError, updateProfileCompletion, markProfileComplete } = useProfileCompletion()
   const { user, isAuthenticated, loading } = useAuthContext()
   const [activeStep, setActiveStep] = useState('business-details')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [completedSteps, setCompletedSteps] = useState(profileStatus.completedSteps.length > 0 ? profileStatus.completedSteps : ['business-details'])
+  const [saving, setSaving] = useState(false)
+  
+  // Form data state
+  const [businessDetails, setBusinessDetails] = useState({
+    businessName: user?.businessName || user?.firstName || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    phoneNumber: user?.phoneNumber || '',
+    country: 'Nigeria',
+    city: 'Lagos',
+    address: (user as any)?.address || '',
+    bio: (user as any)?.bio || ''
+  })
 
   // Check authentication
   useEffect(() => {
@@ -89,33 +104,59 @@ const ProfileSetupPage = () => {
     }
   }
 
-  const handleSaveAndContinue = () => {
-    // Mark current step as completed
-    if (!completedSteps.includes(activeStep)) {
-      const newCompletedSteps = [...completedSteps, activeStep]
-      setCompletedSteps(newCompletedSteps)
-      updateProfileCompletion(newCompletedSteps)
-    }
-    
-    // Move to next step
-    const currentStepIndex = steps.findIndex(step => step.id === activeStep)
-    if (currentStepIndex < steps.length - 1) {
-      const nextStep = steps[currentStepIndex + 1]
-      setActiveStep(nextStep.id)
+  const handleSaveAndContinue = async () => {
+    try {
+      setSaving(true)
       
-      // Show success message
-      setSuccessMessage(`${steps[currentStepIndex].label} completed successfully! Moving to ${nextStep.label}.`)
-      setShowSuccessModal(true)
-    } else {
-      // All steps completed - mark profile as complete and redirect
-      markProfileComplete()
-      setSuccessMessage('Profile setup completed successfully! Redirecting to dashboard...')
-      setShowSuccessModal(true)
+      // Save current step data to API
+      if (activeStep === 'business-details') {
+        const formData = new FormData()
+        formData.append('businessName', businessDetails.businessName)
+        formData.append('firstName', businessDetails.firstName)
+        formData.append('lastName', businessDetails.lastName)
+        formData.append('email', businessDetails.email)
+        formData.append('phoneNumber', businessDetails.phoneNumber)
+        formData.append('country', businessDetails.country)
+        formData.append('city', businessDetails.city)
+        formData.append('address', businessDetails.address)
+        formData.append('bio', businessDetails.bio)
+        
+        await profileAPI.update(user?.id || '', formData)
+        console.log('Business details saved successfully')
+      }
       
-      // Redirect to dashboard after a longer delay to ensure localStorage is saved
-      setTimeout(() => {
-        router.push('/vendor')
-      }, 3000)
+      // Mark current step as completed
+      if (!completedSteps.includes(activeStep)) {
+        const newCompletedSteps = [...completedSteps, activeStep]
+        setCompletedSteps(newCompletedSteps)
+        updateProfileCompletion(newCompletedSteps)
+      }
+      
+      // Move to next step
+      const currentStepIndex = steps.findIndex(step => step.id === activeStep)
+      if (currentStepIndex < steps.length - 1) {
+        const nextStep = steps[currentStepIndex + 1]
+        setActiveStep(nextStep.id)
+        
+        // Show success message
+        setSuccessMessage(`${steps[currentStepIndex].label} completed successfully! Moving to ${nextStep.label}.`)
+        setShowSuccessModal(true)
+      } else {
+        // All steps completed - mark profile as complete and redirect
+        markProfileComplete()
+        setSuccessMessage('Profile setup completed successfully! Redirecting to dashboard...')
+        setShowSuccessModal(true)
+        
+        // Redirect to dashboard after a longer delay to ensure localStorage is saved
+        setTimeout(() => {
+          router.push('/vendor')
+        }, 3000)
+      }
+    } catch (error) {
+      console.error('Error saving profile data:', error)
+      alert('Failed to save profile data. Please try again.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -148,7 +189,8 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
           <input
             type="text"
-            defaultValue={user?.businessName || user?.firstName || ''}
+            value={businessDetails.businessName}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, businessName: e.target.value }))}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your business name"
           />
@@ -159,7 +201,8 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
           <input
             type="text"
-            defaultValue={user?.firstName || ''}
+            value={businessDetails.firstName}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, firstName: e.target.value }))}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your first name"
           />
@@ -170,7 +213,8 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
           <input
             type="text"
-            defaultValue={user?.lastName || ''}
+            value={businessDetails.lastName}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, lastName: e.target.value }))}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your last name"
           />
@@ -181,7 +225,8 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
           <input
             type="email"
-            defaultValue={user?.email || ''}
+            value={businessDetails.email}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, email: e.target.value }))}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -190,12 +235,17 @@ const ProfileSetupPage = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Phone Number</label>
           <div className="flex gap-2">
-            <select className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>🇳🇬 +234</option>
+            <select 
+              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={businessDetails.country}
+              onChange={(e) => setBusinessDetails(prev => ({ ...prev, country: e.target.value }))}
+            >
+              <option value="Nigeria">🇳🇬 +234</option>
             </select>
             <input
               type="tel"
-              defaultValue={user?.phoneNumber || ''}
+              value={businessDetails.phoneNumber}
+              onChange={(e) => setBusinessDetails(prev => ({ ...prev, phoneNumber: e.target.value }))}
               placeholder="Phone number"
               className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -205,16 +255,24 @@ const ProfileSetupPage = () => {
         {/* Country */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-          <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option>Nigeria</option>
+          <select 
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={businessDetails.country}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, country: e.target.value }))}
+          >
+            <option value="Nigeria">Nigeria</option>
           </select>
         </div>
 
         {/* City */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-          <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option>Lagos</option>
+          <select 
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={businessDetails.city}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, city: e.target.value }))}
+          >
+            <option value="Lagos">Lagos</option>
           </select>
         </div>
 
@@ -223,7 +281,8 @@ const ProfileSetupPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
           <input
             type="text"
-            defaultValue={user?.businessAddress || ''}
+            value={businessDetails.address}
+            onChange={(e) => setBusinessDetails(prev => ({ ...prev, address: e.target.value }))}
             placeholder="Enter Address"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -582,9 +641,17 @@ const ProfileSetupPage = () => {
         <div className="flex justify-end mt-6">
           <button 
             onClick={handleSaveAndContinue}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            disabled={saving}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Save & Continue
+            {saving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Saving...
+              </>
+            ) : (
+              'Save & Continue'
+            )}
           </button>
         </div>
       </div>

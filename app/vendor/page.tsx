@@ -129,7 +129,7 @@ const DashboardPage = () => {
                 href="/vendor/service-requests"
                 className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
               >
-                <h2 className="text-lg sm:text-xl font-semibold">Service Requests</h2>
+                <h2 className="text-lg sm:text-xl font-semibold font-asul">Service Requests</h2>
                 <FiArrowRight className="w-4 h-4" />
               </Link>
               <Link 

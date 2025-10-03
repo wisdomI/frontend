@@ -275,7 +275,7 @@ const HeroBanner = () => {
         </div>
         
         {/* Mobile Quick Actions Below - In one line */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div className="mx-4 sm:mx-6 lg:mx-8 mt-6">
           <div className="flex gap-2 sm:gap-3 justify-center">
             {/* Post a Service Request Button */}
             <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
@@ -350,13 +350,13 @@ const HeroBanner = () => {
       {/* Desktop/Tablet: Grid layout with carousel + sidebar */}
       <section className="mb-12 pt-0 hidden md:block">
         {/* Add spacing to align with sidebar blue container */}
-        <div className="mb-4">
+        <div className="mb-0">
           <div className="flex items-center justify-between h-16">
             {/* Empty space to match sidebar header height */}
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-4 gap-4 lg:gap-6 items-start">
           {/* Main Slider Section */}
           <div className="md:col-span-full lg:col-span-3">
             <div className="h-64 md:h-80 lg:h-96 xl:h-[400px]">

@@ -1,15 +1,20 @@
 'use client'
 
-
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useNotificationBreadcrumb } from '@/contexts/NotificationBreadcrumbContext';
 import HeroBanner from '@/components/sections/HeroBanner';
 import RecentlyViewed from '@/components/sections/RecentlyViewed';
 import WhyChooseEventHub from '@/components/sections/WhyChooseUs';
 import PopularServices from '@/components/sections/PopularServices';
+import Header from '@/components/ui/Header';
+import Footer from '@/components/ui/Footer';
+import NotificationContainer from '@/components/ui/NotificationContainer';
+import NotificationBreadcrumbWrapper from '@/components/ui/NotificationBreadcrumbWrapper';
+import Sidebar from '@/components/layouts/Sidebar';
 
 export default function HomePage() {
   const { showNotification } = useNotificationBreadcrumb()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const showSecurityReminder = useCallback(() => {
     showNotification({
@@ -27,17 +32,32 @@ export default function HomePage() {
   }, [showSecurityReminder])
 
   return (
-    <div className="flex min-h-screen flex-1">
-      <main className="flex-1 w-full">
-        <HeroBanner/>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <div className="space-y-6 sm:space-y-8">
-            <WhyChooseEventHub/>
-            <RecentlyViewed/>
-            <PopularServices/>
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
+      <Header />
+      <NotificationBreadcrumbWrapper />
+      
+      {/* Main content area with sidebar - matching category page spacing */}
+      <div className="flex flex-1 md:px-8 bg-gray-50">
+        <Sidebar 
+          isMobileOpen={sidebarOpen} 
+          onMobileToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
+        
+        {/* Main content with proper spacing like category pages */}
+        <main className="flex-1 px-6">
+          <HeroBanner/>
+          <div className="py-4 sm:py-6 lg:py-8">
+            <div className="space-y-6 sm:space-y-8">
+              <WhyChooseEventHub/>
+              <RecentlyViewed/>
+              <PopularServices/>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
+      
+      <Footer />
+      <NotificationContainer />
     </div>
   );
 }

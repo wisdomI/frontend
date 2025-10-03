@@ -6,7 +6,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 bg-gray-800 text-white p-6">
-        <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+        <h2 className="text-xl font-bold mb-6 font-asul">Dashboard</h2>
         <nav>
           <ul className="space-y-2">
             <li>

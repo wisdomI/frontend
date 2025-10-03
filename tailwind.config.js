@@ -58,7 +58,7 @@ module.exports = {
       fontFamily: {
         raleway: ['var(--font-raleway)', 'sans-serif'],
         asul: ['var(--font-asul)', 'sans-serif'],
-        sans: ['var(--font-asul)', 'sans-serif'],
+        sans: ['var(--font-raleway)', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

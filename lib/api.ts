@@ -294,6 +294,7 @@ export const vendorResponseAPI = {
 // Rating & Reviews API
 export const ratingAPI = {
   create: (data: FormData) => api.post<ApiResponse<Rating>>('/ratings/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getAll: (params?: SearchParams) => api.get<ApiResponse<Rating[]>>('/ratings/', { params }),
   getById: (id: string) => api.get<ApiResponse<Rating>>(`/ratings/${id}`),
   update: (id: string, data: FormData) => api.patch<ApiResponse<Rating>>(`/ratings/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id: string) => api.delete<ApiResponse>(`/ratings/${id}`),
