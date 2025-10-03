@@ -1,10 +1,8 @@
 'use client'
 
-import { useMemo, useRef, useState, useEffect } from 'react'
-import { FiChevronDown, FiMoreVertical, FiPaperclip, FiSearch, FiX } from 'react-icons/fi'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { FiUpload, FiX, FiSearch, FiClock, FiMessageCircle, FiThumbsUp, FiDownload } from 'react-icons/fi'
 import ClientPageHeader from '@/components/client/ClientPageHeader'
-
-type TicketStatus = 'Pending' | 'Resolved'
 
 interface SupportTicket {
   id: string
@@ -14,6 +12,8 @@ interface SupportTicket {
   vendor: string
   status: TicketStatus
 }
+
+type TicketStatus = 'Pending' | 'Resolved' | 'In Progress'
 
 export default function HelpSupportPage() {
   const [view, setView] = useState<'form' | 'history'>('form')
@@ -36,6 +36,12 @@ export default function HelpSupportPage() {
   const [showRateModal, setShowRateModal] = useState(false)
   const [showChatModal, setShowChatModal] = useState(false)
 
+  // API state
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
   const onFilesSelected = (incoming: FileList | null) => {
     if (!incoming) return
     const accepted = Array.from(incoming).filter(f => /(\.jpe?g|\.png|\.mp4)$/i.test(f.name))
@@ -52,341 +58,334 @@ export default function HelpSupportPage() {
     onFilesSelected(e.dataTransfer.files)
   }
 
-  const tickets: SupportTicket[] = useMemo(() => (
-    Array.from({ length: 10 }).map((_, i) => ({
-      id: (175623 + i).toString(),
-      dateTime: '20/07/2025; 02:25pm',
-      category: i % 3 === 0 ? 'Dispute' : 'Enquiry',
-      issueType: 'Payment Issue',
-      vendor: 'UK Cakes & Cream - Catering',
-      status: i % 2 === 0 ? 'Pending' : 'Resolved'
-    }))
-  ), [])
+  // Fetch support tickets from API
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        setLoading(true)
+        // This would be replaced with actual API call
+        // const response = await supportAPI.getUserTickets()
+        // setTickets(response.data.data || [])
+        
+        // For now, using empty array since API might not be implemented yet
+        setTickets([])
+      } catch (err) {
+        setError('Failed to fetch support tickets')
+        console.error('Error fetching support tickets:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const filteredTickets = tickets.filter(t => {
-    const matchesSearch = t.id.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || t.status === statusFilter
+    fetchTickets()
+  }, [])
+
+  const filteredTickets = tickets.filter(ticket => {
+    const matchesSearch = ticket.id.includes(search) || 
+                         ticket.category.toLowerCase().includes(search.toLowerCase()) ||
+                         ticket.vendor.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setTicketId(Math.floor(10000 + Math.random() * 90000).toString())
-    setShowSuccess(true)
+    setSubmitting(true)
+    
+    try {
+      // This would be replaced with actual API call
+      // const response = await supportAPI.createTicket({
+      //   category,
+      //   issueType,
+      //   vendor,
+      //   description,
+      //   files
+      // })
+      // setTicketId(response.data.data.id)
+      
+      // For now, generate a mock ticket ID
+      const mockTicketId = Math.random().toString(36).substr(2, 9)
+      setTicketId(mockTicketId)
+      setShowSuccess(true)
+      
+      // Reset form
+      setDescription('')
+      setFiles([])
+    } catch (err) {
+      setError('Failed to submit support ticket')
+      console.error('Error submitting support ticket:', err)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  // close actions on escape
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setActionOpenFor(null) }
-    document.addEventListener('keydown', onEsc)
-    return () => document.removeEventListener('keydown', onEsc)
-  }, [])
+  if (loading) {
+    return (
+      <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+        <ClientPageHeader
+          breadcrumbs={[{ label: 'Help & Support', isActive: true }]}
+          title="Help & Support"
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
       <ClientPageHeader
-        breadcrumbs={[
-          { label: 'My Account' },
-          { label: 'Help & Support', isActive: true }
-        ]}
+        breadcrumbs={[{ label: 'Help & Support', isActive: true }]}
         title="Help & Support"
-      >
-        {view === 'form' ? (
-          <button onClick={() => setView('history')} className="px-3 py-2 rounded-lg bg-blue-50 text-blue-900 font-semibold text-sm shadow-inner">
-            View Support History
-          </button>
-        ) : (
-          <button onClick={() => setView('form')} className="px-3 py-2 rounded-lg bg-blue-50 text-blue-900 font-semibold text-sm shadow-inner">
-            Send Message
-          </button>
-        )}
-      </ClientPageHeader>
+      />
 
-      {view === 'form' && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      {/* View Toggle */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="px-3 sm:px-4 lg:px-6 pt-3">
+          <div className="inline-flex bg-[#0B2E6F] rounded-lg p-1">
+            <button
+              onClick={() => setView('form')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md ${
+                view === 'form' ? 'bg-white text-[#0B2E6F]' : 'text-white'
+              }`}
+            >
+              Submit Request
+            </button>
+            <button
+              onClick={() => setView('history')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md ${
+                view === 'history' ? 'bg-white text-[#0B2E6F]' : 'text-white'
+              }`}
+            >
+              Request History
+            </button>
+          </div>
+        </div>
+
+        {view === 'form' ? (
           <div className="p-3 sm:p-4 lg:p-6">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Send us a message</h2>
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs sm:text-sm text-gray-700 mb-1">Category</label>
-                  <div className="relative">
-                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none bg-white border border-gray-300 rounded-lg py-2 px-3 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option>Enquiry</option>
-                      <option>Dispute</option>
-                      <option>Feedback</option>
-                    </select>
-                    <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Enquiry">Enquiry</option>
+                    <option value="Dispute">Dispute</option>
+                    <option value="Technical">Technical Issue</option>
+                    <option value="Billing">Billing</option>
+                  </select>
                 </div>
+
                 <div>
-                  <label className="block text-xs sm:text-sm text-gray-700 mb-1">Issue Type</label>
-                  <div className="relative">
-                    <select value={issueType} onChange={(e) => setIssueType(e.target.value)} className="w-full appearance-none bg-white border border-gray-300 rounded-lg py-2 px-3 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option>Payment Issue</option>
-                      <option>Unauthorized Charge</option>
-                      <option>Billing Error</option>
-                      <option>Refund or Credit Issue</option>
-                      <option>Service/Product Not Delivered</option>
-                    </select>
-                    <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs sm:text-sm text-gray-700 mb-1">Select Event Vendor <span className="text-gray-400">(Optional)</span></label>
-                  <div className="relative">
-                    <select value={vendor} onChange={(e) => setVendor(e.target.value)} className="w-full appearance-none bg-white border border-gray-300 rounded-lg py-2 px-3 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option>UK Cakes & Cream - Catering</option>
-                      <option>Elite Event Planning</option>
-                      <option>Perfect Moments Photography</option>
-                    </select>
-                    <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Issue Type</label>
+                  <select
+                    value={issueType}
+                    onChange={(e) => setIssueType(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Payment Issue">Payment Issue</option>
+                    <option value="Service Quality">Service Quality</option>
+                    <option value="Communication">Communication</option>
+                    <option value="Cancellation">Cancellation</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Upload */}
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
+                <select
+                  value={vendor}
+                  onChange={(e) => setVendor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="UK Cakes & Cream - Catering">UK Cakes & Cream - Catering</option>
+                  <option value="Elite Event Planning">Elite Event Planning</option>
+                  <option value="Perfect Moments Photography">Perfect Moments Photography</option>
+                  <option value="Sound & Lights Pro">Sound & Lights Pro</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Please describe your issue in detail..."
+                  rows={6}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  required
+                />
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Attach Files (Optional)
+                </label>
                 <div
                   ref={dropRef}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 sm:p-6 text-center"
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
                 >
-                  <div className="flex flex-col items-center justify-center gap-2 text-gray-500">
-                    <FiPaperclip className="w-6 h-6" />
-                    <p className="text-xs sm:text-sm">Choose a file or drag & drop it here</p>
-                    <p className="text-[10px] sm:text-xs">JPEG, PNG, JPG, and MP4 formats, up to 50MB</p>
-                    <label className="inline-flex items-center justify-center px-3 py-2 mt-2 rounded-lg bg-blue-600 text-white text-xs sm:text-sm cursor-pointer">
-                      Browse File
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.mp4"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => onFilesSelected(e.target.files)}
-                      />
-                    </label>
-                  </div>
+                  <FiUpload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 mb-2">Drag and drop files here, or click to select</p>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.mp4"
+                    onChange={(e) => onFilesSelected(e.target.files)}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                  >
+                    Choose Files
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Supported formats: JPG, PNG, MP4 (Max 5 files)
+                  </p>
                 </div>
 
-                {/* File list */}
                 {files.length > 0 && (
-                  <ul className="mt-2 space-y-1">
-                    {files.map((f, i) => (
-                      <li key={i} className="flex items-center justify-between text-xs sm:text-sm text-gray-700 bg-gray-50 rounded-md px-3 py-2">
-                        <span className="truncate">{f.name}</span>
-                        <span className="text-gray-500 ml-2">Size: {(f.size / 1024).toFixed(0)}kb</span>
-                      </li>
+                  <div className="mt-4 space-y-2">
+                    {files.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setFiles(prev => prev.filter((_, i) => i !== index))}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <FiX className="w-4 h-4" />
+                        </button>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-xs sm:text-sm text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={5}
-                  placeholder="Enter your message"
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
 
-              <div className="flex justify-end pt-2">
-                <button type="submit" className="px-4 sm:px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">
-                  Submit
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={submitting || !description.trim()}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      {view === 'history' && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-3 sm:p-4 border-b border-gray-200">
-            <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-              <div className="relative flex-1">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by Ticket ID"
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">From:</span>
-                <input value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-32 sm:w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">To:</span>
-                <input value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-32 sm:w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-              </div>
-              <div className="relative">
-                <button className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm" onClick={() => setStatusFilter(prev => prev === 'all' ? 'Pending' : prev === 'Pending' ? 'Resolved' : 'all')}>
-                  Filter by: <span className="font-semibold">{statusFilter === 'all' ? 'All' : statusFilter}</span>
-                </button>
+        ) : (
+          <div className="p-3 sm:p-4 lg:p-6">
+            {/* Search and Filters */}
+            <div className="mb-6 space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search tickets..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | TicketStatus)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                </select>
               </div>
             </div>
-          </div>
 
-          {/* Desktop table */}
-          <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date & Time</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Ticket ID</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Category</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Issue Type</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Event Vendor</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Support Status</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTickets.map(t => (
-                  <tr key={t.id} className="border-b">
-                    <td className="px-6 py-4 text-sm text-gray-700">{t.dateTime}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{t.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{t.category}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{t.issueType}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700 truncate max-w-[240px]">{t.vendor}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${t.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{t.status}</span>
-                    </td>
-                    <td className="px-6 py-4 text-center relative">
-                      <button onClick={() => setActionOpenFor(actionOpenFor === t.id ? null : t.id)} className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100">
-                        <FiMoreVertical />
-                      </button>
-                      {actionOpenFor === t.id && (
-                        <div className="absolute right-6 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 text-sm">
-                          <button className="w-full text-left px-4 py-2 hover:bg-gray-50" onClick={() => { setShowChatModal(true); setActionOpenFor(null) }}>View Feedback</button>
-                          <button className="w-full text-left px-4 py-2 hover:bg-gray-50" onClick={() => { setShowRateModal(true); setActionOpenFor(null) }}>Rate Support</button>
-                          <button className="w-full text-left px-4 py-2 hover:bg-gray-50" onClick={() => setActionOpenFor(null)}>Close</button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+            {/* Tickets List */}
+            {filteredTickets.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FiMessageCircle className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No support tickets yet</h3>
+                <p className="text-gray-500">You haven&apos;t submitted any support tickets yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredTickets.map((ticket) => (
+                  <div key={ticket.id} className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Ticket #{ticket.id}</h4>
+                        <p className="text-sm text-gray-600">{ticket.dateTime}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        ticket.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                        ticket.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {ticket.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Category:</span>
+                        <span className="ml-2 font-medium">{ticket.category}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Issue:</span>
+                        <span className="ml-2 font-medium">{ticket.issueType}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Vendor:</span>
+                        <span className="ml-2 font-medium">{ticket.vendor}</span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile / Tablet cards */}
-          <div className="lg:hidden divide-y">
-            {filteredTickets.map(t => (
-              <div key={t.id} className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold text-gray-900">Ticket #{t.id}</div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${t.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{t.status}</span>
-                </div>
-                <div className="text-xs text-gray-600">{t.dateTime}</div>
-                <div className="text-sm text-gray-800">{t.category} • {t.issueType}</div>
-                <div className="text-sm text-gray-700 truncate">{t.vendor}</div>
-                <div className="flex gap-2 pt-1">
-                  <button className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md" onClick={() => setShowChatModal(true)}>
-                    View Feedback
-                  </button>
-                  <button className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md" onClick={() => setShowRateModal(true)}>
-                    Rate Support
-                  </button>
-                </div>
               </div>
-            ))}
+            )}
           </div>
-
-          {/* Pagination (static) */}
-          <div className="bg-gray-50 px-3 py-3 sm:px-6 sm:py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-xs sm:text-sm text-gray-700">Showing 1 - 10 of 20</div>
-            <div className="flex items-center space-x-1 text-xs sm:text-sm">
-              <button className="px-2 py-1 text-gray-500 hover:text-gray-700">Previous</button>
-              <button className="px-2 py-1 bg-blue-600 text-white rounded-md">1</button>
-              <button className="px-2 py-1 text-gray-500 hover:text-gray-700 hidden sm:block">2</button>
-              <button className="px-2 py-1 text-gray-500 hover:text-gray-700 hidden sm:block">3</button>
-              <button className="px-2 py-1 text-gray-500 hover:text-gray-700">Next</button>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Success Modal */}
       {showSuccess && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowSuccess(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 sm:p-8">
-            <button className="absolute top-3 right-3 text-gray-500" onClick={() => setShowSuccess(false)}><FiX /></button>
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowSuccess(false)}></div>
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                <FiThumbsUp className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900">Successful</h3>
-              <p className="text-sm text-gray-600">Your support request has been submitted successfully and has been sent to the Admin.</p>
-              <p className="text-sm text-gray-900">Your Ticket ID number is <span className="font-bold">{ticketId}</span>.</p>
-              <div className="pt-2">
-                <button className="px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold" onClick={() => setShowSuccess(false)}>Done</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Rate Support Modal */}
-      {showRateModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowRateModal(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 sm:p-8">
-            <button className="absolute top-3 right-3 text-gray-500" onClick={() => setShowRateModal(false)}><FiX /></button>
-            <h3 className="text-xl font-semibold text-gray-900">Rate Your Support Experience</h3>
-            <p className="text-sm text-gray-600 mt-1">How was your experience with our support team?</p>
-            <div className="bg-gray-50 rounded-lg p-4 mt-4 text-sm grid grid-cols-2 gap-2">
-              <div className="text-gray-600">Support Agent:</div><div className="text-gray-900">Alex Johnson</div>
-              <div className="text-gray-600">Issue:</div><div className="text-gray-900">Payment Issue</div>
-              <div className="text-gray-600">Status:</div><div className="text-gray-900">Resolved</div>
-            </div>
-            <div className="mt-6">
-              <div className="text-sm font-medium text-gray-900 mb-2">Overall Rating</div>
-              <div className="flex items-center gap-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <svg key={i} className="w-8 h-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                ))}
-              </div>
-            </div>
-            <div className="mt-6">
-              <label className="block text-sm text-gray-700 mb-1">Description</label>
-              <textarea rows={5} className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your message" />
-            </div>
-            <div className="pt-6">
-              <button className="w-full px-4 py-3 rounded-lg bg-blue-600 text-white font-semibold">Request Service</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Feedback Chat Modal */}
-      {showChatModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowChatModal(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl h-[80vh] flex flex-col">
-            <button className="absolute top-3 right-3 text-gray-500" onClick={() => setShowChatModal(false)}><FiX /></button>
-            <div className="p-5 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Feedback Chat</h3>
-              <div className="text-xs text-gray-500 mt-1">23rd Jan. 2025</div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-              <div className="bg-white rounded-lg shadow-sm p-3 text-sm text-gray-700 w-full">The Vendor is not truthful and i was cheated. I am so unhappy. I need a refund please<br/><span className="text-xs text-gray-500">4:54pm</span></div>
-              <div className="bg-white rounded-lg shadow-sm p-3 text-sm text-gray-700 w-full">We have reviewed the issue raised and and we will resolve it in 3 days. Please bear with us.<br/><span className="text-xs text-gray-500">4:54pm</span></div>
-              <div className="bg-white rounded-lg shadow-sm p-3 text-sm text-gray-700 w-full">Thanks a lot for the feedback and clarity. I will be expectant<br/><span className="text-xs text-gray-500">4:54pm</span></div>
-              <div className="text-center text-xs text-gray-400 pt-2">--- Chat Ended ---</div>
-            </div>
-            <div className="p-3 border-t flex items-center gap-2">
-              <button className="p-2 text-gray-500 hover:text-gray-700"><FiPaperclip /></button>
-              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Type a message" />
-              <button className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">Send</button>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Request Submitted Successfully!</h3>
+              <p className="text-gray-600 mb-4">
+                Your support ticket has been submitted. Ticket ID: <strong>{ticketId}</strong>
+              </p>
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
@@ -394,5 +393,3 @@ export default function HelpSupportPage() {
     </div>
   )
 }
-
-

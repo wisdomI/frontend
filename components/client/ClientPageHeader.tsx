@@ -50,7 +50,7 @@ export default function ClientPageHeader({
 
       {/* Page Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-asul">{title}</h1>
         
         {/* Date Range Filter or Custom Content */}
         {showDateRange ? (

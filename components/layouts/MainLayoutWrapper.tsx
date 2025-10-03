@@ -14,6 +14,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   const isAuthPage = pathname?.startsWith('/auth')
   const isVendorDashboardPage = pathname?.startsWith('/vendor')
   const isClientPage = pathname?.startsWith('/client')
+  const isHomePage = pathname === '/'
 
   // For vendor dashboard pages, render only the children (they have their own layout)
   if (isVendorDashboardPage) {
@@ -26,6 +27,15 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
 
   // For client pages, render only the children (they have their own layout)
   if (isClientPage) {
+    return (
+      <Providers>
+        {children}
+      </Providers>
+    )
+  }
+
+  // For home page, render only the children (it has its own full-width layout)
+  if (isHomePage) {
     return (
       <Providers>
         {children}

@@ -20,7 +20,7 @@ interface Notification {
 type AppAction =
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SIDEBAR'; payload: boolean }
-  | { type: 'ADD_NOTIFICATION'; payload: Omit<Notification, 'id' | 'timestamp'> }
+  | { type: 'ADD_NOTIFICATION'; payload: Notification }
   | { type: 'REMOVE_NOTIFICATION'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'CLEAR_NOTIFICATIONS' }
@@ -46,11 +46,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         notifications: [
           ...state.notifications,
-          {
-            ...action.payload,
-            id: Date.now().toString(),
-            timestamp: new Date(),
-          },
+          action.payload,
         ],
       }
     case 'REMOVE_NOTIFICATION':
@@ -96,11 +92,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
-    dispatch({ type: 'ADD_NOTIFICATION', payload: notification })
+    const id = Date.now().toString()
+    dispatch({ type: 'ADD_NOTIFICATION', payload: { ...notification, id, timestamp: new Date() } })
     
     // Auto-remove notification after 5 seconds
     setTimeout(() => {
-      dispatch({ type: 'REMOVE_NOTIFICATION', payload: Date.now().toString() })
+      dispatch({ type: 'REMOVE_NOTIFICATION', payload: id })
     }, 5000)
   }
 

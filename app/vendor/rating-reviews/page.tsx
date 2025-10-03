@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { FiMessageCircle, FiEdit2, FiTrash2 } from 'react-icons/fi'
 import ResponseModal from '@/components/ui/modals/ResponseModal'
+import { useRatings } from '@/hooks/useRatings'
+import { useAuthContext } from '@/contexts/AuthContext'
+import VendorPageHeader from '@/components/vendor/VendorPageHeader'
 
 interface Review {
   id: number
@@ -21,87 +24,34 @@ interface Review {
 }
 
 export default function RatingReviewsPage() {
+  const { user } = useAuthContext()
   const [activeTab, setActiveTab] = useState('all')
   const [showResponseModal, setShowResponseModal] = useState(false)
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      clientName: 'Sarah Johnson',
-      clientAvatar: '/images/avatar1.jpg',
-      service: 'Wedding Cake Design',
-      rating: 5,
-      review: 'Absolutely amazing! The cake was exactly what I envisioned and tasted incredible. Sarah went above and beyond to make our wedding day special.',
-      date: '2024-01-15',
-      response: 'Thank you so much, Sarah! It was a pleasure working with you on your special day. Wishing you both a lifetime of happiness!',
-      responseDate: '2024-01-16',
-      vendorRating: 5,
-      vendorReview: 'Sarah was an absolute pleasure to work with. Clear communication, flexible with changes, and very appreciative. Highly recommend!',
-      vendorReviewDate: '2024-01-16'
-    },
-    {
-      id: 2,
-      clientName: 'Mike Chen',
-      clientAvatar: '/images/avatar2.jpg',
-      service: 'Corporate Event Planning',
-      rating: 4,
-      review: 'Great service overall. The event went smoothly and everyone was impressed. Minor communication issues but nothing major.',
-      date: '2024-01-12',
-      vendorRating: 4,
-      vendorReview: 'Mike was professional and organized. The event went well, though there were some last-minute changes that could have been communicated earlier.',
-      vendorReviewDate: '2024-01-13'
-    },
-    {
-      id: 3,
-      clientName: 'Emma Wilson',
-      clientAvatar: '/images/avatar3.jpg',
-      service: 'Photography Package',
-      rating: 5,
-      review: 'Stunning photos! The photographer was professional and captured every important moment. Highly recommend!',
-      date: '2024-01-10',
-      response: 'Thank you, Emma! Your kind words mean the world to us. We\'re thrilled you love the photos!',
-      responseDate: '2024-01-11',
-      vendorRating: 5,
-      vendorReview: 'Emma was fantastic to work with. Very clear about her vision, punctual, and very appreciative of our work.',
-      vendorReviewDate: '2024-01-11'
-    },
-    {
-      id: 4,
-      clientName: 'John Davis',
-      clientAvatar: '/images/avatar4.jpg',
-      service: 'Birthday Party Setup',
-      rating: 3,
-      review: 'Service was okay but there were some delays. The final result was good but could have been better with better communication.',
-      date: '2024-01-08',
-      vendorRating: 3,
-      vendorReview: 'John was okay to work with, but there were some communication challenges and last-minute changes that affected the timeline.',
-      vendorReviewDate: '2024-01-09'
-    },
-    {
-      id: 5,
-      clientName: 'Lisa Martinez',
-      clientAvatar: '/images/avatar5.jpg',
-      service: 'Anniversary Dinner',
-      rating: 5,
-      review: 'Perfect evening! The food was delicious and the service was impeccable. Will definitely book again for future events.',
-      date: '2024-01-05',
-      vendorRating: 5,
-      vendorReview: 'Lisa was wonderful! Very clear about her expectations, easy to work with, and very appreciative. Would love to work with her again.',
-      vendorReviewDate: '2024-01-06'
-    },
-    {
-      id: 6,
-      clientName: 'David Brown',
-      clientAvatar: '/images/avatar6.jpg',
-      service: 'Graduation Party',
-      rating: 2,
-      review: 'Disappointed with the service. Food was cold when it arrived and the setup was not as discussed. Expected better quality.',
-      date: '2024-01-03',
-      vendorRating: 2,
-      vendorReview: 'David was difficult to work with. Unclear expectations, last-minute changes, and unrealistic demands. Would not recommend.',
-      vendorReviewDate: '2024-01-04'
-    }
-  ])
+  
+  // Use API hook for ratings
+  const { ratings, loading, error, updateRating } = useRatings({ 
+    viewType: 'by-reviewee',
+    userId: user?.id 
+  })
+  
+  // Transform API ratings to local Review interface
+  const reviews: Review[] = ratings.map((rating: any) => ({
+    id: parseInt(rating.id),
+    clientName: rating.reviewer?.firstName && rating.reviewer?.lastName 
+      ? `${rating.reviewer.firstName} ${rating.reviewer.lastName}` 
+      : rating.reviewer?.businessName || 'Unknown Client',
+    clientAvatar: rating.reviewer?.profilePicture || '/images/placeholder-avatar.jpg',
+    service: rating.service?.title || 'Service',
+    rating: rating.rating || 0,
+    review: rating.comment || '',
+    date: new Date(rating.createdAt).toLocaleDateString(),
+    response: rating.response || undefined,
+    responseDate: rating.responseDate ? new Date(rating.responseDate).toLocaleDateString() : undefined,
+    vendorRating: rating.vendorRating || undefined,
+    vendorReview: rating.vendorReview || undefined,
+    vendorReviewDate: rating.vendorReviewDate ? new Date(rating.vendorReviewDate).toLocaleDateString() : undefined,
+  }))
 
   const tabs = [
     { id: 'all', label: 'All Reviews', count: reviews.length },
@@ -123,13 +73,41 @@ export default function RatingReviewsPage() {
     ? reviews.filter(r => r.vendorRating)
     : reviews
 
-  const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+  const averageRating = reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0
   const ratingDistribution = {
     5: reviews.filter(r => r.rating === 5).length,
     4: reviews.filter(r => r.rating === 4).length,
     3: reviews.filter(r => r.rating === 3).length,
     2: reviews.filter(r => r.rating === 2).length,
     1: reviews.filter(r => r.rating === 1).length
+  }
+
+  if (loading) {
+    return (
+      <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+        <VendorPageHeader
+          breadcrumbs={[{ label: 'Rating & Reviews', isActive: true }]}
+          title="Rating & Reviews"
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+        <VendorPageHeader
+          breadcrumbs={[{ label: 'Rating & Reviews', isActive: true }]}
+          title="Rating & Reviews"
+        />
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    )
   }
 
   const renderStars = (rating: number) => {
@@ -152,30 +130,27 @@ export default function RatingReviewsPage() {
     setShowResponseModal(true)
   }
 
-  const handleResponseSubmit = (response: string) => {
+  const handleResponseSubmit = async (response: string) => {
     if (selectedReview) {
-      // Update the review with the response
-      const updatedReviews = reviews.map(review => 
-        review.id === selectedReview.id 
-          ? { 
-              ...review, 
-              response: response,
-              responseDate: new Date().toISOString().split('T')[0]
-            }
-          : review
-      )
-      
-      // Update the reviews state to show the response immediately
-      setReviews(updatedReviews)
-      
-      // In a real app, this would make an API call to update the review
-      console.log('Response submitted:', { reviewId: selectedReview.id, response })
-      
-      // Show success message
-      alert('Response submitted successfully!')
-      
-      setShowResponseModal(false)
-      setSelectedReview(null)
+      try {
+        // Update the rating via API
+        const formData = new FormData()
+        formData.append('response', response)
+        
+        await updateRating(selectedReview.id.toString(), formData)
+        
+        console.log('Response submitted:', { reviewId: selectedReview.id, response })
+        
+        // Show success message
+        alert('Response submitted successfully!')
+        
+        // Close the modal
+        setShowResponseModal(false)
+        setSelectedReview(null)
+      } catch (err) {
+        console.error('Error submitting response:', err)
+        alert('Failed to submit response. Please try again.')
+      }
     }
   }
 
@@ -188,11 +163,11 @@ export default function RatingReviewsPage() {
   }
 
   return (
-    <div className="p-3 sm:p-4 lg:p-6">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Rating & Reviews</h1>
-        <p className="text-sm sm:text-base text-gray-600">Manage your client reviews and ratings</p>
-      </div>
+    <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+      <VendorPageHeader
+        breadcrumbs={[{ label: 'Rating & Reviews', isActive: true }]}
+        title="Rating & Reviews"
+      />
 
       {/* Rating Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">

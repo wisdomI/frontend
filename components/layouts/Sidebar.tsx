@@ -431,12 +431,21 @@ const menuItems = [
   },
 ]
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isMobileOpen?: boolean
+  onMobileToggle?: () => void
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onMobileToggle }) => {
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({})
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const pathname = usePathname()
   const { setSelectedCategory, setSelectedSubCategory } = useFilterContext()
+  
+  // Use external mobile state if provided, otherwise use internal state
+  const isMobileOpen = externalMobileOpen !== undefined ? externalMobileOpen : internalMobileOpen
+  const setIsMobileOpen = onMobileToggle || setInternalMobileOpen
 
   const handleToggle = (label: string) => {
     setOpenMenus(prev => ({
@@ -476,7 +485,9 @@ const Sidebar: React.FC = () => {
       {/* Mobile hamburger button */}
       <button
         onClick={toggleMobileSidebar}
-        className="md:hidden fixed top-20 left-4 z-50 bg-[#0B2E6F] text-white p-2 rounded-lg shadow-lg"
+        className={`md:hidden fixed top-20 z-[100] bg-[#0B2E6F] text-white p-2 rounded-lg shadow-lg transition-all duration-300 ${
+          isMobileOpen ? 'left-[280px]' : 'left-4'
+        }`}
       >
         {isMobileOpen ? (
           <XMarkIcon className="h-6 w-6" />
@@ -485,10 +496,11 @@ const Sidebar: React.FC = () => {
         )}
       </button>
 
+
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[90]"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -498,7 +510,7 @@ const Sidebar: React.FC = () => {
         w-64 flex-shrink-0 transition-all duration-300 ease-in-out
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:relative md:block
-        fixed md:static top-0 left-0 z-50 md:z-auto
+        fixed md:static top-0 left-0 z-[95] md:z-auto
         h-screen md:h-full md:max-h-full md:overflow-y-auto
       `}>
         {isFilterModalOpen ? (
@@ -515,7 +527,7 @@ const Sidebar: React.FC = () => {
               <div></div>
               
               {/* Center - Category Title */}
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 font-raleway">Category</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 font-asul">Category</h2>
               
               {/* Right - Filter Icon */}
               <button 
@@ -556,7 +568,7 @@ const Sidebar: React.FC = () => {
                               className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-yellow-400' : 'text-white'}`,
                             })}
                           </div>
-                          <span className="font-medium text-sm md:text-base">
+                          <span className="font-medium text-sm md:text-base font-raleway">
                             {item.label}
                           </span>
                         </div>
@@ -574,7 +586,7 @@ const Sidebar: React.FC = () => {
                             <li key={sub.label}>
                               <Link
                                 href={sub.route}
-                                className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors ${
+                                className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors font-raleway ${
                                   isSubMenuActive(sub.route)
                                     ? 'bg-event-blue text-yellow-400'
                                     : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'

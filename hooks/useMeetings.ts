@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { meetingAPI } from '@/lib/api'
 import { Meeting, MeetingStats } from '@/types/api'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 interface UseMeetingsOptions {
   viewType?: 'all' | 'my' | 'attendances' | 'upcoming'
@@ -10,6 +11,7 @@ interface UseMeetingsOptions {
 }
 
 export function useMeetings(options: UseMeetingsOptions = {}) {
+  const { user } = useAuthContext()
   const { viewType = 'all', autoFetch = true } = options
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [stats, setStats] = useState<MeetingStats | null>(null)
@@ -49,7 +51,12 @@ export function useMeetings(options: UseMeetingsOptions = {}) {
     try {
       const response = await meetingAPI.getStats()
       setStats(response.data.data)
-    } catch (err) {
+    } catch (err: any) {
+      // Handle 403 errors gracefully - user might not have meeting stats yet
+      if (err?.response?.status === 403) {
+        console.log('useMeetings: 403 error - user may not have meeting stats yet')
+        return
+      }
       console.error('Error fetching meeting stats:', err)
     }
   }
@@ -180,11 +187,11 @@ export function useMeetings(options: UseMeetingsOptions = {}) {
   }
 
   useEffect(() => {
-    if (autoFetch) {
+    if (autoFetch && user?.id) {
       fetchMeetings()
       fetchStats()
     }
-  }, [viewType, autoFetch])
+  }, [viewType, autoFetch, user?.id])
 
   return {
     meetings,

@@ -45,7 +45,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <h4 className="font-semibold mb-4 font-asul">Quick Links</h4>
             <ul className="space-y-2 text-blue-100 text-sm">
               <li><a href="/" className="hover:text-white">Home</a></li>
               <li><a href="/about" className="hover:text-white">About Us</a></li>
@@ -60,7 +60,7 @@ export default function Footer() {
 
           {/* Legal Info */}
           <div>
-            <h4 className="font-semibold mb-4">Legal Information</h4>
+            <h4 className="font-semibold mb-4 font-asul">Legal Information</h4>
             <ul className="space-y-2 text-blue-100 text-sm">
               <li><a href="/privacy" className="hover:text-white">Privacy Policy</a></li>
               <li><a href="/vendor-agreement" className="hover:text-white">Vendor Agreement</a></li>
@@ -72,7 +72,7 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h4 className="font-semibold mb-4">Subscribe Newsletter</h4>
+            <h4 className="font-semibold mb-4 font-asul">Subscribe Newsletter</h4>
             <p className="text-blue-100 text-sm mb-4">
               Get the latest Vendor update & Event tips
             </p>

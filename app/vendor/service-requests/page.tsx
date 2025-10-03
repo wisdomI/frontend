@@ -5,8 +5,8 @@ import ServiceRequestCard from '@/components/vendors/ServiceRequestCard'
 import FilterCard from '@/components/vendors/FilterCard'
 import CounterOfferModal from '@/components/vendors/CounterOfferModal'
 import { FiFilter } from 'react-icons/fi'
-import { useServiceRequests } from '@/hooks/useServiceRequests'
 import { useApi } from '@/hooks/useApi'
+import { vendorServiceRequestAPI } from '@/lib/api'
 
 export default function ServiceRequestsPage() {
   const [activeTab, setActiveTab] = useState<'active' | 'rejected' | 'accepted'>('rejected')
@@ -15,7 +15,10 @@ export default function ServiceRequestsPage() {
   const [showFilter, setShowFilter] = useState(false)
 
   // API hooks
-  const { requests: apiServiceRequests, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests()
+  const { data: apiServiceRequests, loading: serviceRequestsLoading, error: serviceRequestsError } = useApi(async () => {
+    const response = await vendorServiceRequestAPI.getReceived()
+    return response.data
+  })
   
   // Transform API data to component format
   const transformServiceRequest = (request: any) => ({
@@ -36,9 +39,9 @@ export default function ServiceRequestsPage() {
     additionalInfo: request.additionalInfo || '',
   })
 
-  const serviceRequestsData = apiServiceRequests?.map(transformServiceRequest) || []
+  const serviceRequestsData = (apiServiceRequests || []).map(transformServiceRequest)
 
-  const filteredRequests = serviceRequestsData.filter(request => {
+  const filteredRequests = serviceRequestsData.filter((request: any) => {
     if (activeTab === 'active') return request.status === 'active'
     if (activeTab === 'rejected') return request.status === 'rejected'
     if (activeTab === 'accepted') return request.status === 'accepted'
@@ -47,20 +50,9 @@ export default function ServiceRequestsPage() {
 
   const handleReject = async (requestId: number) => {
     try {
-      const response = await fetch(`/api/v1/vendor-service-requests/${requestId}/reject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      })
-      
-      if (response.ok) {
-        refetchServiceRequests()
-        console.log(`Offer rejected for request ${requestId}`)
-      } else {
-        console.error('Failed to reject request')
-      }
+      await vendorServiceRequestAPI.respond(requestId.toString(), { response: 'declined' })
+      console.log(`Offer rejected for request ${requestId}`)
+      // Refresh data would be handled by the useApi hook automatically
     } catch (error) {
       console.error('Error rejecting request:', error)
     }
@@ -68,20 +60,9 @@ export default function ServiceRequestsPage() {
 
   const handleAccept = async (requestId: number) => {
     try {
-      const response = await fetch(`/api/v1/vendor-service-requests/${requestId}/accept`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      })
-      
-      if (response.ok) {
-        refetchServiceRequests()
-        console.log(`Offer accepted for request ${requestId}`)
-      } else {
-        console.error('Failed to accept request')
-      }
+      await vendorServiceRequestAPI.respond(requestId.toString(), { response: 'accepted' })
+      console.log(`Offer accepted for request ${requestId}`)
+      // Refresh data would be handled by the useApi hook automatically
     } catch (error) {
       console.error('Error accepting request:', error)
     }

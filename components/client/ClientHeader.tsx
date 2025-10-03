@@ -143,7 +143,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Notifications</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 font-asul">Notifications</h3>
                 <div className="space-y-3">
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-gray-900">New offer received for your event</p>
@@ -174,7 +174,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
           {showMessages && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Messages</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 font-asul">Messages</h3>
                 <div className="space-y-3">
                   <div className="p-3 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-900">New message from Elite Catering</p>
