@@ -93,7 +93,7 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
       
       // Call email verification API
       if (type === 'email' && registrationData) {
-        await authAPI.verifyEmail(registrationData.email, code)
+        await authAPI.verifyEmail({ email: registrationData.email, code })
         
         addNotification({
           type: 'success',

@@ -193,7 +193,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authAPI.logout()
+      if (user?.id) {
+        await authAPI.logout({ userId: user.id })
+      }
     } catch (error) {
       console.error('Logout error:', error)
     } finally {

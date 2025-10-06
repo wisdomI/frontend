@@ -50,7 +50,7 @@ export default function RegisterPage() {
   const handleEmailVerify = async (code: string) => {
     console.log('Email verification code:', code)
     try {
-      const response = await authAPI.verifyEmail(formData.email, code)
+      const response = await authAPI.verifyEmail({ email: formData.email, code })
       
       console.log('Email verification response:', response)
       addNotification({

@@ -69,8 +69,28 @@ export interface PasswordResetRequest {
 }
 
 export interface ValidateCodeRequest {
+  code: string
+}
+
+export interface VerifyEmailRequest {
   email: string
   code: string
+}
+
+export interface ResendVerificationRequest {
+  email: string
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+export interface RevokeRefreshTokenRequest {
+  refreshToken: string
+}
+
+export interface LogoutRequest {
+  userId: string
 }
 
 export interface ResetPasswordRequest {
@@ -86,13 +106,10 @@ export interface Profile {
   userId: string
   displayPicture?: string
   bio?: string
-  location?: string
-  website?: string
-  socialLinks?: {
-    facebook?: string
-    instagram?: string
-    twitter?: string
-  }
+  city?: string
+  country?: string
+  skills?: string[]
+  gender?: string
   createdAt: string
   updatedAt: string
 }
@@ -100,45 +117,56 @@ export interface Profile {
 export interface CreateProfileRequest {
   displayPicture?: File
   bio?: string
-  location?: string
-  website?: string
-  socialLinks?: {
-    facebook?: string
-    instagram?: string
-    twitter?: string
-  }
+  city?: string
+  country?: string
+  skills?: string[]
+  gender?: string
+}
+
+export interface UpdateProfileRequest {
+  bio?: string
+  city?: string
+  country?: string
+  skills?: string[]
+  gender?: string
+}
+
+export interface UpdateProfilePictureRequest {
+  displayPicture: File
 }
 
 // Portfolio Types
 export interface Portfolio {
   id: string
   userId: string
-  title: string
+  projectTitle: string
   description: string
-  categoryId: string
   mediaUrl: string[]
-  tags: string[]
   createdAt: string
   updatedAt: string
 }
 
 export interface CreatePortfolioRequest {
-  title: string
+  projectTitle: string
   description: string
-  categoryId: string
   mediaUrl: File[]
-  tags: string[]
+}
+
+export interface UpdatePortfolioRequest {
+  projectTitle?: string
+  description?: string
+  mediaUrl?: File[]
 }
 
 // Service Offering Types
 export interface ServiceOffering {
   id: string
   userId: string
-  title: string
+  serviceName: string
   description: string
-  categoryId: string
+  categoryIds: string[]
+  pricingTitle: string
   price: number
-  duration: string
   mediaUrl: string[]
   isActive: boolean
   createdAt: string
@@ -155,23 +183,46 @@ export interface CreateServiceRequest {
   isActive: boolean
 }
 
+export interface CreateServiceOfferingRequest {
+  serviceOfferings: Array<{
+    serviceName: string
+    description: string
+    categoryIds: string[]
+    pricingTitle: string
+    price: number
+  }>
+  mediaUrl: File[]
+}
+
+export interface UpdateServiceOfferingRequest {
+  serviceName?: string
+  description?: string
+  categoryIds?: string[]
+  pricingTitle?: string
+  price?: number
+  mediaUrl?: File[]
+}
+
 // Meeting Types
 export interface Meeting {
   id: string
   title: string
   description: string
+  frequency: string
   meetingDate: string
   startTime: string
   endTime: string
-  attendees: string[]
-  meetingType: 'video' | 'phone' | 'in-person'
-  location?: string
-  meetingLink?: string
+  startDate: string
+  endDate: string
   isRecurring: boolean
-  recurrencePattern?: 'daily' | 'weekly' | 'monthly'
-  recurrenceEndDate?: string
-  attachment?: string
-  status: 'scheduled' | 'completed' | 'cancelled'
+  meetingLink?: string
+  location?: string
+  attendees: Array<{
+    email: string
+    firstName: string
+    lastName: string
+  }>
+  status: 'active' | 'inactive' | 'cancelled'
   createdAt: string
   updatedAt: string
 }
@@ -179,17 +230,39 @@ export interface Meeting {
 export interface CreateMeetingRequest {
   title: string
   description: string
+  frequency: string
   meetingDate: string
   startTime: string
   endTime: string
-  attendees: string[]
-  meetingType: 'video' | 'phone' | 'in-person'
-  location?: string
-  meetingLink?: string
+  startDate: string
+  endDate: string
   isRecurring: boolean
-  recurrencePattern?: 'daily' | 'weekly' | 'monthly'
-  recurrenceEndDate?: string
-  attachment?: File
+  meetingLink?: string
+  location?: string
+  attendees: Array<{
+    email: string
+    firstName: string
+    lastName: string
+  }>
+}
+
+export interface UpdateMeetingRequest {
+  title?: string
+  description?: string
+  frequency?: string
+  meetingDate?: string
+  startTime?: string
+  endTime?: string
+  startDate?: string
+  endDate?: string
+  isRecurring?: boolean
+  meetingLink?: string
+  location?: string
+  attendees?: Array<{
+    email: string
+    firstName: string
+    lastName: string
+  }>
 }
 
 export interface MeetingResponse {
