@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { serviceAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { ServiceOffering } from '@/types/api'
-import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiDollarSign, FiClock, FiToggleLeft, FiToggleRight } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiDollarSign, FiClock, FiToggleLeft, FiToggleRight, FiTag } from 'react-icons/fi'
 
 interface ServiceManagerProps {
   userId?: string
@@ -144,7 +144,7 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
                 {service.mediaUrl && service.mediaUrl.length > 0 ? (
                   <Image 
                     src={service.mediaUrl[0]} 
-                    alt={service.title}
+                    alt={service.serviceName}
                     fill
                     className="object-cover"
                   />
@@ -198,7 +198,7 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
               {/* Service Info */}
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
-                  {service.title}
+                  {service.serviceName}
                 </h3>
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                   {service.description}
@@ -211,8 +211,8 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
                     <span>${service.price}</span>
                   </div>
                   <div className="flex items-center text-gray-600 text-sm">
-                    <FiClock className="w-4 h-4 mr-1" />
-                    <span>{service.duration}</span>
+                    <FiTag className="w-4 h-4 mr-1" />
+                    <span>{service.pricingTitle}</span>
                   </div>
                 </div>
 
@@ -260,11 +260,11 @@ interface CreateEditServiceModalProps {
 
 function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServiceModalProps) {
   const [formData, setFormData] = useState({
-    title: service?.title || '',
+    serviceName: service?.serviceName || '',
     description: service?.description || '',
-    categoryId: service?.categoryId || '',
+    categoryIds: service?.categoryIds?.join(', ') || '',
+    pricingTitle: service?.pricingTitle || '',
     price: service?.price?.toString() || '',
-    duration: service?.duration || '',
     isActive: service?.isActive?.toString() || 'true'
   })
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
@@ -278,16 +278,21 @@ function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServi
 
     try {
       const formDataToSend = new FormData()
-      formDataToSend.append('title', formData.title)
-      formDataToSend.append('description', formData.description)
-      formDataToSend.append('categoryId', formData.categoryId)
-      formDataToSend.append('price', formData.price)
-      formDataToSend.append('duration', formData.duration)
-      formDataToSend.append('isActive', formData.isActive)
+      
+      // Add service offering data
+      const serviceOffering = {
+        serviceName: formData.serviceName,
+        description: formData.description,
+        categoryIds: formData.categoryIds.split(',').map(id => id.trim()).filter(Boolean),
+        pricingTitle: formData.pricingTitle,
+        price: parseFloat(formData.price)
+      }
+      
+      formDataToSend.append('serviceOfferings', JSON.stringify([serviceOffering]))
 
       // Add media files
-      mediaFiles.forEach((file, index) => {
-        formDataToSend.append(`mediaUrl`, file)
+      mediaFiles.forEach((file) => {
+        formDataToSend.append('mediaUrl', file)
       })
 
       if (service) {
@@ -323,15 +328,15 @@ function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServi
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Title */}
+            {/* Service Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Service Title *
+                Service Name *
               </label>
               <input
                 type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                value={formData.serviceName}
+                onChange={(e) => setFormData({...formData, serviceName: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -351,7 +356,7 @@ function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServi
               />
             </div>
 
-            {/* Price and Duration */}
+            {/* Price and Pricing Title */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -368,29 +373,29 @@ function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServi
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration *
+                  Pricing Title *
                 </label>
                 <input
                   type="text"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                  placeholder="e.g., 2 hours, 1 day"
+                  value={formData.pricingTitle}
+                  onChange={(e) => setFormData({...formData, pricingTitle: e.target.value})}
+                  placeholder="e.g., Per Hour, Per Project"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
             </div>
 
-            {/* Category */}
+            {/* Category IDs */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
+                Category IDs
               </label>
               <input
                 type="text"
-                value={formData.categoryId}
-                onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                placeholder="Enter category ID"
+                value={formData.categoryIds}
+                onChange={(e) => setFormData({...formData, categoryIds: e.target.value})}
+                placeholder="Enter category IDs separated by commas"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

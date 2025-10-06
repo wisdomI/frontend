@@ -89,7 +89,9 @@ export function useAuth(): AuthState & AuthActions {
     setLoading(true)
     
     try {
-      await authAPI.logout()
+      if (user?.id) {
+        await authAPI.logout({ userId: user.id })
+      }
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -106,7 +108,7 @@ export function useAuth(): AuthState & AuthActions {
     setError(null)
     
     try {
-      await authAPI.verifyEmail(email, code)
+      await authAPI.verifyEmail({ email, code })
       return true
     } catch (error: any) {
       setError(error.response?.data?.message || 'Email verification failed')
@@ -136,7 +138,7 @@ export function useAuth(): AuthState & AuthActions {
     setError(null)
     
     try {
-      await authAPI.validateCode({ email, code })
+      await authAPI.validateResetCode({ code })
       return true
     } catch (error: any) {
       setError(error.response?.data?.message || 'Invalid reset code')
@@ -156,7 +158,7 @@ export function useAuth(): AuthState & AuthActions {
     setError(null)
     
     try {
-      await authAPI.resetPasswordConfirm({ email, code, newPassword, confirmPassword })
+      await authAPI.setNewPassword({ email, newPassword, code, confirmPassword: newPassword })
       return true
     } catch (error: any) {
       setError(error.response?.data?.message || 'Password reset failed')
@@ -215,7 +217,7 @@ export function useRegister() {
 
 export function useEmailVerification() {
   const wrappedVerifyEmail = async (data: { email: string; verificationCode: string }) => {
-    const response = await authAPI.verifyEmail(data.email, data.verificationCode)
+    const response = await authAPI.verifyEmail({ email: data.email, code: data.verificationCode })
     return response.data
   }
   return useApiMutation<{}, { email: string; verificationCode: string }>(wrappedVerifyEmail)

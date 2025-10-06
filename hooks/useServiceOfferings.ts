@@ -1,101 +1,138 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { serviceAPI } from '@/lib/api'
-import { ServiceOffering } from '@/types/api'
+import { ServiceOffering, CreateServiceOfferingRequest, UpdateServiceOfferingRequest } from '@/types/api'
 
-interface UseServiceOfferingsOptions {
-  userId?: string
-  isOwnServices?: boolean
-  autoFetch?: boolean
-}
-
-export function useServiceOfferings(options: UseServiceOfferingsOptions = {}) {
-  const { userId, isOwnServices = false, autoFetch = true } = options
-  const [services, setServices] = useState<ServiceOffering[]>([])
+export const useServiceOfferings = () => {
+  const [serviceOfferings, setServiceOfferings] = useState<ServiceOffering[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchServices = async () => {
+  const fetchMyServices = async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      let response
-      if (isOwnServices) {
-        response = await serviceAPI.userServices()
-      } else if (userId) {
-        // For now, we'll use getAll and filter by userId if needed
-        response = await serviceAPI.getAll()
-      } else {
-        response = await serviceAPI.getAll()
-      }
-      
-      setServices(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch services')
-      console.error('Error fetching services:', err)
+      const response = await serviceAPI.myServices()
+      setServiceOfferings(response.data.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch service offerings')
     } finally {
       setLoading(false)
     }
   }
 
-  const createService = async (formData: FormData) => {
+  const fetchUserServices = async () => {
     try {
       setLoading(true)
       setError(null)
+      const response = await serviceAPI.userServices()
+      setServiceOfferings(response.data.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch user services')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createServiceOffering = async (data: CreateServiceOfferingRequest) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const formData = new FormData()
+      
+      // Add service offerings array
+      data.serviceOfferings.forEach((service, index) => {
+        formData.append(`serviceOfferings[${index}][serviceName]`, service.serviceName)
+        formData.append(`serviceOfferings[${index}][description]`, service.description)
+        formData.append(`serviceOfferings[${index}][pricingTitle]`, service.pricingTitle)
+        formData.append(`serviceOfferings[${index}][price]`, service.price.toString())
+        
+        service.categoryIds.forEach((categoryId, catIndex) => {
+          formData.append(`serviceOfferings[${index}][categoryIds][${catIndex}]`, categoryId)
+        })
+      })
+      
+      // Add media files
+      data.mediaUrl.forEach((file) => {
+        formData.append('mediaUrl', file)
+      })
+
       const response = await serviceAPI.create(formData)
-      await fetchServices() // Refresh the list
-      return response.data.data
-    } catch (err) {
-      setError('Failed to create service')
-      console.error('Error creating service:', err)
+      setServiceOfferings(prev => [...prev, response.data.data])
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create service offering')
       throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const updateService = async (id: string, formData: FormData) => {
+  const updateServiceOffering = async (id: string, data: UpdateServiceOfferingRequest) => {
     try {
       setLoading(true)
       setError(null)
+      const formData = new FormData()
+      
+      if (data.serviceName) {
+        formData.append('serviceName', data.serviceName)
+      }
+      if (data.description) {
+        formData.append('description', data.description)
+      }
+      if (data.pricingTitle) {
+        formData.append('pricingTitle', data.pricingTitle)
+      }
+      if (data.price !== undefined) {
+        formData.append('price', data.price.toString())
+      }
+      if (data.categoryIds) {
+        data.categoryIds.forEach((categoryId, index) => {
+          formData.append(`categoryIds[${index}]`, categoryId)
+        })
+      }
+      if (data.mediaUrl) {
+        data.mediaUrl.forEach((file) => {
+          formData.append('mediaUrl', file)
+        })
+      }
+
       const response = await serviceAPI.update(id, formData)
-      await fetchServices() // Refresh the list
-      return response.data.data
-    } catch (err) {
-      setError('Failed to update service')
-      console.error('Error updating service:', err)
+      setServiceOfferings(prev => 
+        prev.map(service => 
+          service.id === id ? response.data.data : service
+        )
+      )
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update service offering')
       throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const deleteService = async (id: string) => {
+  const deleteServiceOffering = async (id: string) => {
     try {
       setLoading(true)
       setError(null)
       await serviceAPI.delete(id)
-      setServices(services.filter(s => s.id !== id))
-    } catch (err) {
-      setError('Failed to delete service')
-      console.error('Error deleting service:', err)
+      setServiceOfferings(prev => prev.filter(service => service.id !== id))
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete service offering')
       throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const removeMedia = async (id: string) => {
+  const getServiceOfferingById = async (id: string) => {
     try {
       setLoading(true)
       setError(null)
-      await serviceAPI.removeMedia(id)
-      await fetchServices() // Refresh the list
-    } catch (err) {
-      setError('Failed to remove media')
-      console.error('Error removing media:', err)
+      const response = await serviceAPI.getById(id)
+      return response.data.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch service offering')
       throw err
     } finally {
       setLoading(false)
@@ -103,20 +140,18 @@ export function useServiceOfferings(options: UseServiceOfferingsOptions = {}) {
   }
 
   useEffect(() => {
-    if (autoFetch) {
-      fetchServices()
-    }
-  }, [userId, isOwnServices, autoFetch])
+    fetchMyServices()
+  }, [])
 
   return {
-    services,
+    serviceOfferings,
     loading,
     error,
-    fetchServices,
-    createService,
-    updateService,
-    deleteService,
-    removeMedia,
-    setError
+    fetchMyServices,
+    fetchUserServices,
+    createServiceOffering,
+    updateServiceOffering,
+    deleteServiceOffering,
+    getServiceOfferingById,
   }
 }

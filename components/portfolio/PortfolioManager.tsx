@@ -129,7 +129,7 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
                 {portfolio.mediaUrl && portfolio.mediaUrl.length > 0 ? (
                   <Image 
                     src={portfolio.mediaUrl[0]} 
-                    alt={portfolio.title}
+                    alt={portfolio.projectTitle}
                     fill
                     className="object-cover"
                   />
@@ -161,31 +161,12 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
               {/* Portfolio Info */}
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
-                  {portfolio.title}
+                  {portfolio.projectTitle}
                 </h3>
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                   {portfolio.description}
                 </p>
                 
-                {/* Tags */}
-                {portfolio.tags && portfolio.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {portfolio.tags.slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        <FiTag className="w-3 h-3 mr-1" />
-                        {tag}
-                      </span>
-                    ))}
-                    {portfolio.tags.length > 3 && (
-                      <span className="text-xs text-gray-500">
-                        +{portfolio.tags.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 {/* Metadata */}
                 <div className="flex items-center justify-between text-xs text-gray-500">
@@ -234,10 +215,8 @@ interface CreateEditPortfolioModalProps {
 
 function CreateEditPortfolioModal({ portfolio, onClose, onSuccess }: CreateEditPortfolioModalProps) {
   const [formData, setFormData] = useState({
-    title: portfolio?.title || '',
-    description: portfolio?.description || '',
-    categoryId: portfolio?.categoryId || '',
-    tags: portfolio?.tags?.join(', ') || ''
+    projectTitle: portfolio?.projectTitle || '',
+    description: portfolio?.description || ''
   })
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [loading, setLoading] = useState(false)
@@ -250,14 +229,12 @@ function CreateEditPortfolioModal({ portfolio, onClose, onSuccess }: CreateEditP
 
     try {
       const formDataToSend = new FormData()
-      formDataToSend.append('title', formData.title)
+      formDataToSend.append('projectTitle', formData.projectTitle)
       formDataToSend.append('description', formData.description)
-      formDataToSend.append('categoryId', formData.categoryId)
-      formDataToSend.append('tags', formData.tags)
 
       // Add media files
-      mediaFiles.forEach((file, index) => {
-        formDataToSend.append(`mediaUrl`, file)
+      mediaFiles.forEach((file) => {
+        formDataToSend.append('mediaUrl', file)
       })
 
       if (portfolio) {
@@ -293,15 +270,15 @@ function CreateEditPortfolioModal({ portfolio, onClose, onSuccess }: CreateEditP
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Title */}
+            {/* Project Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title *
+                Project Title *
               </label>
               <input
                 type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                value={formData.projectTitle}
+                onChange={(e) => setFormData({...formData, projectTitle: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -321,33 +298,6 @@ function CreateEditPortfolioModal({ portfolio, onClose, onSuccess }: CreateEditP
               />
             </div>
 
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <input
-                type="text"
-                value={formData.categoryId}
-                onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                placeholder="Enter category ID"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tags
-              </label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                placeholder="Enter tags separated by commas"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
 
             {/* Media Upload */}
             <div>

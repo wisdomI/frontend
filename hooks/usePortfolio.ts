@@ -1,70 +1,89 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { portfolioAPI } from '@/lib/api'
-import { Portfolio } from '@/types/api'
+import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest } from '@/types/api'
 
-interface UsePortfolioOptions {
-  userId?: string
-  isOwnPortfolio?: boolean
-  autoFetch?: boolean
-}
-
-export function usePortfolio(options: UsePortfolioOptions = {}) {
-  const { userId, isOwnPortfolio = false, autoFetch = true } = options
+export const usePortfolio = () => {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchPortfolios = async () => {
+  const fetchMyPortfolios = async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      let response
-      if (isOwnPortfolio) {
-        response = await portfolioAPI.getMyPortfolios()
-      } else if (userId) {
-        response = await portfolioAPI.getUserPortfolios(userId)
-      } else {
-        response = await portfolioAPI.getAll()
-      }
-      
-      setPortfolios(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch portfolios')
-      console.error('Error fetching portfolios:', err)
+      const response = await portfolioAPI.getMyPortfolios()
+      setPortfolios(response.data.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch portfolios')
     } finally {
       setLoading(false)
     }
   }
 
-  const createPortfolio = async (formData: FormData) => {
+  const fetchUserPortfolios = async (userId: string) => {
     try {
       setLoading(true)
       setError(null)
+      const response = await portfolioAPI.getUserPortfolios(userId)
+      setPortfolios(response.data.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch user portfolios')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createPortfolio = async (data: CreatePortfolioRequest) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const formData = new FormData()
+      
+      formData.append('projectTitle', data.projectTitle)
+      formData.append('description', data.description)
+      
+      data.mediaUrl.forEach((file, index) => {
+        formData.append('mediaUrl', file)
+      })
+
       const response = await portfolioAPI.create(formData)
-      await fetchPortfolios() // Refresh the list
-      return response.data.data
-    } catch (err) {
-      setError('Failed to create portfolio')
-      console.error('Error creating portfolio:', err)
+      setPortfolios(prev => [...prev, response.data.data])
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create portfolio')
       throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const updatePortfolio = async (id: string, formData: FormData) => {
+  const updatePortfolio = async (id: string, data: UpdatePortfolioRequest) => {
     try {
       setLoading(true)
       setError(null)
+      const formData = new FormData()
+      
+      if (data.projectTitle) {
+        formData.append('projectTitle', data.projectTitle)
+      }
+      if (data.description) {
+        formData.append('description', data.description)
+      }
+      if (data.mediaUrl) {
+        data.mediaUrl.forEach((file) => {
+          formData.append('mediaUrl', file)
+        })
+      }
+
       const response = await portfolioAPI.update(id, formData)
-      await fetchPortfolios() // Refresh the list
-      return response.data.data
-    } catch (err) {
-      setError('Failed to update portfolio')
-      console.error('Error updating portfolio:', err)
+      setPortfolios(prev => 
+        prev.map(portfolio => 
+          portfolio.id === id ? response.data.data : portfolio
+        )
+      )
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update portfolio')
       throw err
     } finally {
       setLoading(false)
@@ -76,25 +95,23 @@ export function usePortfolio(options: UsePortfolioOptions = {}) {
       setLoading(true)
       setError(null)
       await portfolioAPI.delete(id)
-      setPortfolios(portfolios.filter(p => p.id !== id))
-    } catch (err) {
-      setError('Failed to delete portfolio')
-      console.error('Error deleting portfolio:', err)
+      setPortfolios(prev => prev.filter(portfolio => portfolio.id !== id))
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete portfolio')
       throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const removeMedia = async (id: string) => {
+  const getPortfolioById = async (id: string) => {
     try {
       setLoading(true)
       setError(null)
-      await portfolioAPI.removeMedia(id)
-      await fetchPortfolios() // Refresh the list
-    } catch (err) {
-      setError('Failed to remove media')
-      console.error('Error removing media:', err)
+      const response = await portfolioAPI.getById(id)
+      return response.data.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch portfolio')
       throw err
     } finally {
       setLoading(false)
@@ -102,20 +119,18 @@ export function usePortfolio(options: UsePortfolioOptions = {}) {
   }
 
   useEffect(() => {
-    if (autoFetch) {
-      fetchPortfolios()
-    }
-  }, [userId, isOwnPortfolio, autoFetch])
+    fetchMyPortfolios()
+  }, [])
 
   return {
     portfolios,
     loading,
     error,
-    fetchPortfolios,
+    fetchMyPortfolios,
+    fetchUserPortfolios,
     createPortfolio,
     updatePortfolio,
     deletePortfolio,
-    removeMedia,
-    setError
+    getPortfolioById,
   }
 }

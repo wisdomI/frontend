@@ -198,8 +198,8 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                   </h3>
                   <div className="flex items-center text-sm text-gray-600">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      meeting.status === 'scheduled' ? 'bg-green-100 text-green-800' :
-                      meeting.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                      meeting.status === 'active' ? 'bg-green-100 text-green-800' :
+                      meeting.status === 'inactive' ? 'bg-gray-100 text-gray-800' :
                       meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                       'bg-yellow-100 text-yellow-800'
                     }`}>
@@ -244,10 +244,12 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <div className="w-4 h-4 mr-2">
-                    {getMeetingTypeIcon(meeting.meetingType)}
+                    {getMeetingTypeIcon(meeting.meetingLink ? 'video' : meeting.location ? 'in-person' : 'phone')}
                   </div>
-                  <span className="capitalize">{meeting.meetingType}</span>
-                  {meeting.meetingType === 'video' && meeting.meetingLink && (
+                  <span className="capitalize">
+                    {meeting.meetingLink ? 'Video' : meeting.location ? 'In-person' : 'Phone'}
+                  </span>
+                  {meeting.meetingLink && (
                     <a 
                       href={meeting.meetingLink} 
                       target="_blank" 
@@ -257,7 +259,7 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                       <FiLink className="w-3 h-3" />
                     </a>
                   )}
-                  {meeting.meetingType === 'in-person' && meeting.location && (
+                  {!meeting.meetingLink && meeting.location && (
                     <span className="ml-2">{meeting.location}</span>
                   )}
                 </div>
@@ -289,7 +291,10 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                         key={index}
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                       >
-                        {attendee}
+                        {(() => {
+                          const name = `${attendee.firstName} ${attendee.lastName}`.trim()
+                          return name || attendee.email
+                        })()}
                       </span>
                     ))}
                     {meeting.attendees.length > 3 && (
@@ -313,14 +318,17 @@ export default function MeetingManager({ viewType = 'all' }: MeetingManagerProps
                 </div>
                 
                 {/* Meeting Response (for attendees) */}
-                {meeting.attendees?.includes(user?.email || '') && meeting.status === 'scheduled' && (
+                {meeting.attendees?.some(attendee => attendee.email === user?.email) && meeting.status === 'active' && (
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-600">Response:</span>
                     <select
                       onChange={(e) => {
                         const value = e.target.value as 'accepted' | 'declined' | 'tentative'
-                        if (value) {
-                          handleRespondToMeeting(meeting.id, user?.id || '', value)
+                        if (value && user) {
+                          const attendee = meeting.attendees?.find(a => a.email === user.email)
+                          if (attendee) {
+                            handleRespondToMeeting(meeting.id, attendee.email, value)
+                          }
                         }
                       }}
                       className="text-xs border border-gray-300 rounded px-2 py-1"
@@ -373,13 +381,13 @@ function CreateEditMeetingModal({ meeting, onClose, onSuccess, onCheckConflicts 
     meetingDate: meeting?.meetingDate || '',
     startTime: meeting?.startTime || '',
     endTime: meeting?.endTime || '',
-    attendees: meeting?.attendees?.join(', ') || '',
-    meetingType: meeting?.meetingType || 'video',
+    attendees: meeting?.attendees?.map(a => a.email).join(', ') || '',
+    meetingType: 'video',
     location: meeting?.location || '',
     meetingLink: meeting?.meetingLink || '',
     isRecurring: meeting?.isRecurring?.toString() || 'false',
-    recurrencePattern: meeting?.recurrencePattern || 'weekly',
-    recurrenceEndDate: meeting?.recurrenceEndDate || ''
+    recurrencePattern: 'weekly',
+    recurrenceEndDate: ''
   })
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -407,29 +415,32 @@ function CreateEditMeetingModal({ meeting, onClose, onSuccess, onCheckConflicts 
         return
       }
 
-      const formDataToSend = new FormData()
-      formDataToSend.append('title', formData.title)
-      formDataToSend.append('description', formData.description)
-      formDataToSend.append('meetingDate', formData.meetingDate)
-      formDataToSend.append('startTime', formData.startTime)
-      formDataToSend.append('endTime', formData.endTime)
-      formDataToSend.append('attendees', formData.attendees)
-      formDataToSend.append('meetingType', formData.meetingType)
-      formDataToSend.append('location', formData.location)
-      formDataToSend.append('meetingLink', formData.meetingLink)
-      formDataToSend.append('isRecurring', formData.isRecurring)
-      formDataToSend.append('recurrencePattern', formData.recurrencePattern)
-      formDataToSend.append('recurrenceEndDate', formData.recurrenceEndDate)
-
-      // Add attachment file
-      if (attachmentFile) {
-        formDataToSend.append('attachment', attachmentFile)
+      const meetingData = {
+        title: formData.title,
+        description: formData.description,
+        frequency: formData.recurrencePattern,
+        meetingDate: formData.meetingDate,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        startDate: formData.meetingDate,
+        endDate: formData.recurrenceEndDate || formData.meetingDate,
+        isRecurring: formData.isRecurring === 'true',
+        meetingLink: formData.meetingType === 'video' ? formData.meetingLink : undefined,
+        location: formData.meetingType === 'in-person' ? formData.location : undefined,
+        attendees: formData.attendees.split(',').map(email => {
+          const trimmedEmail = email.trim()
+          return {
+            email: trimmedEmail,
+            firstName: trimmedEmail.split('@')[0],
+            lastName: ''
+          }
+        }).filter(attendee => attendee.email)
       }
 
       if (meeting) {
-        await meetingAPI.update(meeting.id, formDataToSend)
+        await meetingAPI.update(meeting.id, meetingData)
       } else {
-        await meetingAPI.create(formDataToSend)
+        await meetingAPI.create(meetingData)
       }
 
       onSuccess()

@@ -6,10 +6,21 @@ import {
   PasswordResetRequest,
   ValidateCodeRequest,
   ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+  RefreshTokenRequest,
+  RevokeRefreshTokenRequest,
+  LogoutRequest,
   CreateProfileRequest,
+  UpdateProfileRequest,
+  UpdateProfilePictureRequest,
   CreatePortfolioRequest,
+  UpdatePortfolioRequest,
+  CreateServiceOfferingRequest,
+  UpdateServiceOfferingRequest,
   CreateServiceRequest,
   CreateMeetingRequest,
+  UpdateMeetingRequest,
   MeetingResponse,
   CheckConflictsRequest,
   CreateServiceRequestData,
@@ -49,7 +60,7 @@ import {
   CategoryStats
 } from '@/types/api'
 
-const API_BASE_URL = 'https://backend-a3nd.onrender.com/api/v1'
+const API_BASE_URL = 'http://localhost:3000/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -84,7 +95,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null
 
   try {
-    const res = await api.post('/auth/refresh-token', undefined, {
+    const res = await api.post('/auth/refresh-token', { refreshToken }, {
       headers: { Authorization: `Bearer ${refreshToken}` },
     })
     const newAccessToken: string | undefined = res?.data?.accessToken || res?.data?.data?.accessToken
@@ -148,20 +159,21 @@ export const authAPI = {
   register: (userData: RegisterRequest) => api.post<ApiResponse<AuthResponse>>('/auth/register', userData),
   
   // Email Verification
-  verifyEmail: (email: string, verificationCode: string) => api.post<ApiResponse>('/auth/verify-email', { email, verificationCode }),
-  resendVerificationCode: (email: string) => api.post<ApiResponse>('/auth/resend-verification', { email }),
+  verifyEmail: (data: VerifyEmailRequest) => api.post<ApiResponse>('/auth/verify-email', data),
+  resendVerificationCode: (data: ResendVerificationRequest) => api.post<ApiResponse>('/auth/resend-verification-code', data),
   
   // Login
   login: (loginData: LoginRequest) => api.post<ApiResponse<AuthResponse>>('/auth/login', loginData),
   
+  // Password Reset
+  resetPassword: (data: PasswordResetRequest) => api.post<ApiResponse>('/password/reset', data),
+  validateResetCode: (data: ValidateCodeRequest) => api.post<ApiResponse>('/password/validate-code', data),
+  setNewPassword: (data: ResetPasswordRequest) => api.post<ApiResponse>('/password/reset-password', data),
+  
   // Token Management
-  refresh: () => {
-    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null
-    return api.post<ApiResponse<{ accessToken: string }>>('/auth/refresh-token', undefined, {
-      headers: refreshToken ? { Authorization: `Bearer ${refreshToken}` } : {}
-    })
-  },
-  logout: () => api.post<ApiResponse>('/auth/logout'),
+  refresh: (data: RefreshTokenRequest) => api.post<ApiResponse<{ accessToken: string }>>('/auth/refresh-token', data),
+  revokeRefreshToken: (data: RevokeRefreshTokenRequest) => api.post<ApiResponse>('/auth/revoke-refresh-token', data),
+  logout: (data: LogoutRequest) => api.post<ApiResponse>('/auth/logout', data),
   
   // User Information
   me: () => api.get<ApiResponse<User>>('/auth/me'),
@@ -169,11 +181,6 @@ export const authAPI = {
   getAll: (params?: SearchParams) => api.get<ApiResponse<User[]>>('/auth/', { params }),
   update: (id: string, data: Partial<User>) => api.patch<ApiResponse<User>>(`/auth/${id}`, data),
   delete: (id: string) => api.delete<ApiResponse>(`/auth/${id}`),
-  
-  // Password Reset
-  resetPassword: (data: PasswordResetRequest) => api.post<ApiResponse>('/password/reset', data),
-  validateCode: (data: ValidateCodeRequest) => api.post<ApiResponse>('/password/validate-code', data),
-  resetPasswordConfirm: (data: ResetPasswordRequest) => api.post<ApiResponse>('/password/reset-password', data),
 }
 
 // Profile Management API
@@ -190,19 +197,19 @@ export const profileAPI = {
 
 // Portfolio Management API (Vendors Only)
 export const portfolioAPI = {
-  create: (data: FormData) => api.post<ApiResponse<Portfolio>>('/portfolio/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  getAll: (params?: SearchParams) => api.get<ApiResponse<Portfolio[]>>('/portfolio/all', { params }),
-  getById: (id: string) => api.get<ApiResponse<Portfolio>>(`/portfolio/${id}`),
-  getUserPortfolios: (userId: string) => api.get<ApiResponse<Portfolio[]>>(`/portfolio/user/${userId}`),
-  getMyPortfolios: () => api.get<ApiResponse<Portfolio[]>>('/portfolio/user-portfolios'),
-  update: (id: string, data: FormData) => api.patch<ApiResponse<Portfolio>>(`/portfolio/single-portfolio/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (data: FormData) => api.post<ApiResponse<Portfolio>>('/profile/portfolio/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getAll: (params?: SearchParams) => api.get<ApiResponse<Portfolio[]>>('/profile/portfolio/all', { params }),
+  getById: (id: string) => api.get<ApiResponse<Portfolio>>(`/profile/portfolio/${id}`),
+  getUserPortfolios: (userId: string) => api.get<ApiResponse<Portfolio[]>>(`/profile/user-portfolio/${userId}`),
+  getMyPortfolios: () => api.get<ApiResponse<Portfolio[]>>('/profile/user-portfolio/me'),
+  update: (id: string, data: FormData) => api.put<ApiResponse<Portfolio>>(`/profile/single-portfolio/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   removeMedia: (id: string) => api.delete<ApiResponse>(`/portfolio/${id}/media`),
   delete: (id: string) => api.delete<ApiResponse>(`/portfolio/${id}`),
 }
 
 // Service Offerings API (Vendors Only)
 export const serviceAPI = {
-  create: (data: FormData) => api.post<ApiResponse<ServiceOffering>>('/service/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (data: FormData) => api.post<ApiResponse<ServiceOffering>>('/profile/serviceOffering', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   myServices: () => api.get<ApiResponse<ServiceOffering[]>>('/service/me'),
   getAll: (params?: SearchParams) => api.get<ApiResponse<ServiceOffering[]>>('/service/', { params }),
   getById: (id: string) => api.get<ApiResponse<ServiceOffering>>(`/service/${id}`),
@@ -214,16 +221,16 @@ export const serviceAPI = {
 
 // Meeting Management API
 export const meetingAPI = {
-  create: (data: FormData) => api.post<ApiResponse<Meeting>>('/meetings/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (data: CreateMeetingRequest) => api.post<ApiResponse<Meeting>>('/meeting/', data),
   getAll: (params?: SearchParams) => api.get<ApiResponse<Meeting[]>>('/meetings/', { params }),
   getMy: () => api.get<ApiResponse<Meeting[]>>('/meetings/my'),
   getAttendances: () => api.get<ApiResponse<Meeting[]>>('/meetings/attendances'),
   getByEmail: (email: string) => api.get<ApiResponse<Meeting[]>>(`/meetings/email/${email}`),
   getById: (id: string) => api.get<ApiResponse<Meeting>>(`/meetings/${id}`),
-  update: (id: string, data: FormData) => api.patch<ApiResponse<Meeting>>(`/meetings/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  delete: (id: string) => api.delete<ApiResponse>(`/meetings/${id}`),
-  getInstances: (id: string) => api.get<ApiResponse<Meeting[]>>(`/meetings/${id}/instances`),
+  update: (id: string, data: UpdateMeetingRequest) => api.patch<ApiResponse<Meeting>>(`/meetings/${id}`, data),
   toggleStatus: (id: string) => api.patch<ApiResponse<Meeting>>(`/meetings/${id}/toggle-status`),
+  getInstances: (id: string) => api.get<ApiResponse<Meeting[]>>(`/meetings/${id}/instances`),
+  delete: (id: string) => api.delete<ApiResponse>(`/meetings/${id}`),
   respond: (meetingId: string, attendeeId: string, response: MeetingResponse) => api.post<ApiResponse>(`/meetings/${meetingId}/attendees/${attendeeId}/respond`, response),
   getStats: () => api.get<ApiResponse<MeetingStats>>('/meetings/stats'),
   getUpcoming: () => api.get<ApiResponse<Meeting[]>>('/meetings/upcoming'),
@@ -366,8 +373,6 @@ export const customerAPI = {
 
 // Additional missing endpoints from documentation
 
-// Resend Verification Code (missing from authAPI)
-authAPI.resendVerificationCode = (email: string) => api.post<ApiResponse>('/auth/resend-verification', { email })
 
 // Profile API - missing endpoints
 profileAPI.getAll = (params?: SearchParams) => api.get<ApiResponse<Profile[]>>('/profile/all', { params })
