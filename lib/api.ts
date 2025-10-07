@@ -60,7 +60,7 @@ import {
   CategoryStats
 } from '@/types/api'
 
-const API_BASE_URL = 'http://localhost:3000/api/v1'
+const API_BASE_URL = 'https://backend-a3nd.onrender.com/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
