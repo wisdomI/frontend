@@ -677,46 +677,4 @@ profileAPI.updateDisplayPicture = (userId: string, data: FormData) => api.patch<
 profileAPI.removeDisplayPicture = (userId: string) => api.delete<ApiResponse>(`/profile/${userId}/display-picture`)
 profileAPI.delete = (userId: string) => api.delete<ApiResponse>(`/profile/${userId}`)
 
-// Utility function to check token status (for debugging)
-export const checkTokenStatus = () => {
-  if (typeof window === 'undefined') return null
-  
-  const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
-  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
-  
-  if (!accessToken) {
-    console.log('🔍 Token Status: No access token found')
-    return { hasToken: false }
-  }
-  
-  try {
-    const payload = JSON.parse(atob(accessToken.split('.')[1]))
-    const now = Math.floor(Date.now() / 1000)
-    const expiresIn = payload.exp - now
-    const isExpired = payload.exp < now
-    
-    const status = {
-      hasToken: true,
-      hasRefreshToken: !!refreshToken,
-      isExpired,
-      expiresIn,
-      expiresInMinutes: Math.floor(expiresIn / 60),
-      userId: payload.id,
-      issuedAt: new Date(payload.iat * 1000).toLocaleString(),
-      expiresAt: new Date(payload.exp * 1000).toLocaleString()
-    }
-    
-    console.log('🔍 Token Status:', status)
-    return status
-  } catch (e) {
-    console.error('❌ Token Status: Could not decode token')
-    return { hasToken: true, error: 'Invalid token format' }
-  }
-}
-
-// Make checkTokenStatus available globally for debugging
-if (typeof window !== 'undefined') {
-  (window as any).checkTokenStatus = checkTokenStatus
-}
-
 export default api
