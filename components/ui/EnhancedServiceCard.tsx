@@ -78,6 +78,20 @@ const EnhancedServiceCard: React.FC<EnhancedServiceCardProps> = ({
         </div>
       </div>
 
+      {/* Service Title with Diamond Icon */}
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="text-lg font-bold text-gray-900 leading-tight font-asul flex-1">{title}</h3>
+        <div className="ml-2 flex-shrink-0">
+          <Image 
+            src="/Diamond.svg" 
+            alt="Diamond" 
+            width={16} 
+            height={16}
+            className="w-4 h-4"
+          />
+        </div>
+      </div>
+
       {/* Vendor and Action Icons */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs md:text-sm text-event-blue font-semibold truncate flex-1 mr-2">{vendor}</p>

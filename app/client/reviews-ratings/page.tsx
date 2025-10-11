@@ -34,15 +34,43 @@ export default function ClientReviewsRatingsPage() {
     const fetchReviews = async () => {
       try {
         setLoading(true)
-        // This would be replaced with actual API call
-        // const response = await ratingAPI.getAll()
-        // setReviews(response.data.data || [])
+        const { ratingAPI } = await import('@/lib/api')
         
-        // For now, using empty array since API might not be implemented yet
-        setReviews([])
-      } catch (err) {
-        setError('Failed to fetch reviews')
+        // Fetch reviews from API
+        const response = await ratingAPI.getAll()
+        const reviewsData = response.data.data || []
+        
+        // Transform API data to component format
+        const transformedReviews = reviewsData.map((review: any) => ({
+          id: review.id,
+          vendor: review.vendor?.businessName || review.vendorName || 'Unknown Vendor',
+          vendorName: review.vendor?.businessName || review.vendorName || 'Unknown Vendor',
+          vendorImage: review.vendor?.displayPicture || '/images/vendor-img1.jpg',
+          vendorAvatar: review.vendor?.displayPicture || '/images/vendor-img1.jpg',
+          service: review.service?.serviceName || review.serviceName || 'Service',
+          rating: review.rating || 0,
+          reviewDate: new Date(review.createdAt).toLocaleDateString(),
+          date: new Date(review.createdAt).toLocaleDateString(),
+          review: review.comment || review.review || '',
+          response: review.response || null,
+          responseDate: review.responseDate || null,
+          clientReview: review.clientReview || null,
+          clientReviewDate: review.clientReviewDate || null
+        }))
+        
+        setReviews(transformedReviews)
+        console.log('✅ Client Reviews: Loaded from API:', transformedReviews)
+      } catch (err: any) {
         console.error('Error fetching reviews:', err)
+        
+        // Fallback to empty array if API fails
+        setReviews([])
+        
+        if (err.response?.status === 403 || err.response?.status === 404) {
+          setError('Reviews data not available yet')
+        } else {
+          setError('Failed to fetch reviews')
+        }
       } finally {
         setLoading(false)
       }

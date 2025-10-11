@@ -7,6 +7,7 @@ import { MessageOutlined } from '@ant-design/icons'
 import { FaArrowDown, FaChevronDown } from 'react-icons/fa6'
 import { ArrowDownIcon } from '@heroicons/react/20/solid'
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { FiUser, FiLogOut, FiSettings } from 'react-icons/fi'
 import LogoutConfirmationModal from '@/components/ui/modals/LogoutConfirmationModal'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -17,6 +18,7 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
   const [showLogoutDropdown, setShowLogoutDropdown] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [profilePicture, setProfilePicture] = useState<string | null>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const messageRef = useRef<HTMLDivElement>(null)
   const logoutRef = useRef<HTMLDivElement>(null)
@@ -42,10 +44,55 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
     }
   }, [])
 
+  // Fetch profile picture from API
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user?.id) return
+      
+      try {
+        const { profileAPI } = await import('@/lib/api')
+        const response = await profileAPI.me()
+        const profileData = response.data.data
+        
+        if (profileData?.displayPicture) {
+          setProfilePicture(profileData.displayPicture)
+          console.log('✅ Header: Loaded display picture from API:', profileData.displayPicture)
+        } else {
+          console.log('ℹ️ Header: No display picture in profile')
+          setProfilePicture(null)
+        }
+      } catch (error) {
+        console.log('⚠️ Header: Could not load profile picture from API')
+      }
+    }
+    
+    fetchProfilePicture()
+    
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      console.log('🔄 Header: Profile updated event received, refreshing picture...')
+      fetchProfilePicture()
+    }
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    
+    // Refresh profile picture every 30 seconds to catch updates
+    const interval = setInterval(fetchProfilePicture, 30000)
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
+      clearInterval(interval)
+    }
+  }, [user?.id])
+
   const handleSwitchToClient = () => {
-    // In a real app, this would switch the user to client mode
-    console.log('Switching to client profile')
+    console.log('Switching to client profile...')
     setShowLogoutDropdown(false)
+    
+    // Navigate to client dashboard
+    if (typeof window !== 'undefined') {
+      window.location.href = '/client/dashboard'
+    }
   }
 
   const handleLogoutClick = () => {
@@ -68,53 +115,9 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
     setIsLoggingOut(false)
   }
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'New booking request',
-      message: 'Sarah Johnson wants to book your catering service',
-      time: '2 minutes ago',
-      unread: true
-    },
-    {
-      id: 2,
-      title: 'Payment received',
-      message: 'Payment of ₦150,000 received for Wedding Catering',
-      time: '1 hour ago',
-      unread: true
-    },
-    {
-      id: 3,
-      title: 'Review received',
-      message: 'You received a 5-star review from Michael Brown',
-      time: '3 hours ago',
-      unread: false
-    }
-  ]
-
-  const messages = [
-    {
-      id: 1,
-      sender: 'Sarah Johnson',
-      message: 'Hi, I would like to discuss the menu options...',
-      time: '5 minutes ago',
-      unread: true
-    },
-    {
-      id: 2,
-      sender: 'Michael Brown',
-      message: 'Thank you for the excellent service!',
-      time: '2 hours ago',
-      unread: true
-    },
-    {
-      id: 3,
-      sender: 'Emma Wilson',
-      message: 'Can we schedule a meeting for next week?',
-      time: '1 day ago',
-      unread: false
-    }
-  ]
+  // Notifications and messages will be populated from API
+  const notifications: any[] = []
+  const messages: any[] = []
 
   return (
     <header className="w-full bg-white shadow px-2 sm:px-3 lg:px-6 py-2 sm:py-3 flex items-center justify-between sticky top-0 z-20">
@@ -150,9 +153,11 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
                    className="relative cursor-pointer p-1 sm:p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                  >
                    <Bell className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-gray-600" />
-                   <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full px-0.5 sm:px-1 min-w-[12px] sm:min-w-[16px] text-center">
-                     {notifications.filter(n => n.unread).length}
-                   </span>
+                   {notifications.filter(n => n.unread).length > 0 && (
+                     <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full px-0.5 sm:px-1 min-w-[12px] sm:min-w-[16px] text-center">
+                       {notifications.filter(n => n.unread).length}
+                     </span>
+                   )}
                  </button>
 
           {/* Notification Dropdown */}
@@ -198,9 +203,11 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
                    className="relative cursor-pointer p-1 sm:p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                  >
                    <MessageOutlined className="text-gray-600" width={12} height={12} style={{ width: '12px', height: '12px' }} />
-                   <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full px-0.5 sm:px-1 min-w-[12px] sm:min-w-[16px] text-center">
-                     {messages.filter(m => m.unread).length}
-                   </span>
+                   {messages.filter(m => m.unread).length > 0 && (
+                     <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full px-0.5 sm:px-1 min-w-[12px] sm:min-w-[16px] text-center">
+                       {messages.filter(m => m.unread).length}
+                     </span>
+                   )}
                  </button>
 
           {/* Message Dropdown */}
@@ -242,14 +249,30 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
         {/* User Profile - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-3 px-2 sm:px-3 py-1 sm:py-2">
           {/* Display Picture */}
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            {(user?.businessName || user?.firstName || user?.displayName) ? (
-              <span className="text-gray-600 font-medium text-sm">
-                {(user?.businessName || user?.firstName || user?.displayName || 'V').charAt(0).toUpperCase()}
-              </span>
-            ) : (
-              <FiUser className="w-4 h-4 text-gray-600" />
-            )}
+          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+            {(() => {
+              const displayName = user?.displayName || user?.businessName || user?.firstName || 'Vendor';
+              
+              // Use profile picture from API
+              if (profilePicture) {
+                return (
+                  <Image 
+                    src={profilePicture} 
+                    alt="Profile" 
+                    fill
+                    className="object-cover"
+                  />
+                );
+              }
+              
+              return displayName ? (
+                <span className="text-gray-600 font-medium text-sm">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <FiUser className="w-4 h-4 text-gray-600" />
+              );
+            })()}
           </div>
           {/* Business Name */}
           <p className="text-xs sm:text-sm font-medium text-gray-700">

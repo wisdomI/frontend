@@ -67,15 +67,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const payload = JSON.parse(atob(token.split('.')[1]))
             console.log('AuthContext: Token payload:', payload)
             
+            // Check if token is expired
+            const now = Math.floor(Date.now() / 1000)
+            if (payload.exp && payload.exp < now) {
+              console.log('AuthContext: Token is expired, clearing tokens')
+              localStorage.removeItem('accessToken')
+              localStorage.removeItem('refreshToken')
+              setLoading(false)
+              return
+            }
+            
+            // Note: There's no vendor-specific profile endpoint, so we'll create a minimal user from JWT
+            console.log('AuthContext: No vendor profile endpoint available, creating minimal user from JWT...')
+            console.log('AuthContext: Backend vendor profile endpoints not implemented yet')
+            
+            // Create minimal user from JWT payload
             const vendorUser = {
               id: payload.id,
               accountType: payload.accountType || 'vendor' as const,
               email: payload.email || '',
+              firstName: payload.firstName || '',
+              lastName: payload.lastName || '',
+              businessName: payload.businessName || '',
               isEmailVerified: true,
               createdAt: new Date(payload.iat * 1000).toISOString(),
               updatedAt: new Date(payload.iat * 1000).toISOString(),
             }
-            console.log('AuthContext: Created vendor user:', vendorUser)
+            console.log('AuthContext: Created minimal vendor user from JWT:', vendorUser)
+            
+            // Ensure token is stored in localStorage for API calls
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('accessToken', token)
+            }
+            
             setUser(vendorUser)
           } catch (tokenError) {
             console.error('AuthContext: Failed to decode token:', tokenError)
@@ -110,6 +134,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const data = await resp.json()
         const userData = data.data || data
         console.log('AuthContext: Retrieved user data:', userData)
+        
+        // Ensure token is stored in localStorage for API calls
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', token)
+        }
+        
         setUser(userData)
         setLoading(false)
       } catch (error) {

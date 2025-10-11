@@ -52,6 +52,10 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
           const response = await profileAPI.me()
           if (response.data.data?.displayPicture) {
             setProfilePicture(response.data.data.displayPicture)
+            console.log('✅ ClientHeader: Loaded display picture from API:', response.data.data.displayPicture)
+          } else {
+            console.log('ℹ️ ClientHeader: No display picture in profile')
+            setProfilePicture(null)
           }
         } catch (error: any) {
           console.error('Error fetching profile picture:', error)
@@ -66,8 +70,35 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
         }
       }
     }
+    
     fetchProfilePicture()
+    
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      console.log('🔄 ClientHeader: Profile updated event received, refreshing picture...')
+      fetchProfilePicture()
+    }
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    
+    // Refresh profile picture every 30 seconds to catch updates
+    const interval = setInterval(fetchProfilePicture, 30000)
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
+      clearInterval(interval)
+    }
   }, [user, isAuthenticated])
+
+  const handleSwitchToVendor = () => {
+    console.log('Switching to vendor profile...')
+    setShowLogoutDropdown(false)
+    
+    // Navigate to vendor dashboard
+    if (typeof window !== 'undefined') {
+      window.location.href = '/vendor'
+    }
+  }
 
   const handleLogoutClick = () => {
     setShowLogoutDropdown(false)
@@ -135,9 +166,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
             className="p-2 text-gray-600 hover:text-gray-900 relative"
           >
             <FiBell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              2
-            </span>
+            {/* Notification count removed - will be fetched from API */}
           </button>
           
           {showNotifications && (
@@ -145,14 +174,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 font-asul">Notifications</h3>
                 <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-900">New offer received for your event</p>
-                    <p className="text-xs text-gray-500 mt-1">2 minutes ago</p>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm text-gray-900">Booking confirmed</p>
-                    <p className="text-xs text-gray-500 mt-1">1 hour ago</p>
-                  </div>
+                  <p className="text-sm text-gray-500 text-center py-4">No new notifications</p>
                 </div>
               </div>
             </div>
@@ -166,9 +188,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
             className="p-2 text-gray-600 hover:text-gray-900 relative"
           >
             <FiMessageCircle className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              1
-            </span>
+            {/* Message count removed - will be fetched from API */}
           </button>
           
           {showMessages && (
@@ -176,10 +196,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 font-asul">Messages</h3>
                 <div className="space-y-3">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-900">New message from Elite Catering</p>
-                    <p className="text-xs text-gray-500 mt-1">5 minutes ago</p>
-                  </div>
+                  <p className="text-sm text-gray-500 text-center py-4">No new messages</p>
                 </div>
               </div>
             </div>
@@ -225,8 +242,15 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
               <div className="py-2">
                 <button
-                  onClick={handleLogoutClick}
+                  onClick={handleSwitchToVendor}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                >
+                  <FiUser className="w-4 h-4" />
+                  <span>Switch to Vendor</span>
+                </button>
+                <button
+                  onClick={handleLogoutClick}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                 >
                   <FiLogOut className="w-4 h-4" />
                   <span>Sign Out</span>

@@ -389,7 +389,15 @@ const PopularServices: React.FC = () => {
             {/* Service Title with Diamond Icon */}
             <div className="flex items-start justify-between">
               <h3 className="text-lg font-bold text-gray-900 leading-tight font-asul">{service.title}</h3>
-              <div className="w-4 h-4 bg-blue-100 rounded-sm ml-2 flex-shrink-0"></div>
+            <div className="ml-2 flex-shrink-0">
+              <Image 
+                src="/Diamond.svg" 
+                alt="Diamond" 
+                width={16} 
+                height={16}
+                className="w-4 h-4"
+              />
+            </div>
             </div>
 
             {/* Vendor Name with Action Buttons */}
@@ -447,14 +455,7 @@ const PopularServices: React.FC = () => {
             }}
           >
             {/* Flame Icon */}
-            <div className="flex items-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C12 2 8 6 8 10C8 12.5 9.5 14 12 14C14.5 14 16 12.5 16 10C16 6 12 2 12 2Z" fill="#FF6B35"/>
-                <path d="M12 2C12 2 8 6 8 10C8 12.5 9.5 14 12 14C14.5 14 16 12.5 16 10C16 6 12 2 12 2Z" fill="#FFA500"/>
-                <path d="M12 6C12 6 10 8 10 10C10 11 10.5 11.5 12 11.5C13.5 11.5 14 11 14 10C14 8 12 6 12 6Z" fill="#FFD700"/>
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-gray-800 font-asul">Popular Services</h2>
+          <h2 className="text-lg font-bold text-gray-800 font-asul"> 🔥Popular Services</h2>
           </div>
           
           {/* View Toggle Controls - Beside the title */}

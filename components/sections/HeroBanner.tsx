@@ -244,7 +244,7 @@ const HeroBanner = () => {
           <Slider ref={sliderRef} {...sliderSettings}>
             {slides.map((slide, index) => (
               <div key={index} className="relative">
-                <div className="relative h-64 md:h-80">
+                <div className="relative h-72 md:h-80">
                   <Image 
                     src={slide.image}
                     alt={slide.title} 
@@ -278,13 +278,13 @@ const HeroBanner = () => {
         <div className="mx-4 sm:mx-6 lg:mx-8 mt-6">
           <div className="flex gap-2 sm:gap-3 justify-center">
             {/* Post a Service Request Button */}
-            <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
+            <div className="flex-1 max-w-[80px] sm:max-w-[90px]">
               {isAuthenticated ? (
                 <PostServiceModal 
                   trigger={
-                    <Button className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full">
-                      <PlusOutlined className="text-lg sm:text-xl mb-1 text-white" />
-                      <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
+                    <Button className="bg-blue-900 text-white p-2 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-20 transition-all duration-200 shadow-md hover:shadow-lg w-full">
+                      <PlusOutlined className="text-lg mb-1 text-white" />
+                      <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
                         Post Request
                       </span>
                     </Button>
@@ -293,10 +293,10 @@ const HeroBanner = () => {
               ) : (
                 <Button 
                   onClick={handlePostServiceRequest}
-                  className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full"
+                  className="bg-blue-900 text-white p-2 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-20 transition-all duration-200 shadow-md hover:shadow-lg w-full"
                 >
-                  <PlusOutlined className="text-lg sm:text-xl mb-1 text-white" />
-                  <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
+                  <PlusOutlined className="text-lg mb-1 text-white" />
+                  <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
                     {loading ? 'Loading...' : 'Login'}
                   </span>
                 </Button>
@@ -304,41 +304,41 @@ const HeroBanner = () => {
             </div>
 
             {/* Manage all Posts Button */}
-            <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
-              <Button className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full">
-                <div className="relative">
-                  <FileSearchOutlined className="text-lg sm:text-xl mb-1 text-white" />
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] sm:text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+            <div className="flex-1 max-w-[80px] sm:max-w-[90px]">
+              <Button className="bg-blue-900 text-white p-2 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-20 transition-all duration-200 shadow-md hover:shadow-lg w-full">
+                <div className="relative mb-1">
+                  <FileSearchOutlined className="text-lg text-white" />
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                     3
                   </div>
                 </div>
-                <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
+                <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
                   Manage Posts
                 </span>
               </Button>
             </div>
 
             {/* Manage all Bookings Button */}
-            <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
-              <Button className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full">
+            <div className="flex-1 max-w-[80px] sm:max-w-[90px]">
+              <Button className="bg-blue-900 text-white p-2 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-20 transition-all duration-200 shadow-md hover:shadow-lg w-full">
                 <Image 
                   src="/images/tabler_brand-booking-inactive.svg" 
                   alt="Manage Bookings" 
-                  width={20}
-                  height={20}
+                  width={18}
+                  height={18}
                   className="mb-1"
                 />
-                <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
-                  Manage Bookings
+                <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
+                  Bookings
                 </span>
               </Button>
             </div>
 
             {/* View all Favourites Button */}
-            <div className="flex-1 max-w-[70px] sm:max-w-[80px] md:max-w-[90px]">
-              <Button className="bg-blue-900 text-white p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-16 sm:h-20 md:h-24 transition-all duration-200 shadow-md hover:shadow-lg w-full">
-                <EyeFilled className="text-lg sm:text-xl mb-1 text-white" />
-                <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-center leading-tight px-1">
+            <div className="flex-1 max-w-[80px] sm:max-w-[90px]">
+              <Button className="bg-blue-900 text-white p-2 rounded-lg flex flex-col items-center justify-center hover:bg-blue-800 h-20 transition-all duration-200 shadow-md hover:shadow-lg w-full">
+                <EyeFilled className="text-lg mb-1 text-white" />
+                <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
                   Favourites
                 </span>
               </Button>
@@ -348,7 +348,7 @@ const HeroBanner = () => {
       </section>
 
       {/* Desktop/Tablet: Grid layout with carousel + sidebar */}
-      <section className="mb-12 pt-0 hidden md:block">
+      <section className="mb-6 lg:mb-8 pt-0 hidden md:block">
         {/* Add spacing to align with sidebar blue container */}
         <div className="mb-0">
           <div className="flex items-center justify-between h-16">
@@ -359,11 +359,11 @@ const HeroBanner = () => {
         <div className="grid grid-cols-4 gap-4 lg:gap-6 items-start">
           {/* Main Slider Section */}
           <div className="md:col-span-full lg:col-span-3">
-            <div className="h-64 md:h-80 lg:h-96 xl:h-[400px]">
+            <div className="h-48 md:h-56 lg:h-64 xl:h-72">
               <Slider ref={sliderRef} {...sliderSettings}>
                 {slides.map((slide, index) => (
                   <div key={index} className="relative">
-                    <div className="relative h-64 md:h-80 lg:h-96 xl:h-[400px]">
+                    <div className="relative h-48 md:h-56 lg:h-64 xl:h-72">
                       <Image 
                         src={slide.image}
                         alt={slide.title} 
@@ -395,7 +395,7 @@ const HeroBanner = () => {
           
           {/* Quick Actions Section */}
           <div className="md:col-span-full mt-6 lg:col-span-1 lg:mt-0">
-            <div className="hidden lg:block h-64 md:h-80 lg:h-96 xl:h-[400px]">
+            <div className="hidden lg:block h-48 md:h-56 lg:h-64 xl:h-72">  
               <QuickActions />
             </div>
             <div className="lg:hidden">

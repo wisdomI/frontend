@@ -27,14 +27,15 @@ const QuickActions = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4 font-raleway">Quick Actions</h3>
       <div className="grid grid-cols-2 grid-rows-2 gap-3 flex-1">
         {/* Post a Service Request Button */}
         {isAuthenticated ? (
           <PostServiceModal 
             trigger={
               <Button className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg w-full">
-                <PlusOutlined className="text-2xl mb-2 text-white" />
+                <span className="mb-2 inline-flex items-center justify-center w-10 h-10 rounded-md" style={{ backgroundColor: '#E5EFFB' }}>
+                  <PlusOutlined className="text-xl text-[#032D71]" />
+                </span>
                 <span className="text-xs font-medium text-center leading-tight px-2">
                   Post a Service Request
                 </span>
@@ -46,7 +47,9 @@ const QuickActions = () => {
             onClick={handlePostServiceRequest}
             className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg w-full"
           >
-            <PlusOutlined className="text-2xl mb-2 text-white" />
+            <span className="mb-2 inline-flex items-center justify-center w-10 h-10 rounded-md" style={{ backgroundColor: '#E5EFFB' }}>
+              <PlusOutlined className="text-xl text-[#032D71]" />
+            </span>
             <span className="text-xs font-medium text-center leading-tight px-2">
               {loading ? 'Loading...' : 'Login to Post Request'}
             </span>
@@ -55,8 +58,10 @@ const QuickActions = () => {
 
         {/* Manage all Posts Button */}
         <Button className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg">
-          <div className="relative">
-            <FileSearchOutlined className="text-2xl mb-2 text-white" />
+          <div className="relative mb-2">
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-md" style={{ backgroundColor: '#E5EFFB' }}>
+              <FileSearchOutlined className="text-xl text-[#032D71]" />
+            </span>
             {/* Notification Badge */}
             <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
               3
@@ -69,13 +74,14 @@ const QuickActions = () => {
 
         {/* Manage all Bookings Button */}
         <Button className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg">
-          <Image 
-            src="/images/tabler_brand-booking-inactive.svg" 
-            alt="Manage Bookings" 
-            width={24}
-            height={24}
-            className="mb-2"
-          />
+          <span className="mb-2 inline-flex items-center justify-center w-10 h-10 rounded-md" style={{ backgroundColor: '#E5EFFB' }}>
+            <Image 
+              src="/images/tabler_brand-booking.svg" 
+              alt="Manage Bookings" 
+              width={20}
+              height={20}
+            />
+          </span>
           <span className="text-xs font-medium text-center leading-tight px-2">
             Manage all Bookings
           </span>
@@ -83,7 +89,9 @@ const QuickActions = () => {
 
         {/* View all Favourites Button */}
         <Button className="bg-event-blue text-white p-4 rounded-lg flex flex-col items-center justify-center hover:bg-event-blue-hover h-full min-h-[100px] transition-all duration-200 shadow-md hover:shadow-lg">
-          <EyeFilled className="text-2xl mb-2 text-white" />
+          <span className="mb-2 inline-flex items-center justify-center w-10 h-10 rounded-md" style={{ backgroundColor: '#E5EFFB' }}>
+            <EyeFilled className="text-xl text-[#032D71]" />
+          </span>
           <span className="text-xs font-medium text-center leading-tight px-2">
             View all Favourites
           </span>

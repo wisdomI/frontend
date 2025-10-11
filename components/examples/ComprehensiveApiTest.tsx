@@ -122,11 +122,15 @@ export default function ComprehensiveApiTest() {
     const startTime = Date.now()
     
     try {
-      // Test Get My Portfolios
-      const portfoliosResponse = await portfolioAPI.getMyPortfolios()
-      addResult('GET /portfolio/user-portfolios', 'success', `Found ${portfoliosResponse.data.data?.length || 0} portfolios`, Date.now() - startTime)
+      // Test Get User Portfolios
+      if (user?.id) {
+        const portfoliosResponse = await portfolioAPI.getUserPortfolios(user.id)
+        addResult('GET /portfolio/user', 'success', `Found ${portfoliosResponse.data.data?.length || 0} portfolios`, Date.now() - startTime)
+      } else {
+        addResult('GET /portfolio/user', 'error', 'User ID not available')
+      }
     } catch (error: any) {
-      addResult('GET /portfolio/user-portfolios', 'error', error.response?.data?.message || 'Failed to get portfolios')
+      addResult('GET /portfolio/user', 'error', error.response?.data?.message || 'Failed to get portfolios')
     }
 
     // Test Get All Portfolios

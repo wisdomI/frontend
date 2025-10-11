@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Image from 'next/image'
 import { FiEdit2, FiSave, FiX, FiCamera, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiLogOut } from 'react-icons/fi'
 import { profileAPI } from '@/lib/api'
 
@@ -11,6 +12,8 @@ export default function MyProfilePage() {
   const { user, isAuthenticated, loading, logout } = useAuthContext()
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,6 +30,71 @@ export default function MyProfilePage() {
       router.push('/auth/login?redirect=' + encodeURIComponent('/client/my-profile'))
     }
   }, [loading, isAuthenticated, router])
+
+  // Fetch profile picture from API
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user?.id || !isAuthenticated) {
+        console.log('⏸️ My Profile: Waiting for authentication...', { userId: user?.id, isAuthenticated })
+        return
+      }
+      
+      try {
+        console.log('🔄 My Profile: Fetching profile picture for user:', user.id)
+        
+        let response
+        try {
+          // Try the /profile/me endpoint first
+          response = await profileAPI.me()
+          console.log('📥 My Profile: Profile API response (via /me):', response.data)
+        } catch (meError: any) {
+          if (meError.response?.status === 404) {
+            console.log('⚠️ My Profile: /profile/me not found, trying /profile/:id')
+            // Fallback to using user ID
+            response = await profileAPI.getById(user.id)
+            console.log('📥 My Profile: Profile API response (via /id):', response.data)
+          } else {
+            throw meError
+          }
+        }
+        
+        if (response.data.data?.displayPicture) {
+          setProfileImage(response.data.data.displayPicture)
+          console.log('✅ My Profile: Loaded display picture from API:', response.data.data.displayPicture)
+        } else {
+          console.log('ℹ️ My Profile: No display picture in profile data')
+          setProfileImage(null)
+        }
+      } catch (error: any) {
+        console.error('⚠️ My Profile: Error fetching profile picture:', error)
+        console.error('Error details:', {
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data
+        })
+        
+        // If profile endpoint doesn't work at all, show user info without picture
+        if (error.response?.status === 404) {
+          console.log('ℹ️ My Profile: Profile endpoints not implemented yet, will show initials')
+        }
+        setProfileImage(null)
+      }
+    }
+    
+    fetchProfilePicture()
+    
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      console.log('🔄 My Profile: Profile updated event received, refreshing picture...')
+      fetchProfilePicture()
+    }
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
+    }
+  }, [user?.id, isAuthenticated])
 
   // Initialize form data when user loads
   useEffect(() => {
@@ -49,6 +117,51 @@ export default function MyProfilePage() {
       ...prev,
       [name]: value
     }))
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPEG, JPG, or PNG)')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxSize) {
+      alert('Image size should be less than 5MB')
+      return
+    }
+
+    setUploadingImage(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('displayPicture', file)
+
+      const response = await profileAPI.update(user!.id, formData)
+      
+      if (response.data.data?.displayPicture) {
+        setProfileImage(response.data.data.displayPicture)
+        console.log('✅ Profile picture uploaded successfully:', response.data.data.displayPicture)
+        
+        // Dispatch event to update all headers
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('profileUpdated'))
+        }
+        
+        alert('Profile picture updated successfully!')
+      }
+    } catch (error: any) {
+      console.error('Error uploading profile picture:', error)
+      alert('Failed to upload profile picture. Please try again.')
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
   const handleSave = async () => {
@@ -138,20 +251,64 @@ export default function MyProfilePage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
-                  <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto">
-                    {user?.displayName ? (
-                      <span className="text-4xl font-semibold text-gray-600">
-                        {user.displayName.charAt(0).toUpperCase()}
-                      </span>
-                    ) : (
-                      <FiUser className="w-16 h-16 text-gray-400" />
-                    )}
+                  <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto overflow-hidden">
+                    {(() => {
+                      console.log('🖼️ My Profile Render:', { 
+                        uploadingImage, 
+                        profileImage, 
+                        hasUser: !!user, 
+                        displayName: user?.displayName 
+                      })
+                      
+                      if (uploadingImage) {
+                        return (
+                          <div className="flex items-center justify-center w-full h-full">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          </div>
+                        )
+                      }
+                      
+                      if (profileImage) {
+                        console.log('✅ Rendering profile image:', profileImage)
+                        return (
+                          <Image 
+                            src={profileImage} 
+                            alt="Profile" 
+                            fill
+                            className="object-cover"
+                            onLoad={() => console.log('✅ Profile image loaded successfully')}
+                            onError={() => console.error('❌ Profile image failed to load')}
+                          />
+                        )
+                      }
+                      
+                      if (user?.displayName) {
+                        console.log('📝 Rendering initial:', user.displayName.charAt(0))
+                        return (
+                          <span className="text-4xl font-semibold text-gray-600">
+                            {user.displayName.charAt(0).toUpperCase()}
+                          </span>
+                        )
+                      }
+                      
+                      console.log('👤 Rendering default user icon')
+                      return <FiUser className="w-16 h-16 text-gray-400" />
+                    })()}
                   </div>
-                  {isEditing && (
-                    <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                      <FiCamera className="w-4 h-4" />
-                    </button>
-                  )}
+                  <label 
+                    htmlFor="profile-picture-upload"
+                    className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors cursor-pointer"
+                  >
+                    <FiCamera className="w-4 h-4" />
+                  </label>
+                  <input
+                    id="profile-picture-upload"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                    className="hidden"
+                  />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">
                   {formData.firstName} {formData.lastName}

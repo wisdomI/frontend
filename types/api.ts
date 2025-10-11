@@ -59,9 +59,18 @@ export interface LoginRequest {
 }
 
 export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  user: User
+  accessToken?: string
+  refreshToken?: string
+  user?: User
+  // For registration response
+  message?: string
+  data?: {
+    message: string
+    data: {
+      id: string
+      email: string
+    }
+  }
 }
 
 export interface PasswordResetRequest {
@@ -630,4 +639,171 @@ export interface NotificationWebSocketData {
   title: string
   message: string
   data?: any
+}
+
+// Invoice Types
+export interface InvoiceItem {
+  description: string
+  quantity: number
+  amount: number
+  total: number
+}
+
+export interface Invoice {
+  id: string
+  invoiceNumber: string
+  userId: string
+  clientEmail: string
+  clientName: string
+  dueDate: string
+  paymentPattern: 'full_upfront' | 'installment' | 'milestone'
+  items: InvoiceItem[]
+  subtotal: number
+  discount: number
+  total: number
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateInvoiceRequest {
+  clientEmail: string
+  clientName: string
+  dueDate: string
+  paymentPattern: 'full_upfront' | 'installment' | 'milestone'
+  items: InvoiceItem[]
+  discount?: number
+  notes?: string
+}
+
+export interface UpdateInvoiceRequest {
+  clientEmail?: string
+  clientName?: string
+  dueDate?: string
+  paymentPattern?: 'full_upfront' | 'installment' | 'milestone'
+  items?: InvoiceItem[]
+  discount?: number
+  notes?: string
+  status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+}
+
+export interface InvoiceStats {
+  totalInvoices: number
+  paidInvoices: number
+  pendingInvoices: number
+  overdueInvoices: number
+  totalRevenue: number
+  pendingRevenue: number
+}
+
+// Earnings Types
+export interface Earning {
+  id: string
+  userId: string
+  amount: number
+  source: 'service' | 'booking' | 'subscription' | 'other'
+  description?: string
+  date: string
+  invoiceId?: string
+  serviceRequestId?: string
+  status: 'pending' | 'completed' | 'withdrawn'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface EarningsOverview {
+  totalEarnings: number
+  pendingEarnings: number
+  completedEarnings: number
+  withdrawnEarnings: number
+  monthlyEarnings: number
+  yearlyEarnings: number
+}
+
+// Expenses Types
+export interface Expense {
+  id: string
+  userId: string
+  category: 'marketing' | 'equipment' | 'supplies' | 'travel' | 'staff' | 'other'
+  amount: number
+  date: string
+  description?: string
+  receiptUrl?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateExpenseRequest {
+  category: 'marketing' | 'equipment' | 'supplies' | 'travel' | 'staff' | 'other'
+  amount: number
+  date: string
+  description?: string
+  receiptUrl?: string
+}
+
+export interface ExpensesOverview {
+  totalExpenses: number
+  monthlyExpenses: number
+  yearlyExpenses: number
+  expensesByCategory: Record<string, number>
+}
+
+// Teams & Roles Types
+export interface Team {
+  id: string
+  name: string
+  description?: string
+  vendorId: string
+  vendor?: {
+    id: string
+    firstName: string
+    lastName: string
+    businessName: string
+    email: string
+  }
+  memberCount: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TeamMember {
+  id: string
+  teamId: string
+  userId?: string
+  email: string
+  phoneNumber: string
+  role: 'admin' | 'manager' | 'support' | 'coordinator' | 'assistant'
+  status: 'pending' | 'active' | 'inactive'
+  invitedBy: string
+  joinedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateTeamRequest {
+  name: string
+  description?: string
+}
+
+export interface UpdateTeamRequest {
+  name?: string
+  description?: string
+  isActive?: boolean
+}
+
+export interface InviteTeamMemberRequest {
+  teamId: string
+  email: string
+  phoneNumber: string
+  role: 'admin' | 'manager' | 'support' | 'coordinator' | 'assistant'
+}
+
+export interface TeamStats {
+  totalTeams: number
+  activeTeams: number
+  totalMembers: number
+  activeMembers: number
+  pendingInvitations: number
 }

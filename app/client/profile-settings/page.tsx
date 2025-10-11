@@ -312,14 +312,6 @@ export default function ProfileSettingsPage() {
             {uploadError && (
               <p className="text-xs sm:text-sm text-red-600 mt-2 text-center max-w-xs">{uploadError}</p>
             )}
-            
-            {/* API Status Notice */}
-            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-xs text-yellow-800 text-center">
-                <strong>Note:</strong> Profile pictures are currently saved locally. 
-                Server-side storage will be available when the backend profile endpoints are implemented.
-              </p>
-            </div>
           </div>
 
           {/* Form Fields */}

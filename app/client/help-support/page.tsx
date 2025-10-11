@@ -63,15 +63,24 @@ export default function HelpSupportPage() {
     const fetchTickets = async () => {
       try {
         setLoading(true)
-        // This would be replaced with actual API call
+        // Note: Support API might not be implemented yet, so we'll use a fallback
         // const response = await supportAPI.getUserTickets()
         // setTickets(response.data.data || [])
         
-        // For now, using empty array since API might not be implemented yet
+        // For now, using empty array since support API might not be implemented yet
         setTickets([])
-      } catch (err) {
-        setError('Failed to fetch support tickets')
+        console.log('ℹ️ Client Support: Support API not implemented yet, using empty tickets')
+      } catch (err: any) {
         console.error('Error fetching support tickets:', err)
+        
+        // Fallback to empty array if API fails
+        setTickets([])
+        
+        if (err.response?.status === 403 || err.response?.status === 404) {
+          setError('Support tickets not available yet')
+        } else {
+          setError('Failed to fetch support tickets')
+        }
       } finally {
         setLoading(false)
       }
@@ -93,7 +102,7 @@ export default function HelpSupportPage() {
     setSubmitting(true)
     
     try {
-      // This would be replaced with actual API call
+      // Note: Support API might not be implemented yet, so we'll use a mock response
       // const response = await supportAPI.createTicket({
       //   category,
       //   issueType,
@@ -103,17 +112,19 @@ export default function HelpSupportPage() {
       // })
       // setTicketId(response.data.data.id)
       
-      // For now, generate a mock ticket ID
+      // For now, generate a mock ticket ID since support API might not be implemented yet
       const mockTicketId = Math.random().toString(36).substr(2, 9)
       setTicketId(mockTicketId)
       setShowSuccess(true)
       
+      console.log('ℹ️ Client Support: Support API not implemented yet, using mock ticket ID:', mockTicketId)
+      
       // Reset form
       setDescription('')
       setFiles([])
-    } catch (err) {
-      setError('Failed to submit support ticket')
+    } catch (err: any) {
       console.error('Error submitting support ticket:', err)
+      setError('Failed to submit support ticket')
     } finally {
       setSubmitting(false)
     }

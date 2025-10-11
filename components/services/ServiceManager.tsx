@@ -76,9 +76,9 @@ export default function ServiceManager({ userId, isOwnServices = false }: Servic
   }
 
   // Remove media from service
-  const handleRemoveMedia = async (serviceId: string) => {
+  const handleRemoveMedia = async (serviceId: string, mediaUrl: string) => {
     try {
-      await serviceAPI.removeMedia(serviceId)
+      await serviceAPI.removeMedia(serviceId, mediaUrl)
       await fetchServices() // Refresh the list
     } catch (err) {
       setError('Failed to remove media')

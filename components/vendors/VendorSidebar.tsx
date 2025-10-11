@@ -61,7 +61,6 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       label: 'Messages',
       icon: <MessageOutlined style={{ fontSize: 24 }} />,
       path: '/vendor/messages',
-      notificationCount: 3,
       isActive: pathname === '/vendor/messages',
     },
     {
@@ -162,7 +161,6 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
         </div>
       ),
       path: '/vendor/rating-reviews',
-      notificationCount: 3,
       isActive: pathname === '/vendor/rating-reviews',
     },
     {
@@ -217,24 +215,26 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
         <div className="p-4 border-b border-event-blue flex-shrink-0">
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
             {!isCollapsed && (
-              <div className="text-white font-bold text-lg">
+              <Link href="/" className="text-white font-bold text-lg hover:opacity-80 transition-opacity">
                 <span className="text-white">Event</span>
                 <span className="text-yellow-400">hub</span>
-              </div>
+              </Link>
             )}
             <button
               onClick={onToggle}
               className="text-white hover:text-gray-300 p-2 rounded-lg hover:bg-event-blue-hover transition-colors"
             >
               {isCollapsed ? (
-                <Image 
-                  src={iconLogo} 
-                  alt="Event Hub" 
-                  width={40} 
-                  height={40}
-                  className="drop-shadow-lg"
-                  style={{ filter: 'brightness(1.2) contrast(1.1)' }}
-                />
+                <Link href="/" title="Go to landing page">
+                  <Image 
+                    src={iconLogo} 
+                    alt="Event Hub" 
+                    width={40} 
+                    height={40}
+                    className="drop-shadow-lg hover:opacity-80 transition-opacity cursor-pointer"
+                    style={{ filter: 'brightness(1.2) contrast(1.1)' }}
+                  />
+                </Link>
               ) : (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useVendorBookings } from '@/hooks/useVendorBookings'
 import FilterCard from '@/components/vendors/FilterCard'
 import CreateProgressTrackerModal from '@/components/vendors/CreateProgressTrackerModal'
 import { FiFilter, FiPlus, FiCheck } from 'react-icons/fi'
@@ -14,70 +15,19 @@ export default function ManageBookingsPage() {
   const [showProgressTrackerModal, setShowProgressTrackerModal] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<any>(null)
 
-  const bookingsData = [
-    {
-      id: 1,
-      status: 'active',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      amount: '₦199,000',
-      additionalInfo: 'We need milky flavoured cake and some Cherry as toppings',
-      hasProgressTracker: false,
-    },
-    {
-      id: 2,
-      status: 'active',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      amount: '₦199,000',
-      additionalInfo: 'We need milky flavoured cake and some Cherry as toppings',
-      hasProgressTracker: true,
-    },
-    {
-      id: 3,
-      status: 'active',
-      clientName: 'Daniel Adebayo',
-      clientAvatar: '/images/avatar1.jpg',
-      eventTitle: 'Baby Linda\'s Birthday Party',
-      eventType: 'Social Event (Wedding, Birthday)',
-      eventDate: '12th May, 2025',
-      eventLocation: 'Surulere, Lagos State',
-      guests: 14,
-      servicesNeeded: 'Small Chops, Cake Bakers',
-      amount: '₦199,000',
-      additionalInfo: 'We need milky flavoured cake and some Cherry as toppings',
-      hasProgressTracker: false,
-    },
-    {
-      id: 4,
-      status: 'completed',
-      clientName: 'Amaka Obi',
-      clientAvatar: '/images/avatar2.jpg',
-      eventTitle: 'Traditional Wedding Reception',
-      eventType: 'Wedding Ceremony',
-      eventDate: '22nd June, 2025',
-      eventLocation: 'Enugu, Enugu State',
-      guests: 150,
-      servicesNeeded: 'Full Catering, Live Band, Decor',
-      amount: '₦1,200,000',
-      additionalInfo: 'Decor should be traditional Igbo style with palm wine service.',
-      hasProgressTracker: true,
-    },
-  ]
+  // API hooks
+  const { 
+    bookings, 
+    meetings, 
+    stats, 
+    loading: bookingsLoading, 
+    error: bookingsError,
+    fetchBookings,
+    updateBookingStatus
+  } = useVendorBookings()
 
-  const filteredBookings = bookingsData.filter(booking => {
+  // Filter bookings based on active tab
+  const filteredBookings = bookings.filter(booking => {
     if (activeTab === 'active') return booking.status === 'active'
     if (activeTab === 'completed') return booking.status === 'completed'
     return true
@@ -98,9 +48,19 @@ export default function ManageBookingsPage() {
     // Here you would typically save the progress tracker to your backend
   }
 
+  const handleUpdateBookingStatus = async (bookingId: string, status: 'active' | 'completed') => {
+    try {
+      await updateBookingStatus(bookingId, status)
+      // Refresh bookings after status update
+      await fetchBookings()
+    } catch (error) {
+      console.error('Failed to update booking status:', error)
+    }
+  }
+
   const tabs = [
-    { id: 'active', label: 'Active Bookings', count: bookingsData.filter(b => b.status === 'active').length },
-    { id: 'completed', label: 'Completed Bookings', count: bookingsData.filter(b => b.status === 'completed').length },
+    { id: 'active', label: 'Active Bookings', count: bookings.filter(b => b.status === 'active').length },
+    { id: 'completed', label: 'Completed Bookings', count: bookings.filter(b => b.status === 'completed').length },
   ]
 
   return (
@@ -144,7 +104,24 @@ export default function ManageBookingsPage() {
       <div className="flex flex-col lg:flex-row w-full p-4 gap-4">
         {/* Bookings list */}
         <div className="flex flex-col gap-3 flex-1 max-h-[calc(100vh-180px)] overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-event-blue scrollbar-thumb-rounded-full hover:scrollbar-thumb-event-blue-hover lg:scrollbar lg:scrollbar-thin lg:scrollbar-track-gray-100 lg:scrollbar-thumb-event-blue lg:scrollbar-thumb-rounded-full lg:hover:scrollbar-thumb-event-blue-hover">
-          {filteredBookings.length > 0 ? (
+          {bookingsLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-event-blue mx-auto mb-4"></div>
+              <p className="text-sm">Loading bookings...</p>
+            </div>
+          ) : bookingsError ? (
+            <div className="flex flex-col items-center justify-center py-12 text-red-500">
+              <div className="text-6xl mb-4">❌</div>
+              <h3 className="text-lg font-medium mb-2">Failed to load bookings</h3>
+              <p className="text-sm text-center mb-4">{bookingsError}</p>
+              <button 
+                onClick={() => fetchBookings()}
+                className="px-4 py-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : filteredBookings.length > 0 ? (
             filteredBookings.map((booking) => (
               <div key={booking.id} className="bg-white border rounded-xl p-4 shadow-sm">
                 {/* Header */}
@@ -183,9 +160,16 @@ export default function ManageBookingsPage() {
                 <span className="sm:hidden">Create Tracker</span>
               </button>
               
-              <button className="flex items-center justify-center gap-2 bg-green-500 text-white px-3 py-2 sm:px-4 rounded-lg font-semibold text-sm sm:text-base">
+              <button 
+                onClick={() => handleUpdateBookingStatus(booking.id, booking.status === 'active' ? 'completed' : 'active')}
+                className={`flex items-center justify-center gap-2 px-3 py-2 sm:px-4 rounded-lg font-semibold text-sm sm:text-base transition-colors ${
+                  booking.status === 'active' 
+                    ? 'bg-green-500 text-white hover:bg-green-600' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
                 <FiCheck className="w-4 h-4" />
-                In Progress
+                {booking.status === 'active' ? 'Mark Complete' : 'Mark Active'}
               </button>
             </div>
             

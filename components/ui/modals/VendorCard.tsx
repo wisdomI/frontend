@@ -125,7 +125,18 @@ const VendorCard: React.FC<VendorCardProps> = ({
         <div className="flex-1 p-6 flex flex-col justify-between">
           {/* Top Section: Title and Action Icons */}
           <div className="flex items-start justify-between mb-3">
-            <h3 className="text-xl font-bold text-gray-900 pr-4 flex-1">{title}</h3>
+            <div className="flex items-start justify-between pr-4 flex-1">
+              <h3 className="text-xl font-bold text-gray-900 flex-1">{title}</h3>
+              <div className="ml-2 flex-shrink-0">
+                <Image 
+                  src="/Diamond.svg" 
+                  alt="Diamond" 
+                  width={16} 
+                  height={16}
+                  className="w-4 h-4"
+                />
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <button className="p-2 bg-event-blue text-white rounded-lg hover:bg-event-blue-hover transition-colors">
                 <IoChatbubbleEllipsesOutline className="w-4 h-4" />
@@ -140,7 +151,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
           </div>
 
           {/* Middle Section: Vendor Name */}
-          <p className="text-blue-600 font-semibold text-base mb-4">{vendorName}</p>
+          <p className="text-blue-600 font-semibold text-sm mb-4">{vendorName}</p>
 
           {/* Bottom Section: Rating, Location, and View Details Button */}
           <div className="space-y-3">
@@ -159,19 +170,6 @@ const VendorCard: React.FC<VendorCardProps> = ({
               <span>{location}</span>
             </div>
 
-            {/* View Details Button */}
-            <button 
-              className="w-full bg-event-blue text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-event-blue-hover transition-colors flex items-center justify-center space-x-2"
-              onClick={() => {
-                console.log('Button clicked for vendor:', id);
-                router.push(`/vendor/${id}`);
-              }}
-            >
-              <span>View Details</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>

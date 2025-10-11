@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useVendorAnalytics } from '@/hooks/useVendorAnalytics'
 import { Chart } from 'react-google-charts'
 
 export default function PerformanceAnalyticsPage() {
@@ -8,6 +9,24 @@ export default function PerformanceAnalyticsPage() {
   const [isPremiumUser, setIsPremiumUser] = useState(false) // This would come from user subscription status
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [upgradeSuccess, setUpgradeSuccess] = useState(false)
+
+  // API hooks
+  const { 
+    performanceMetrics, 
+    engagementMetrics: apiEngagementMetrics, 
+    clientInsights, 
+    revenueAnalytics, 
+    servicePerformance, 
+    eventTypeAnalytics,
+    loading: analyticsLoading, 
+    error: analyticsError,
+    fetchPerformanceMetrics,
+    fetchEngagementMetrics,
+    fetchClientInsights,
+    fetchRevenueAnalytics,
+    fetchServicePerformance,
+    fetchEventTypeAnalytics
+  } = useVendorAnalytics()
 
   const analyticsData = {
     totalBookings: 45,
@@ -75,7 +94,7 @@ export default function PerformanceAnalyticsPage() {
     clientLifetimeValue: 1850
   }
 
-  const engagementMetrics = [
+  const engagementMetricsData = [
     { metric: 'Service Request Clicks', value: 324, change: 18, icon: '👆' },
     { metric: 'Profile Views', value: 1247, change: 24, icon: '👁️' },
     { metric: 'Saved to Favorites', value: 89, change: 12, icon: '❤️' },
@@ -360,7 +379,7 @@ export default function PerformanceAnalyticsPage() {
             Engagement Metrics
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {engagementMetrics.map((metric, index) => (
+            {engagementMetricsData.map((metric: any, index: number) => (
               <div key={index} className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500 transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:-translate-y-1 cursor-pointer group hover:border-purple-600">
                 <div className="flex items-center justify-between">
                   <div>
