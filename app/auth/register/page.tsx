@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authAPI } from '@/lib/api'
 import { useApp } from '@/contexts/AppContext'
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import AccountTypeSelectionModal from '@/components/ui/modals/AccountTypeSelectionModal'
 import VerificationMethodModal from '@/components/ui/modals/VerificationMethodModal'
 import EmailVerificationModal from '@/components/ui/modals/EmailVerificationModal'
@@ -22,8 +22,13 @@ export default function RegisterPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [selectedAccountType, setSelectedAccountType] = useState<'individual' | 'vendor' | null>(null)
   const [verificationType, setVerificationType] = useState<'email' | 'phone' | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [registrationData, setRegistrationData] = useState<any>(null)
+  const [registrationStep, setRegistrationStep] = useState<'form' | 'loading' | 'verification'>('form')
+  const [loadingProgress, setLoadingProgress] = useState(0)
   const [formData, setFormData] = useState({
-    accountType: 'individual',
+    accountType: 'vendor',
     firstName: '',
     lastName: '',
     email: '',
@@ -50,7 +55,7 @@ export default function RegisterPage() {
   const handleEmailVerify = async (code: string) => {
     console.log('Email verification code:', code)
     try {
-      const response = await authAPI.verifyEmail({ email: formData.email, code })
+      const response = await authAPI.verifyEmail({ email: registrationData?.email || formData.email, code })
       
       console.log('Email verification response:', response)
       addNotification({
@@ -63,6 +68,24 @@ export default function RegisterPage() {
     } catch (error: any) {
       console.error('Email verification error:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Email verification failed'
+      addNotification({
+        type: 'error',
+        message: errorMessage
+      })
+    }
+  }
+
+  const handleResendCode = async () => {
+    try {
+      const email = registrationData?.email || formData.email
+      await authAPI.resendVerificationCode({ email })
+      addNotification({
+        type: 'success',
+        message: 'Verification code resent successfully!'
+      })
+    } catch (error: any) {
+      console.error('Resend code error:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to resend verification code'
       addNotification({
         type: 'error',
         message: errorMessage
@@ -92,22 +115,22 @@ export default function RegisterPage() {
     }
   }
 
-  const handleResendCode = async () => {
-    try {
-      // Resend verification code logic
-      console.log('Resending verification code...')
-      addNotification({
-        type: 'info',
-        message: 'Verification code resent!'
-      })
-    } catch (error: any) {
-      console.error('Resend code error:', error)
-      addNotification({
-        type: 'error',
-        message: 'Failed to resend verification code'
-      })
-    }
-  }
+  // const handleResendCode = async () => {
+  //   try {
+  //     // Resend verification code logic
+  //     console.log('Resending verification code...')
+  //     addNotification({
+  //       type: 'info',
+  //       message: 'Verification code resent!'
+  //     })
+  //   } catch (error: any) {
+  //     console.error('Resend code error:', error)
+  //     addNotification({
+  //       type: 'error',
+  //       message: 'Failed to resend verification code'
+  //     })
+  //   }
+  // }
 
   const handleLogin = () => {
     setShowSuccessModal(false)
@@ -116,7 +139,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     
     try {
       // Validate form data
@@ -125,80 +147,95 @@ export default function RegisterPage() {
           type: 'error',
           message: 'Passwords do not match'
         })
-        setIsLoading(false)
         return
       }
 
       // Validate password strength
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/
-      console.log('Password validation:', {
-        password: formData.password,
-        hasLowercase: /[a-z]/.test(formData.password),
-        hasUppercase: /[A-Z]/.test(formData.password),
-        hasNumber: /\d/.test(formData.password),
-        hasSpecial: /[@$!%*?&]/.test(formData.password),
-        passesRegex: passwordRegex.test(formData.password)
-      })
       
       if (!passwordRegex.test(formData.password)) {
         addNotification({
           type: 'error',
           message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
         })
-        setIsLoading(false)
         return
       }
       
-      // Prepare registration data
-      const registrationData: any = {
+      // Prepare registration data according to API documentation
+      const registrationPayload: any = {
         email: formData.email,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        accountType: formData.accountType === 'organization' ? 'business' : formData.accountType,
+        accountType: formData.accountType,
         phoneNumber: `+234${formData.phoneNumber}` // Add country code
       }
       
-      // Add name fields for individual accounts
-      if (formData.accountType === 'individual') {
-        registrationData.firstName = formData.firstName
-        registrationData.lastName = formData.lastName
-      } else if (formData.accountType === 'vendor') {
-        // For vendor accounts, add business fields
-        registrationData.businessName = formData.firstName + ' ' + formData.lastName
-        registrationData.businessAddress = 'Lagos, Nigeria' // Default address
+      // Add fields based on account type
+      if (formData.accountType === 'vendor') {
+        // For vendor accounts - use business fields
+        registrationPayload.businessName = formData.firstName
+        registrationPayload.businessAddress = formData.lastName || 'Lagos, Nigeria'
+        registrationPayload.businessEmail = formData.email
       } else {
-        // For business accounts, add business fields
-        registrationData.businessName = formData.firstName + ' ' + formData.lastName
-        registrationData.businessAddress = 'Lagos, Nigeria' // Default address
+        // For individual/organisation accounts - use personal fields
+        registrationPayload.firstName = formData.firstName
+        registrationPayload.lastName = formData.lastName
+        // Map accountType to API expected values
+        registrationPayload.accountType = 'individual' // API expects 'individual' for both individual and organisation
       }
       
-      console.log('Attempting registration with:', registrationData)
-      console.log('Form data password:', formData.password)
-      console.log('Registration data password:', registrationData.password)
+      // Store registration data for later use
+      setRegistrationData(registrationPayload)
+      
+      // Start async registration process
+      setRegistrationStep('loading')
+      setIsLoading(true)
+      
+      // Simulate loading progress (30 seconds max)
+      const startTime = Date.now()
+      const maxDuration = 30000 // 30 seconds
+      
+      const progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min((elapsed / maxDuration) * 100, 95) // Cap at 95% until API completes
+        setLoadingProgress(progress)
+      }, 100)
       
       // Call the real API
-      const response = await authAPI.register(registrationData)
+      const response = await authAPI.register(registrationPayload)
+      
+      clearInterval(progressInterval)
+      setLoadingProgress(100)
       
       console.log('Registration response:', response)
       
-      addNotification({
-        type: 'success',
-        message: 'Registration successful! Please check your email for verification.'
-      })
-      
-      // Show verification modal
-      setShowAccountTypeModal(true)
+      // Wait a bit for the progress bar to complete
+      setTimeout(() => {
+        setRegistrationStep('verification')
+        setIsLoading(false)
+        
+        addNotification({
+          type: 'success',
+          message: 'Registration successful! Please verify your email.'
+        })
+        
+        // Automatically show email verification
+        setShowEmailVerification(true)
+      }, 500)
       
     } catch (error: any) {
       console.error('Registration error:', error)
       console.error('Error response:', error.response?.data)
       const errorMessage = error.response?.data?.message || error.message || 'Registration failed'
+      
+      setRegistrationStep('form')
+      setIsLoading(false)
+      setLoadingProgress(0)
+      
       addNotification({
         type: 'error',
         message: errorMessage
       })
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -207,216 +244,301 @@ export default function RegisterPage() {
     console.log(`Input change - ${name}:`, value)
     setFormData(prev => ({ ...prev, [name]: value }))
   }
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 font-asul">
-            Create your account
-          </h2>
-        </div>
-        
-        <div className="mt-8 space-y-6">
-          <GoogleSignInButton />
+  // Loading step component
+  const LoadingStep = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-2xl bg-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 relative my-8 sm:my-12">
+        <div className="text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2E6F] font-asul">Creating Your Account</h2>
+          <p className="mt-3 text-gray-600">Please wait while we set up your EventHub account...</p>
           
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+          <div className="mt-8">
+            <div className="w-full bg-gray-200 rounded-full h-4">
+              <div 
+                className="bg-[#0B2E6F] h-4 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              ></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">Or register with</span>
-            </div>
+            <p className="mt-2 text-sm text-gray-600">{Math.round(loadingProgress)}% Complete</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Account Type
-              </label>
-              <select
-                id="accountType"
-                name="accountType"
-                value={formData.accountType}
-                onChange={handleInputChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="individual">Individual</option>
-                <option value="organization">Organisation</option>
-                <option value="vendor">Event Vendor</option>
-              </select>
-            </div>
-            {formData.accountType === 'individual' ? (
-              <>
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name
-                  </label>
+          <div className="mt-6 space-y-2 text-sm text-gray-500">
+            <p>✓ Validating your information</p>
+            <p>✓ Setting up your account</p>
+            <p>✓ Sending verification email</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Verification step component
+  const VerificationStep = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-2xl bg-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 relative my-8 sm:my-12">
+        <div className="text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2E6F] font-asul">Verify Your Email</h2>
+          <p className="mt-3 text-gray-600">
+            We&apos;ve sent a verification code to <strong>{registrationData?.email || formData.email}</strong>
+          </p>
+          
+          <div className="mt-6">
+            <button
+              onClick={handleResendCode}
+              className="px-6 py-2 bg-[#0B2E6F] text-white rounded-lg hover:bg-[#0A285F] transition"
+            >
+              Resend Verification Code
+            </button>
+          </div>
+          
+          <p className="mt-4 text-sm text-gray-500">
+            Didn&apos;t receive the email? Check your spam folder or click &quot;Resend&quot; above.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Render appropriate step
+  if (registrationStep === 'loading') {
+    return <LoadingStep />
+  }
+
+  if (registrationStep === 'verification') {
+    return <VerificationStep />
+  }
+
+  // Form step (default)
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-2xl bg-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 relative my-8 sm:my-12">
+        <button
+          aria-label="Close"
+          onClick={() => router.push('/')}
+          className="absolute top-4 right-4 w-8 h-8 rounded bg-[#0B2E6F] text-white flex items-center justify-center hover:bg-[#0A285F] transition"
+        >
+          ×
+        </button>
+        
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2E6F] font-asul">Create an EventHub Account</h2>
+        <p className="mt-3 text-gray-600">EventHub makes your Event Planning easy.</p>
+
+        {/* Account Type Toggle */}
+        <div className="mt-6">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, accountType: 'vendor' }))}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                formData.accountType === 'vendor'
+                  ? 'bg-[#0B2E6F] text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Vendor
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, accountType: 'individual' }))}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                formData.accountType === 'individual'
+                  ? 'bg-[#0B2E6F] text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Individual/Organisation
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          {/* Dynamic Fields Based on Account Type */}
+          {formData.accountType === 'vendor' ? (
+            // Vendor Fields
+            <>
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">Business Name</label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Company Name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Business Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Company Email"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">Business Address</label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Company Address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-2">Business Phone Number</label>
+                <div className="flex">
+                  <select className="h-12 px-3 border border-gray-200 border-r-0 rounded-l-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]">
+                    <option>🇳🇬 +234</option>
+                  </select>
                   <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
                     required
-                    value={formData.firstName}
+                    value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter First Name"
+                    className="block w-full h-12 rounded-r-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                    placeholder="Phone number"
                   />
                 </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
-                  </label>
+              </div>
+            </>
+          ) : (
+            // Individual/Organisation Fields
+            <>
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter First Name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Last Name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Email Address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <div className="flex">
+                  <select className="h-12 px-3 border border-gray-200 border-r-0 rounded-l-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]">
+                    <option>🇳🇬 +234</option>
+                  </select>
                   <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
                     required
-                    value={formData.lastName}
+                    value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter Last Name"
+                    className="block w-full h-12 rounded-r-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                    placeholder="Phone number"
                   />
                 </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                    {formData.accountType === 'vendor' ? 'Business Name' : 'First Name'}
-                  </label>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder={formData.accountType === 'vendor' ? 'Enter Business Name' : 'Enter First Name'}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                    {formData.accountType === 'vendor' ? 'Business Address' : 'Last Name'}
-                  </label>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    required={formData.accountType !== 'vendor'}
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder={formData.accountType === 'vendor' ? 'Enter Business Address (Optional)' : 'Enter Last Name'}
-                  />
-                </div>
-              </>
-            )}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
+              </div>
+            </>
+          )}
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+            <div className="relative">
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
                 required
-                value={formData.email}
+                value={formData.password}
                 onChange={handleInputChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter Email"
+                className="block w-full h-12 rounded-lg border border-gray-200 bg-white pl-3 pr-10 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                placeholder="Enter Password"
               />
-            </div>
-            <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <div className="flex">
-                <select className="px-3 py-2 border border-gray-300 border-r-0 rounded-l-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                  <option>🇳🇬 +234</option>
-                </select>
-                <input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  required
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="appearance-none rounded-r-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Phone number"
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter Password"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Must contain: uppercase, lowercase, number, and special character (@$!%*?&)
-              </p>
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter Password"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-event-blue hover:bg-event-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-event-blue disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? (
-                  <div className="spinner w-5 h-5"></div>
-                ) : (
-                  'Continue'
-                )}
+              <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
+                {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
               </button>
             </div>
-          </form>
-          
-          <div className="text-center">
-            <a href="/auth/login" className="text-event-blue hover:opacity-80 transition-all">
-              Already have an account? Sign in
-            </a>
+            <p className="mt-1 text-xs text-gray-500">Must contain: uppercase, lowercase, number, and special character (@$!%*?&)</p>
           </div>
-        </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className="block w-full h-12 rounded-lg border border-gray-200 bg-white pl-3 pr-10 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                placeholder="Enter Password"
+              />
+              <button type="button" onClick={() => setShowConfirmPassword(v => !v)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
+                {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 rounded-lg text-white bg-[#0B2E6F] hover:bg-[#0A285F] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="spinner w-5 h-5"></div>
+              ) : (
+                'Continue'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center text-gray-700">
+            Already have an Account? <a href="/auth/login" className="text-[#0B2E6F] font-semibold">Login</a>
+          </div>
+        </form>
       </div>
 
       {/* Modals */}
@@ -435,7 +557,7 @@ export default function RegisterPage() {
       <EmailVerificationModal
         isOpen={showEmailVerification}
         onClose={() => setShowEmailVerification(false)}
-        email={formData.email}
+        email={registrationData?.email || formData.email}
         onVerify={handleEmailVerify}
         onResend={handleResendCode}
       />
@@ -443,7 +565,7 @@ export default function RegisterPage() {
       <PhoneVerificationModal
         isOpen={showPhoneVerification}
         onClose={() => setShowPhoneVerification(false)}
-        phoneNumber={formData.phoneNumber}
+        phoneNumber={registrationData?.phoneNumber || formData.phoneNumber}
         onVerify={handlePhoneVerify}
         onResend={handleResendCode}
       />

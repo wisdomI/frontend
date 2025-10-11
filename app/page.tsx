@@ -36,22 +36,24 @@ export default function HomePage() {
       <Header />
       <NotificationBreadcrumbWrapper />
       
-      {/* Main content area with sidebar - matching category page spacing */}
-      <div className="flex flex-1 md:px-8 bg-gray-50">
+      {/* Main content area with sidebar - unified container and gutters */}
+      <div className="flex flex-1 bg-gray-50 mt-4 sm:mt-6">
         <Sidebar 
           isMobileOpen={sidebarOpen} 
           onMobileToggle={() => setSidebarOpen(!sidebarOpen)}
         />
         
-        {/* Main content with proper spacing like category pages */}
-        <main className="flex-1 px-6">
+        {/* Main content with consistent max-width container */}
+        <main className="flex-1">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HeroBanner/>
-          <div className="py-4 sm:py-6 lg:py-8">
-            <div className="space-y-6 sm:space-y-8">
+          <div className="pt-3 sm:pt-4 lg:pt-5 pb-4">
+            <div className="space-y-4 sm:space-y-8">
               <WhyChooseEventHub/>
               <RecentlyViewed/>
               <PopularServices/>
             </div>
+          </div>
           </div>
         </main>
       </div>

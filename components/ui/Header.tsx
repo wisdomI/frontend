@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -36,14 +36,18 @@ const locations = [
 export default function Header() {
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState('Location')
+  const [selectedLocation, setSelectedLocation] = useState('Select Location')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSignUpFlow, setShowSignUpFlow] = useState(false)
   const { user, isAuthenticated, loading, logout } = useAuthContext()
   const [showLogout, setShowLogout] = useState(false)
+  const [showLogoutDropdown, setShowLogoutDropdown] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const router = useRouter()
   const { state: appState } = useApp()
+  const [profilePictureKey, setProfilePictureKey] = useState(0) // Force re-render when profile picture changes
+  const [profilePicture, setProfilePicture] = useState<string | null>(null)
+  const logoutDropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -53,6 +57,96 @@ export default function Header() {
     }
   }, [])
 
+  // Close logout dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (logoutDropdownRef.current && !logoutDropdownRef.current.contains(event.target as Node)) {
+        setShowLogoutDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Fetch profile picture from API
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user?.id || !isAuthenticated) {
+        console.log('⏸️ Main Header: Waiting for authentication...', { 
+          userId: user?.id, 
+          isAuthenticated, 
+          loading,
+          accountType: user?.accountType 
+        })
+        return
+      }
+      
+      try {
+        console.log('🔄 Main Header: Fetching profile picture for user:', user.id, 'Type:', user.accountType)
+        const { profileAPI } = await import('@/lib/api')
+        
+        let response
+        try {
+          // Try the /profile/me endpoint first
+          response = await profileAPI.me()
+          console.log('📥 Main Header: Profile API response (via /me):', response.data)
+        } catch (meError: any) {
+          if (meError.response?.status === 404) {
+            console.log('⚠️ Main Header: /profile/me not found, trying /profile/:id')
+            // Fallback to using user ID
+            response = await profileAPI.getById(user.id)
+            console.log('📥 Main Header: Profile API response (via /id):', response.data)
+          } else {
+            throw meError
+          }
+        }
+        
+        if (response.data.data?.displayPicture) {
+          setProfilePicture(response.data.data.displayPicture)
+          setProfilePictureKey(prev => prev + 1)
+          console.log('✅ Main Header: Loaded display picture from API:', response.data.data.displayPicture)
+        } else {
+          console.log('ℹ️ Main Header: No display picture in profile data')
+          setProfilePicture(null)
+        }
+      } catch (error: any) {
+        console.error('⚠️ Main Header: Error fetching profile picture:', error)
+        console.error('Error details:', {
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data
+        })
+        
+        // If profile endpoint doesn't work at all, show user info without picture
+        if (error.response?.status === 404) {
+          console.log('ℹ️ Main Header: Profile endpoints not implemented yet, will show initials')
+        }
+        setProfilePicture(null)
+      }
+    }
+    
+    fetchProfilePicture()
+    
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      console.log('🔄 Main Header: Profile updated event received, refreshing picture...')
+      fetchProfilePicture()
+    }
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    
+    // Refresh profile picture every 30 seconds to catch updates
+    const interval = setInterval(fetchProfilePicture, 30000)
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
+      clearInterval(interval)
+    }
+  }, [user?.id, isAuthenticated, loading])
+
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location)
     setIsLocationDropdownOpen(false)
@@ -61,6 +155,24 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Searching for:', searchQuery, 'in', selectedLocation)
+  }
+
+  const handleSwitchToVendor = () => {
+    console.log('Switching to vendor profile...')
+    setShowLogoutDropdown(false)
+    
+    if (typeof window !== 'undefined') {
+      window.location.href = '/vendor'
+    }
+  }
+
+  const handleSwitchToClient = () => {
+    console.log('Switching to client profile...')
+    setShowLogoutDropdown(false)
+    
+    if (typeof window !== 'undefined') {
+      window.location.href = '/client/dashboard'
+    }
   }
 
   return (
@@ -116,7 +228,7 @@ export default function Header() {
                     <input
                       type="text"
                       placeholder="Search locations..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-event-blue"
+                      className="placeholder-center w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-event-blue focus:border-event-blue"
                     />
                   </div>
                   <div className="py-1">
@@ -188,18 +300,47 @@ export default function Header() {
 
                 {/* Profile Picture - Navigate to My Profile */}
                 <Link href="/client/my-profile" className="relative">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                  <div key={profilePictureKey} className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                     {(() => {
                       const displayName = user?.displayName || 
                         (user?.accountType === 'vendor' ? user?.businessName : 
                          `${user?.firstName || ''} ${user?.lastName || ''}`.trim());
-                      return displayName ? (
-                        <span className="text-gray-600 font-medium">
-                          {displayName.charAt(0).toUpperCase()}
-                        </span>
-                      ) : (
-                        <FiUser className="w-5 h-5 text-gray-400" />
-                      );
+                      
+                      console.log('🖼️ Main Header Render:', {
+                        profilePicture,
+                        profilePictureKey,
+                        hasUser: !!user,
+                        isAuthenticated,
+                        displayName
+                      });
+                      
+                      // Use profile picture from API state
+                      if (profilePicture) {
+                        console.log('✅ Main Header: Rendering profile image:', profilePicture);
+                        return (
+                          <Image 
+                            src={profilePicture} 
+                            alt="Profile" 
+                            fill
+                            className="object-cover"
+                            key={profilePictureKey}
+                            onLoad={() => console.log('✅ Main Header: Image loaded successfully')}
+                            onError={() => console.error('❌ Main Header: Image failed to load')}
+                          />
+                        );
+                      }
+                      
+                      if (displayName) {
+                        console.log('📝 Main Header: Rendering initial for:', displayName);
+                        return (
+                          <span className="text-gray-600 font-medium">
+                            {displayName.charAt(0).toUpperCase()}
+                          </span>
+                        );
+                      }
+                      
+                      console.log('👤 Main Header: Rendering default icon');
+                      return <FiUser className="w-5 h-5 text-gray-400" />;
                     })()}
                   </div>
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
@@ -213,14 +354,53 @@ export default function Header() {
                    'User'}
                 </span>
 
-                {/* Logout Button */}
-                <button
-                  onClick={() => setShowLogout(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <FiLogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
+                {/* Profile Dropdown */}
+                <div className="relative" ref={logoutDropdownRef}>
+                  <button
+                    onClick={() => setShowLogoutDropdown(!showLogoutDropdown)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    <FiUser className="w-4 h-4" />
+                    <span>Account</span>
+                    <svg className={`w-4 h-4 transition-transform ${showLogoutDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {showLogoutDropdown && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50">
+                      <div className="py-2">
+                        {user?.accountType === 'vendor' ? (
+                          <button
+                            onClick={handleSwitchToClient}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <FiUser className="w-4 h-4" />
+                            <span>Switch to Client Profile</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleSwitchToVendor}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <FiUser className="w-4 h-4" />
+                            <span>Switch to Vendor Profile</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setShowLogoutDropdown(false)
+                            setShowLogout(true)
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                        >
+                          <FiLogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>

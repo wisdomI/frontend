@@ -18,7 +18,9 @@ import { useEffect, useState } from 'react'
 import { useServiceRequests } from '@/hooks/useServiceRequests'
 import { useMeetings } from '@/hooks/useMeetings'
 import { useApi } from '@/hooks/useApi'
-import { serviceRequestAPI } from '@/lib/api'
+import { useVendorBookings } from '@/hooks/useVendorBookings'
+import { serviceRequestAPI, vendorEarningsAPI, vendorAnalyticsAPI } from '@/lib/api'
+// Debug components removed for production
 
 const DashboardPage = () => {
   const { profileStatus } = useProfileCompletion()
@@ -28,7 +30,10 @@ const DashboardPage = () => {
   // API hooks
   const { requests: vendorRequests, loading: serviceRequestsLoading, error: serviceRequestsError } = useServiceRequests()
   const { meetings, loading: meetingsLoading } = useMeetings()
+  const { bookings, stats: bookingStats, loading: bookingsLoading } = useVendorBookings()
   const { data: dashboardStats, loading: statsLoading } = useApi(() => serviceRequestAPI.getStats().then(res => res.data))
+  const { data: earningsStats, loading: earningsLoading } = useApi(() => vendorEarningsAPI.getEarningsStats().then(res => res.data))
+  const { data: analyticsData, loading: analyticsLoading } = useApi(() => vendorAnalyticsAPI.getPerformanceMetrics().then(res => res.data))
   
   // Local state
   const [stats, setStats] = useState({
@@ -50,14 +55,14 @@ const DashboardPage = () => {
 
   // Update stats when dashboard data loads
   useEffect(() => {
-    if (dashboardStats) {
+    if (dashboardStats || bookingStats) {
       setStats({
-        activeBookings: dashboardStats.inProgressRequests || 0,
-        pendingBookings: dashboardStats.openRequests || 0,
-        completedBookings: dashboardStats.completedRequests || 0
+        activeBookings: bookingStats?.activeBookings || dashboardStats?.inProgressRequests || 0,
+        pendingBookings: dashboardStats?.openRequests || 0,
+        completedBookings: bookingStats?.completedBookings || dashboardStats?.completedRequests || 0
       })
     }
-  }, [dashboardStats])
+  }, [dashboardStats, bookingStats])
 
   // Show loading state while checking authentication and profile status
   if (loading || statsLoading) {

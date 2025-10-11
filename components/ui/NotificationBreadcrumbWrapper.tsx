@@ -10,13 +10,14 @@ export default function NotificationBreadcrumbWrapper() {
   if (!notification) return null
 
   return (
-    <div className="p-8 w-full rounded-lg">
+    <div className="w-full">
       <NotificationBreadcrumb
         message={notification.message}
         type={notification.type}
         icon={notification.icon}
         dismissible={notification.dismissible}
         onDismiss={hideNotification}
+        className="w-full"
       />
     </div>
   )

@@ -48,31 +48,64 @@ export default function MyEarningsPage() {
     const fetchEarningsData = async () => {
       try {
         setLoading(true)
-        // This would be replaced with actual API call
-        // const response = await earningsAPI.getUserEarnings()
-        // setEarningsData(response.data.data)
+        const { earningsAPI } = await import('@/lib/api')
         
-        // For now, using mock data structure since API might not be implemented yet
-        const mockData = {
+        // Try to fetch client earnings data
+        const response = await earningsAPI.getAll()
+        const earningsData = response.data.data || []
+        
+        // Calculate summary from actual earnings data
+        const totalPlanned = earningsData.reduce((sum: number, earning: any) => sum + (earning.amount || 0), 0)
+        const totalActual = earningsData.reduce((sum: number, earning: any) => sum + (earning.actualAmount || earning.amount || 0), 0)
+        
+        // Group by category
+        const categoryMap = new Map()
+        earningsData.forEach((earning: any) => {
+          const category = earning.category || 'Miscellaneous'
+          if (!categoryMap.has(category)) {
+            categoryMap.set(category, { planned: 0, actual: 0 })
+          }
+          const current = categoryMap.get(category)
+          current.planned += earning.amount || 0
+          current.actual += earning.actualAmount || earning.amount || 0
+        })
+        
+        const categories = Array.from(categoryMap.entries()).map(([name, data]) => ({
+          name,
+          planned: data.planned,
+          actual: data.actual
+        }))
+        
+        const processedData = {
           summary: {
-            total: 2500000,
-            planned: 2500000,
-            actual: 2435000,
+            total: totalPlanned,
+            planned: totalPlanned,
+            actual: totalActual,
           },
-          categories: [
-            { name: 'Catering', planned: 800000, actual: 750000 },
-            { name: 'Decoration', planned: 400000, actual: 420000 },
-            { name: 'Photography', planned: 300000, actual: 280000 },
-            { name: 'Entertainment', planned: 200000, actual: 220000 },
-            { name: 'Venue', planned: 700000, actual: 700000 },
-            { name: 'Transport', planned: 150000, actual: 170000 },
-            { name: 'Miscellaneous', planned: 100000, actual: 85000 },
-          ]
+          categories
         }
-        setEarningsData(mockData)
-      } catch (err) {
-        setError('Failed to fetch earnings data')
+        
+        setEarningsData(processedData)
+        console.log('✅ Client Earnings: Loaded from API:', processedData)
+      } catch (err: any) {
         console.error('Error fetching earnings data:', err)
+        
+        // Fallback to empty data if API fails
+        const fallbackData = {
+          summary: {
+            total: 0,
+            planned: 0,
+            actual: 0,
+          },
+          categories: []
+        }
+        setEarningsData(fallbackData)
+        
+        if (err.response?.status === 403 || err.response?.status === 404) {
+          setError('Earnings data not available yet')
+        } else {
+          setError('Failed to fetch earnings data')
+        }
       } finally {
         setLoading(false)
       }

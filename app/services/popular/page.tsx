@@ -245,68 +245,29 @@ const PopularServicesPage: React.FC = () => {
           {viewType === 'grid' ? (
             // Grid View Layout
             <>
-              <div className="flex gap-2 items-center justify-between">
-                <h3 className="text-lg font-bold">{service.title}</h3>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M16.0332 9.85713H22.2492C22.2725 9.78807 22.2846 9.71573 22.2852 9.64284L22.2835 9.69855L22.2852 9.61284L22.2766 9.53741L22.262 9.47141L22.2526 9.43884L22.2157 9.35141L18.7812 2.9117L18.7349 2.83713C18.6751 2.75466 18.5967 2.68756 18.5059 2.64136C18.4152 2.59517 18.3147 2.57119 18.2129 2.57141H13.7129C13.8546 2.57136 13.9924 2.61815 14.1048 2.70449C14.2171 2.79083 14.2978 2.91189 14.3343 3.04884L16.0486 9.47741C16.0818 9.60265 16.0765 9.735 16.0332 9.85713Z"
-                    fill="#616161"
+              <div className="flex items-start justify-between">
+                <h3 className="text-lg font-bold text-gray-900 leading-tight font-asul">{service.title}</h3>
+                <div className="ml-2 flex-shrink-0">
+                  <Image 
+                    src="/Diamond.svg" 
+                    alt="Diamond" 
+                    width={16} 
+                    height={16}
+                    className="w-4 h-4"
                   />
-                  <path
-                    d="M16.0332 9.85713H22.2492C22.2725 9.78807 22.2846 9.71573 22.2852 9.64284L22.2835 9.69855L22.2852 9.61284L22.2766 9.53741L22.262 9.47141L22.2526 9.43884L22.2157 9.35141L18.7812 2.9117L18.7349 2.83713C18.6751 2.75466 18.5967 2.68756 18.5059 2.64136C18.4152 2.59517 18.3147 2.57119 18.2129 2.57141H13.7129C13.8546 2.57136 13.9924 2.61815 14.1048 2.70449C14.2171 2.79083 14.2978 2.91189 14.3343 3.04884L16.0486 9.47741C16.0818 9.60265 16.0765 9.735 16.0332 9.85713Z"
-                    fill="url(#paint0_linear_899_30759)"
-                  />
-                  <path
-                    d="M7.96451 9.85713C7.92122 9.735 7.91584 9.60265 7.94908 9.47741L9.66337 3.04884C9.69984 2.91189 9.78054 2.79083 9.89293 2.70449C10.0053 2.61815 10.1431 2.57136 10.2848 2.57141H5.78565L5.69823 2.57741C5.59748 2.5912 5.50145 2.62869 5.418 2.6868C5.33456 2.74491 5.26609 2.82199 5.21823 2.9117L1.78965 9.34027L1.76651 9.38913L1.73737 9.47141L1.7288 9.5057L1.7168 9.5897V9.69855L1.73651 9.81084L1.75365 9.85713H7.96451Z"
-                    fill="#9F9F9F"
-                  />
-                  <path
-                    d="M7.96451 9.85713C7.92122 9.735 7.91584 9.60265 7.94908 9.47741L9.66337 3.04884C9.69984 2.91189 9.78054 2.79083 9.89293 2.70449C10.0053 2.61815 10.1431 2.57136 10.2848 2.57141H5.78565L5.69823 2.57741C5.59748 2.5912 5.50145 2.62869 5.418 2.6868C5.33456 2.74491 5.26609 2.82199 5.21823 2.9117L1.78965 9.34027L1.76651 9.38913L1.73737 9.47141L1.7288 9.5057L1.7168 9.5897V9.69855L1.73651 9.81084L1.75365 9.85713H7.96451Z"
-                    fill="url(#paint1_linear_899_30759)"
-                  />
-                  <defs>
-                    <linearGradient
-                      id="paint0_linear_899_30759"
-                      x1="13.7129"
-                      y1="2.57141"
-                      x2="22.2492"
-                      y2="9.85713"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
-                      <stop offset="1" stopColor="#FF6CE8" />
-                    </linearGradient>
-                    <linearGradient
-                      id="paint1_linear_899_30759"
-                      x1="5.78565"
-                      y1="2.57141"
-                      x2="7.96451"
-                      y2="9.85713"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
-                      <stop offset="1" stopColor="#FF6CE8" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                </div>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-event-blue font-semibold text-sm">{service.vendorName}</p>
-                <div className="flex items-center gap-2 text-white text-xs">
-                  <button className="text-base p-1.5 bg-event-blue rounded-lg">
-                    <IoChatbubbleEllipsesOutline />
+                <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
+                <div className="flex items-center gap-2">
+                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                   </button>
-                  <button className="p-2 bg-event-blue rounded-lg">
-                    <BsHeart />
+                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <BsHeart className="w-4 h-4" />
                   </button>
-                  <button className="p-2 bg-event-blue rounded-lg">
-                    <HiShare />
+                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <HiShare className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -319,88 +280,34 @@ const PopularServicesPage: React.FC = () => {
                 <HiOutlineLocationMarker /> {service.location}
               </p>
               
-              {/* View Details Button */}
-              <div className="mt-4">
-                <button 
-                  className="w-full bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-event-blue-hover transition-colors flex items-center justify-center space-x-2 cursor-pointer relative z-10"
-                  onClick={() => {
-                    console.log('Button clicked for service:', service.id);
-                    router.push(`/vendor/${service.id}`);
-                  }}
-                >
-                  <span>View Details</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
             </>
           ) : (
             // List View Layout
             <>
               <div className="flex-1">
-                <div className="flex gap-2 items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold">{service.title}</h3>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16.0332 9.85713H22.2492C22.2725 9.78807 22.2846 9.71573 22.2852 9.64284L22.2835 9.69855L22.2852 9.61284L22.2766 9.53741L22.262 9.47141L22.2526 9.43884L22.2157 9.35141L18.7812 2.9117L18.7349 2.83713C18.6751 2.75466 18.5967 2.68756 18.5059 2.64136C18.4152 2.59517 18.3147 2.57119 18.2129 2.57141H13.7129C13.8546 2.57136 13.9924 2.61815 14.1048 2.70449C14.2171 2.79083 14.2978 2.91189 14.3343 3.04884L16.0486 9.47741C16.0818 9.60265 16.0765 9.735 16.0332 9.85713Z"
-                      fill="#616161"
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 leading-tight font-asul">{service.title}</h3>
+                  <div className="ml-2 flex-shrink-0">
+                    <Image 
+                      src="/Diamond.svg" 
+                      alt="Diamond" 
+                      width={16} 
+                      height={16}
+                      className="w-4 h-4"
                     />
-                    <path
-                      d="M16.0332 9.85713H22.2492C22.2725 9.78807 22.2846 9.71573 22.2852 9.64284L22.2835 9.69855L22.2852 9.61284L22.2766 9.53741L22.262 9.47141L22.2526 9.43884L22.2157 9.35141L18.7812 2.9117L18.7349 2.83713C18.6751 2.75466 18.5967 2.68756 18.5059 2.64136C18.4152 2.59517 18.3147 2.57119 18.2129 2.57141H13.7129C13.8546 2.57136 13.9924 2.61815 14.1048 2.70449C14.2171 2.79083 14.2978 2.91189 14.3343 3.04884L16.0486 9.47741C16.0818 9.60265 16.0765 9.735 16.0332 9.85713Z"
-                      fill="url(#paint0_linear_899_30759)"
-                    />
-                    <path
-                      d="M7.96451 9.85713C7.92122 9.735 7.91584 9.60265 7.94908 9.47741L9.66337 3.04884C9.69984 2.91189 9.78054 2.79083 9.89293 2.70449C10.0053 2.61815 10.1431 2.57136 10.2848 2.57141H5.78565L5.69823 2.57741C5.59748 2.5912 5.50145 2.62869 5.418 2.6868C5.33456 2.74491 5.26609 2.82199 5.21823 2.9117L1.78965 9.34027L1.76651 9.38913L1.73737 9.47141L1.7288 9.5057L1.7168 9.5897V9.69855L1.73651 9.81084L1.75365 9.85713H7.96451Z"
-                      fill="#9F9F9F"
-                    />
-                    <path
-                      d="M7.96451 9.85713C7.92122 9.735 7.91584 9.60265 7.94908 9.47741L9.66337 3.04884C9.69984 2.91189 9.78054 2.79083 9.89293 2.70449C10.0053 2.61815 10.1431 2.57136 10.2848 2.57141H5.78565L5.69823 2.57741C5.59748 2.5912 5.50145 2.62869 5.418 2.6868C5.33456 2.74491 5.26609 2.82199 5.21823 2.9117L1.78965 9.34027L1.76651 9.38913L1.73737 9.47141L1.7288 9.5057L1.7168 9.5897V9.69855L1.73651 9.81084L1.75365 9.85713H7.96451Z"
-                      fill="url(#paint1_linear_899_30759)"
-                    />
-                    <defs>
-                      <linearGradient
-                        id="paint0_linear_899_30759"
-                        x1="13.7129"
-                        y1="2.57141"
-                        x2="22.2492"
-                        y2="9.85713"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
-                        <stop offset="1" stopColor="#FF6CE8" />
-                      </linearGradient>
-                      <linearGradient
-                        id="paint1_linear_899_30759"
-                        x1="5.78565"
-                        y1="2.57141"
-                        x2="7.96451"
-                        y2="9.85713"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop offset="0.533" stopColor="#FF6CE8" stopOpacity="0" />
-                        <stop offset="1" stopColor="#FF6CE8" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-event-blue font-semibold text-sm">{service.vendorName}</p>
-                  <div className="flex items-center gap-2 text-white text-xs">
-                    <button className="text-base p-1.5 bg-event-blue rounded-lg">
-                      <IoChatbubbleEllipsesOutline />
+                  <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
+                  <div className="flex items-center gap-2">
+                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                      <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                     </button>
-                    <button className="p-2 bg-event-blue rounded-lg">
-                      <BsHeart />
+                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                      <BsHeart className="w-4 h-4" />
                     </button>
-                    <button className="p-2 bg-event-blue rounded-lg">
-                      <HiShare />
+                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                      <HiShare className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -413,21 +320,6 @@ const PopularServicesPage: React.FC = () => {
                 </p>
               </div>
               
-              {/* View Details Button for List View */}
-              <div className="flex-shrink-0">
-                <button 
-                  className="bg-event-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-event-blue-hover transition-colors flex items-center space-x-2 cursor-pointer relative z-10"
-                  onClick={() => {
-                    console.log('Button clicked for service:', service.id);
-                    router.push(`/vendor/${service.id}`);
-                  }}
-                >
-                  <span>View Details</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
             </>
           )}
         </div>

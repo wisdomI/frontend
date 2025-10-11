@@ -57,9 +57,13 @@ export function useAuth(): AuthState & AuthActions {
       const response = await authAPI.login(credentials)
       const authData = response.data.data || response.data
       
-      localStorage.setItem('accessToken', authData.accessToken)
-      localStorage.setItem('refreshToken', authData.refreshToken)
-      setUser(authData.user)
+      if (authData.accessToken) {
+        localStorage.setItem('accessToken', authData.accessToken)
+      }
+      if (authData.refreshToken) {
+        localStorage.setItem('refreshToken', authData.refreshToken)
+      }
+      setUser(authData.user || null)
       
       return true
     } catch (error: any) {

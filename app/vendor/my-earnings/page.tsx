@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
+import { useVendorEarnings } from '@/hooks/useVendorEarnings'
 import { Bar } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -37,22 +38,77 @@ export default function MyEarningsPage() {
   const [activePageTab, setActivePageTab] = useState<'Earnings' | 'Expenses Tracker'>('Earnings')
   const [selectedPeriod, setSelectedPeriod] = useState('Jul 2025')
   const [selectedView, setSelectedView] = useState('Daily')
+
+  // API hooks
+  const { 
+    earnings, 
+    withdrawals, 
+    stats, 
+    bankDetails, 
+    loading: earningsLoading, 
+    error: earningsError,
+    fetchEarnings,
+    requestWithdrawal,
+    updateBankDetails
+  } = useVendorEarnings()
   
   // Expenses tracker state
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [showExpenseToast, setShowExpenseToast] = useState(false)
-  const [expenses, setExpenses] = useState<Array<{ date: string; category: string; desc: string; amount: number }>>([
-    { date: '01/14/2025', category: 'Equipment', desc: 'Camera lens rental', amount: 150000 },
-    { date: '01/13/2025', category: 'Transport', desc: 'Fuel for event delivery', amount: 25000 },
-    { date: '01/11/2025', category: 'Marketing', desc: 'Social media ads', amount: 35000 },
-    { date: '01/09/2025', category: 'Materials', desc: 'Decorative materials', amount: 80000 },
-    { date: '01/07/2025', category: 'Utilities', desc: 'Electricity & internet bills', amount: 45000 },
-    { date: '01/04/2025', category: 'Staff', desc: 'Assistant payment', amount: 120000 },
-  ])
+  const [expenses, setExpenses] = useState<Array<{ date: string; category: string; desc: string; amount: number }>>([])
+  const [expensesLoading, setExpensesLoading] = useState(false)
+  const [expensesOverview, setExpensesOverview] = useState<any>(null)
 
-  // KPI values for Expenses Tracker
-  const totalEarningsKpi = 1250000
-  const totalExpensesKpi = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses])
+  // Fetch expenses from API
+  useEffect(() => {
+    if (activePageTab === 'Expenses Tracker') {
+      fetchExpenses()
+      fetchExpensesOverview()
+    }
+  }, [activePageTab])
+
+  const fetchExpenses = async () => {
+    setExpensesLoading(true)
+    try {
+      console.log('📥 Fetching expenses from API...')
+      const { expensesAPI } = await import('@/lib/api')
+      const response = await expensesAPI.getAll()
+      const apiExpenses = response.data.data || []
+      console.log('✅ Expenses loaded from API:', apiExpenses)
+      
+      // Transform to component format
+      const transformedExpenses = apiExpenses.map((exp: any) => ({
+        date: new Date(exp.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        category: exp.category.charAt(0).toUpperCase() + exp.category.slice(1),
+        desc: exp.description || 'No description',
+        amount: exp.amount
+      }))
+      
+      setExpenses(transformedExpenses)
+      console.log('✅ Expenses transformed:', transformedExpenses.length)
+    } catch (error: any) {
+      console.error('❌ Error fetching expenses:', error)
+      setExpenses([])
+    } finally {
+      setExpensesLoading(false)
+    }
+  }
+
+  const fetchExpensesOverview = async () => {
+    try {
+      console.log('📥 Fetching expenses overview from API...')
+      const { expensesAPI } = await import('@/lib/api')
+      const response = await expensesAPI.getOverview()
+      setExpensesOverview(response.data.data)
+      console.log('✅ Expenses overview loaded:', response.data.data)
+    } catch (error: any) {
+      console.error('❌ Error fetching expenses overview:', error)
+    }
+  }
+
+  // KPI values for Expenses Tracker - use API data
+  const totalEarningsKpi = stats?.totalEarnings || expensesOverview?.totalEarnings || 0
+  const totalExpensesKpi = expensesOverview?.totalExpenses || expenses.reduce((sum, e) => sum + e.amount, 0)
   const netProfitKpi = totalEarningsKpi - totalExpensesKpi
   const profitMarginKpi = (netProfitKpi / totalEarningsKpi) * 100
 
@@ -113,18 +169,31 @@ export default function MyEarningsPage() {
     recipientName: ''
   })
 
-  const earningsData: EarningRecord[] = [
-    { id: 1, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Released' },
-    { id: 2, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Pending' },
-    { id: 3, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Released' },
-    { id: 4, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Pending' },
-    { id: 5, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Paid' },
-    { id: 6, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Paid' },
-    { id: 7, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Pending' },
-    { id: 8, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Paid' },
-    { id: 9, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Paid' },
-    { id: 10, dateTime: '20/07/2025; 02:25pm', clientName: 'Daniel Adebayo', serviceType: 'Catering & Drinks', amount: 'N200,000.00', paymentStatus: 'Pending' },
-  ]
+  // Transform earnings from API to EarningRecord format
+  const earningsData: EarningRecord[] = useMemo(() => {
+    if (!earnings || earnings.length === 0) {
+      console.log('ℹ️ No earnings data from API yet')
+      return []
+    }
+    
+    console.log('🔄 Transforming earnings data:', earnings.length, 'records')
+    return earnings.map((earning: any) => ({
+      id: earning.id,
+      dateTime: new Date(earning.createdAt || earning.date).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }),
+      clientName: earning.clientName || 'Unknown Client',
+      serviceType: earning.description || earning.source || 'Service',
+      amount: `₦${earning.amount.toLocaleString()}`,
+      paymentStatus: earning.status === 'completed' ? 'Released' : 
+                     earning.status === 'pending' ? 'Pending' : 'Paid'
+    }))
+  }, [earnings])
 
   const filteredEarnings = earningsData.filter(earning => {
     const matchesSearch = earning.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -256,7 +325,9 @@ export default function MyEarningsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-blue-700 mb-1">Total Earnings</p>
-                <p className="text-lg sm:text-2xl font-bold text-blue-900">₦500,000.00</p>
+                <p className="text-lg sm:text-2xl font-bold text-blue-900">
+                  ₦{(stats?.totalEarnings || 0).toLocaleString()}
+                </p>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-xl flex items-center justify-center">
                 <FiTrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -269,7 +340,9 @@ export default function MyEarningsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-orange-700 mb-1">Pending Payout</p>
-                <p className="text-lg sm:text-2xl font-bold text-orange-900">₦100,000.00</p>
+                <p className="text-lg sm:text-2xl font-bold text-orange-900">
+                  ₦{(stats?.pendingEarnings || 0).toLocaleString()}
+                </p>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500 rounded-xl flex items-center justify-center">
                 <FiTrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -282,7 +355,9 @@ export default function MyEarningsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-green-700 mb-1">Withdrawable Balance</p>
-                <p className="text-lg sm:text-2xl font-bold text-green-900">₦100,000.00</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-900">
+                  ₦{(stats?.completedEarnings || 0).toLocaleString()}
+                </p>
               </div>
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center">
                 <FiTrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -785,11 +860,37 @@ export default function MyEarningsPage() {
             </div>
             <ExpenseForm
               onCancel={() => setIsAddExpenseOpen(false)}
-              onSave={(payload) => {
+              onSave={async (payload) => {
+                try {
+                  console.log('💾 Saving expense to API:', payload)
+                  const { expensesAPI } = await import('@/lib/api')
+                  
+                  // Create expense via API
+                  const expenseData = {
+                    category: payload.category.toLowerCase() as any,
+                    amount: payload.amount,
+                    date: new Date().toISOString(),
+                    description: payload.desc,
+                    receiptUrl: (payload as any).receiptUrl
+                  }
+                  
+                  const response = await expensesAPI.create(expenseData)
+                  console.log('✅ Expense created successfully:', response.data)
+                  
+                  // Add to local state for immediate display
                 setExpenses((prev) => [{ ...payload }, ...prev])
+                  
+                  // Refresh from API to ensure sync
+                  fetchExpenses()
+                  fetchExpensesOverview()
+                  
                 setIsAddExpenseOpen(false)
                 setShowExpenseToast(true)
                 setTimeout(() => setShowExpenseToast(false), 3000)
+                } catch (error: any) {
+                  console.error('❌ Error creating expense:', error)
+                  alert('Failed to create expense. Please try again.')
+                }
               }}
             />
           </div>

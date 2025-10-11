@@ -14,9 +14,19 @@ export default function ClientDashboardPage() {
   const { user } = useAuthContext()
   const [activeTab, setActiveTab] = useState('service-request-posts')
   
-  // API hooks
-  const { requests: serviceRequestsData, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests()
+  // API hooks - Use 'my' to get only the client's service requests
+  const { requests: serviceRequestsData, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests({ viewType: 'my' })
   const { data: dashboardStats, loading: statsLoading } = useApi(() => serviceRequestAPI.getStats().then(res => res.data))
+  
+  // Log to verify we're fetching the right data
+  useEffect(() => {
+    console.log('📊 Client Dashboard: Service requests loaded:', {
+      count: serviceRequestsData?.length || 0,
+      requests: serviceRequestsData,
+      loading: serviceRequestsLoading,
+      error: serviceRequestsError
+    })
+  }, [serviceRequestsData, serviceRequestsLoading, serviceRequestsError])
   
   // Transform API data to component format
   const transformServiceRequest = (request: any) => ({

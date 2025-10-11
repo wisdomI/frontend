@@ -26,8 +26,8 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
       setLoading(true)
       let response
       
-      if (isOwnPortfolio) {
-        response = await portfolioAPI.getMyPortfolios()
+      if (isOwnPortfolio && user?.id) {
+        response = await portfolioAPI.getUserPortfolios(user.id)
       } else if (userId) {
         response = await portfolioAPI.getUserPortfolios(userId)
       } else {

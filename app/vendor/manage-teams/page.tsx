@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useVendorTeam } from '@/hooks/useVendorTeam'
 import { FiSearch, FiCalendar, FiChevronDown, FiChevronLeft, FiChevronRight, FiPlus, FiUsers, FiClock, FiMoreVertical } from 'react-icons/fi'
 
 interface StaffRecord {
@@ -20,18 +21,47 @@ export default function ManageTeamsPage() {
   const [toDate, setToDate] = useState('18 Jul, 2025')
   const [currentPage, setCurrentPage] = useState(1)
 
-  const staffData: StaffRecord[] = [
-    { id: 1, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Sarah Madu', staffName: 'Moses Clement', staffEmail: 'mosesclement@gmail.com', staffPhone: '+234803 453 9866', role: 'Support' },
-    { id: 2, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Femi Ola', staffName: 'Favour Odunsi', staffEmail: 'favour@gmail.com', staffPhone: '+234803 453 9866', role: 'Supervisor' },
-    { id: 3, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Shola Ajayi', staffName: 'Michael Irabo', staffEmail: 'michael@gmail.com', staffPhone: '+234803 453 9866', role: 'Support' },
-    { id: 4, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Sarah Madu', staffName: 'Grace Okonkwo', staffEmail: 'grace@gmail.com', staffPhone: '+234803 453 9866', role: 'Supervisor' },
-    { id: 5, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Femi Ola', staffName: 'David Johnson', staffEmail: 'david@gmail.com', staffPhone: '+234803 453 9866', role: 'Support' },
-    { id: 6, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Shola Ajayi', staffName: 'Mary Williams', staffEmail: 'mary@gmail.com', staffPhone: '+234803 453 9866', role: 'Supervisor' },
-    { id: 7, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Sarah Madu', staffName: 'John Brown', staffEmail: 'john@gmail.com', staffPhone: '+234803 453 9866', role: 'Support' },
-    { id: 8, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Femi Ola', staffName: 'Sarah Davis', staffEmail: 'sarah@gmail.com', staffPhone: '+234803 453 9866', role: 'Supervisor' },
-    { id: 9, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Shola Ajayi', staffName: 'James Wilson', staffEmail: 'james@gmail.com', staffPhone: '+234803 453 9866', role: 'Support' },
-    { id: 10, dateTime: '20/07/2025; 02:25pm', profiledBy: 'Sarah Madu', staffName: 'Lisa Anderson', staffEmail: 'lisa@gmail.com', staffPhone: '+234803 453 9866', role: 'Supervisor' },
-  ]
+  // API hooks
+  const { 
+    staff, 
+    roles, 
+    teamStats, 
+    loading: teamLoading, 
+    error: teamError,
+    fetchStaff,
+    addStaff,
+    updateStaff,
+    removeStaff,
+    createRole,
+    updateRole,
+    deleteRole
+  } = useVendorTeam()
+
+  // Transform staff/members from API to StaffRecord format
+  const staffData: StaffRecord[] = React.useMemo(() => {
+    if (!staff || staff.length === 0) {
+      console.log('ℹ️ No team members from API yet')
+      return []
+    }
+    
+    console.log('🔄 Transforming team members:', staff.length, 'members')
+    return staff.map((member: any) => ({
+      id: member.id,
+      dateTime: new Date(member.createdAt).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }),
+      profiledBy: member.invitedBy || 'You',
+      staffName: member.name || member.userName || 'Unknown',
+      staffEmail: member.email,
+      staffPhone: member.phoneNumber || 'N/A',
+      role: member.role.charAt(0).toUpperCase() + member.role.slice(1)
+    }))
+  }, [staff])
 
   const filteredStaff = staffData.filter(staff => {
     const matchesSearch = staff.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||

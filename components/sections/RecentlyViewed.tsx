@@ -117,7 +117,15 @@ const RecentlyViewed: React.FC = () => {
           {/* Service Title with Diamond Icon */}
           <div className="flex items-start justify-between">
             <h3 className="text-lg font-bold text-gray-900 leading-tight font-asul">{service.title}</h3>
-            <div className="w-4 h-4 bg-blue-100 rounded-sm ml-2 flex-shrink-0"></div>
+            <div className="ml-2 flex-shrink-0">
+              <Image 
+                src="/Diamond.svg" 
+                alt="Diamond" 
+                width={16} 
+                height={16}
+                className="w-4 h-4"
+              />
+            </div>
           </div>
 
           {/* Vendor Name with Action Buttons */}
@@ -173,12 +181,6 @@ const RecentlyViewed: React.FC = () => {
             }}
           >
             {/* Clock Icon for Recently Viewed */}
-            <div className="flex items-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="#FF6B35" strokeWidth="2"/>
-                <path d="M12 6v6l4 2" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
             <h2 className="text-lg font-bold text-gray-800 font-asul">Recently Viewed</h2>
           </div>
           

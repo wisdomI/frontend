@@ -440,6 +440,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({})
   const [internalMobileOpen, setInternalMobileOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
   const pathname = usePathname()
   const { setSelectedCategory, setSelectedSubCategory } = useFilterContext()
   
@@ -465,8 +466,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
     setIsMobileOpen(false)
   }
 
-  const toggleMobileSidebar = () => {
-    setIsMobileOpen(!isMobileOpen)
+  const toggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      setIsDesktopCollapsed((v) => !v)
+    } else {
+      setIsMobileOpen(!isMobileOpen)
+    }
   }
 
   // Check if a menu item or its submenu is active
@@ -482,9 +487,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
 
   return (
     <>
-      {/* Mobile hamburger button */}
+      {/* Mobile hamburger button (hidden on large displays) */}
       <button
-        onClick={toggleMobileSidebar}
+        onClick={toggleSidebar}
         className={`md:hidden fixed top-20 z-[100] bg-[#0B2E6F] text-white p-2 rounded-lg shadow-lg transition-all duration-300 ${
           isMobileOpen ? 'left-[280px]' : 'left-4'
         }`}
@@ -507,11 +512,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
 
       {/* Sidebar */}
       <aside className={`
-        w-64 flex-shrink-0 transition-all duration-300 ease-in-out
+        flex-shrink-0 transition-all duration-300 ease-in-out
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:relative md:block
         fixed md:static top-0 left-0 z-[95] md:z-auto
         h-screen md:h-full md:max-h-full md:overflow-y-auto
+        md:ml-4 lg:ml-6
+        w-64 ${isDesktopCollapsed ? 'md:w-12 lg:w-12' : 'md:w-64 lg:w-64'}
       `}>
         {isFilterModalOpen ? (
           <FilterModal 
@@ -521,18 +528,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
         ) : (
           <div className="flex flex-col h-full md:h-full">
           {/* Header Section */}
-          <div className="mb-4">
+          <div className={`mb-4 ${isDesktopCollapsed ? 'md:mb-2 lg:mb-2' : 'lg:mb-6'}` }>
             <div className="flex items-center justify-between">
-              {/* Left - Empty space */}
-              <div></div>
+              {/* Left - Hamburger on large screens */}
+              <button
+                aria-label="Toggle categories"
+                onClick={toggleSidebar}
+                className="hidden md:inline-flex mr-3 bg-[#0B2E6F] text-white p-2 rounded-lg shadow-sm hover:shadow-md transition"
+              >
+                <Bars3Icon className="h-5 w-5" />
+              </button>
               
               {/* Center - Category Title */}
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 font-asul">Category</h2>
+              <h2 className={`text-xl md:text-2xl font-semibold text-gray-800 font-asul ${isDesktopCollapsed ? 'hidden' : ''}`}>Category</h2>
               
               {/* Right - Filter Icon */}
               <button 
                 onClick={() => setIsFilterModalOpen(true)}
-                className="bg-event-blue text-white p-3 rounded-lg hover:bg-event-blue-hover transition-colors duration-200"
+                className={`bg-event-blue text-white p-3 rounded-lg hover:bg-event-blue-hover transition-colors duration-200 ${isDesktopCollapsed ? 'hidden' : ''}`}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
@@ -541,19 +554,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
             </div>
           </div>
           
-          {/* Blue container with service categories */}
-          <div className="bg-[#0B2E6F] rounded-xl p-3 md:p-4 flex-1 md:flex-none overflow-hidden">
-            <nav>
-              <ul className="space-y-0.5 md:space-y-1">
-                {menuItems.map((item, index) => {
-                  const active = isActive(item)
-                  return (
+          {/* Blue container with service categories - when desktop collapsed, show icons only */}
+          <div className={`bg-[#0B2E6F] rounded-xl p-3 md:p-4 flex-1 md:flex-none overflow-hidden ${isDesktopCollapsed ? 'md:p-2 md:mt-1 lg:p-2 lg:mt-1' : ''}`}>
+            {isDesktopCollapsed ? (
+              <nav className="hidden md:block">
+                <ul className="space-y-2">
+                  {menuItems.map((item) => (
                     <li key={item.label}>
                       <div
-                        className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors cursor-pointer ${
-                          active
-                            ? 'text-yellow-400 bg-event-blue' 
-                            : 'text-white hover:bg-event-blue-hover'
+                        className={`flex items-center justify-center py-2 rounded-lg transition-colors cursor-pointer ${
+                          isActive(item) ? 'bg-event-blue text-yellow-400' : 'text-white hover:bg-event-blue-hover'
                         }`}
                         onClick={() => {
                           handleToggle(item.label)
@@ -561,60 +571,92 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                             handleCategoryClick(item.categoryKey)
                           }
                         }}
+                        title={item.label}
                       >
-                        <div className="flex items-center space-x-2 md:space-x-3">
-                          <div className={`${active ? 'text-yellow-400' : 'text-white'}`}>
-                            {React.cloneElement(item.icon, {
-                              className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-yellow-400' : 'text-white'}`,
-                            })}
-                          </div>
-                          <span className="font-medium text-sm md:text-base font-raleway">
-                            {item.label}
-                          </span>
-                        </div>
-                        {item.subMenu.length > 0 && (
-                          <ChevronRightIcon 
-                            className={`h-4 w-4 md:h-5 md:w-5 transition-transform ${
-                              openMenus[item.label] ? 'rotate-90' : ''
-                            } ${active ? 'text-yellow-400' : 'text-white'}`} 
-                          />
-                        )}
+                        {React.cloneElement(item.icon as any, {
+                          className: `h-6 w-6 ${isActive(item) ? 'text-yellow-400' : 'text-white'}`,
+                        })}
                       </div>
-                      {item.subMenu.length > 0 && openMenus[item.label] && (
-                        <ul className="ml-4 md:ml-6 mt-1 md:mt-2 space-y-0.5 md:space-y-1">
-                          {item.subMenu.map(sub => (
-                            <li key={sub.label}>
-                              <Link
-                                href={sub.route}
-                                className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors font-raleway ${
-                                  isSubMenuActive(sub.route)
-                                    ? 'bg-event-blue text-yellow-400'
-                                    : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'
-                                }`}
-                                onClick={() => {
-                                  setIsMobileOpen(false)
-                                  if (sub.subCategoryKey) {
-                                    handleSubCategoryClick(sub.subCategoryKey)
-                                  }
-                                }}
-                              >
-                                {sub.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </li>
-                  )
-                })}
-              </ul>
-            </nav>
+                  ))}
+                </ul>
+              </nav>
+            ) : (
+              <nav>
+                <ul className="space-y-0.5 md:space-y-1">
+                  {menuItems.map((item) => {
+                    const active = isActive(item)
+                    return (
+                      <li key={item.label}>
+                        <div
+                          className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors cursor-pointer ${
+                            active
+                              ? 'text-yellow-400 bg-event-blue' 
+                              : 'text-white hover:bg-event-blue-hover'
+                          }`}
+                          onClick={() => {
+                            handleToggle(item.label)
+                            if (item.categoryKey) {
+                              handleCategoryClick(item.categoryKey)
+                            }
+                          }}
+                        >
+                          <div className="flex items-center space-x-2 md:space-x-3">
+                            <div className={`${active ? 'text-yellow-400' : 'text-white'}`}>
+                              {React.cloneElement(item.icon as any, {
+                                className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-yellow-400' : 'text-white'}`,
+                              })}
+                            </div>
+                            <span className="font-medium text-sm md:text-base font-raleway">
+                              {item.label}
+                            </span>
+                          </div>
+                          {item.subMenu.length > 0 && (
+                            <ChevronRightIcon 
+                              className={`h-4 w-4 md:h-5 md:w-5 transition-transform ${
+                                openMenus[item.label] ? 'rotate-90' : ''
+                              } ${active ? 'text-yellow-400' : 'text-white'}`} 
+                            />
+                          )}
+                        </div>
+                        {item.subMenu.length > 0 && openMenus[item.label] && (
+                          <ul className="ml-4 md:ml-6 mt-1 md:mt-2 space-y-0.5 md:space-y-1">
+                            {item.subMenu.map(sub => (
+                              <li key={sub.label}>
+                                <Link
+                                  href={sub.route}
+                                  className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors font-raleway ${
+                                    isSubMenuActive(sub.route)
+                                      ? 'bg-event-blue text-yellow-400'
+                                      : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'
+                                  }`}
+                                  onClick={() => {
+                                    setIsMobileOpen(false)
+                                    if (sub.subCategoryKey) {
+                                      handleSubCategoryClick(sub.subCategoryKey)
+                                    }
+                                  }}
+                                >
+                                  {sub.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </nav>
+            )}
           </div>
 
-          {/* Post Service Request button outside the blue container */}
-          <div className="mt-3 md:mt-4">
-            <PostServiceModal />
-          </div>
+          {/* Post Service Request button outside the blue container - hidden when collapsed */}
+          {!isDesktopCollapsed && (
+            <div className="mt-3 md:mt-4">
+              <PostServiceModal />
+            </div>
+          )}
         </div>
         )}
       </aside>

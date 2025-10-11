@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const WhyChooseEventHub = () => {
     return (
-      <section className="bg-blue-100 rounded-t-lg p-4 md:p-6">
+      <section className="bg-blue-100 rounded-t-lg p-4 pt-0 mt-0 md:p-6">
         <div className="flex flex-col md:flex-row items-center justify-between text-gray-700 space-y-4 md:space-y-0">
           {/* Left Container - Why Choose EventHub */}
           <div className="flex items-center space-x-3">

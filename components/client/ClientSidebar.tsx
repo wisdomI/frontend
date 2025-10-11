@@ -111,8 +111,8 @@ export default function ClientSidebar({ onClose }: ClientSidebarProps) {
   ]
 
   return (
-    <div className="w-full h-full bg-white shadow-xl rounded-lg">
-      <div className="p-6 h-full flex flex-col">
+    <div className="w-full bg-white shadow-xl rounded-lg">
+      <div className="p-6 flex flex-col">
         {/* Close button for mobile */}
         {onClose && (
           <button
@@ -124,7 +124,7 @@ export default function ClientSidebar({ onClose }: ClientSidebarProps) {
         )}
         
         <h2 className="text-lg font-semibold text-gray-900 mb-6 font-asul">My Account</h2>
-        <nav className="space-y-2 flex-1">
+        <nav className="space-y-2">
           {menuItems.map((item) => (
             <Link
               key={item.href}

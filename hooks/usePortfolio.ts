@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { portfolioAPI } from '@/lib/api'
 import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest } from '@/types/api'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export const usePortfolio = () => {
+  const { user } = useAuthContext()
   const [portfolios, setPortfolios] = useState<Portfolio[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -11,8 +13,10 @@ export const usePortfolio = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await portfolioAPI.getMyPortfolios()
-      setPortfolios(response.data.data)
+      if (user?.id) {
+        const response = await portfolioAPI.getUserPortfolios(user.id)
+        setPortfolios(response.data.data)
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch portfolios')
     } finally {
