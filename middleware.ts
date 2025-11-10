@@ -23,13 +23,6 @@ export function middleware(request: NextRequest) {
   const authToken = request.cookies.get('authToken')?.value || 
                    request.headers.get('authorization')?.replace('Bearer ', '')
 
-  // Debug logging
-  console.log('Middleware:', {
-    pathname,
-    isProtectedRoute,
-    hasAuthToken: !!authToken,
-    userRole: request.cookies.get('userRole')?.value
-  })
 
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !authToken) {
@@ -79,7 +72,7 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://localhost:3000 https://localhost:3001 ws://localhost:3000 ws://localhost:3001 wss://localhost:3000 wss://localhost:3001 https://backend-a3nd.onrender.com wss://backend-a3nd.onrender.com; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src-elem 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: https:; font-src 'self' data:;"
+    "default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:3001 https://localhost:3000 https://localhost:3001 ws://localhost:3000 ws://localhost:3001 wss://localhost:3000 wss://localhost:3001 https://backend-a3nd.onrender.com wss://backend-a3nd.onrender.com https://eventhub-asgpata8c3aeapgu.westeurope-01.azurewebsites.net wss://eventhub-asgpata8c3aeapgu.westeurope-01.azurewebsites.net; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src-elem 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: https:; font-src 'self' data:;"
   )
 
   return response

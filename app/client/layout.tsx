@@ -34,6 +34,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       } else if (user?.accountType === 'admin') {
         router.push('/dashboard/admin')
         return
+      } else if (user?.accountType && !['client', 'individual', 'business'].includes(user.accountType)) {
+        // If user has an unrecognized account type, redirect to login
+        router.push('/auth/login')
+        return
       }
     }
   }, [loading, isAuthenticated, user, router, pathname])

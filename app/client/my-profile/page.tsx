@@ -35,49 +35,80 @@ export default function MyProfilePage() {
   useEffect(() => {
     const fetchProfilePicture = async () => {
       if (!user?.id || !isAuthenticated) {
-        console.log('⏸️ My Profile: Waiting for authentication...', { userId: user?.id, isAuthenticated })
         return
       }
       
       try {
-        console.log('🔄 My Profile: Fetching profile picture for user:', user.id)
+        const { profileAPI } = await import('@/lib/api')
         
         let response
         try {
           // Try the /profile/me endpoint first
+          console.log('🔍 Fetching profile from /profile/me endpoint...')
           response = await profileAPI.me()
-          console.log('📥 My Profile: Profile API response (via /me):', response.data)
+          console.log('✅ Profile fetched successfully:', response.data)
         } catch (meError: any) {
+          console.error('❌ Error fetching /profile/me:', {
+            status: meError.response?.status,
+            statusText: meError.response?.statusText,
+            url: meError.config?.url,
+            baseURL: meError.config?.baseURL,
+            message: meError.message
+          })
+          
           if (meError.response?.status === 404) {
-            console.log('⚠️ My Profile: /profile/me not found, trying /profile/:id')
+            console.log('ℹ️ Client Profile: /profile/me endpoint not implemented (404) - trying fallback')
             // Fallback to using user ID
-            response = await profileAPI.getById(user.id)
-            console.log('📥 My Profile: Profile API response (via /id):', response.data)
+            try {
+              console.log('🔍 Trying fallback: /profile/:id endpoint with userId:', user.id)
+              response = await profileAPI.getById(user.id)
+              console.log('✅ Profile fetched via fallback:', response.data)
+            } catch (getByIdError: any) {
+              console.error('❌ Error fetching /profile/:id:', {
+                status: getByIdError.response?.status,
+                statusText: getByIdError.response?.statusText,
+                url: getByIdError.config?.url,
+                baseURL: getByIdError.config?.baseURL,
+                message: getByIdError.message
+              })
+              
+              if (getByIdError.response?.status === 404) {
+                console.log('ℹ️ Client Profile: /profile/:id endpoint also not implemented (404) - using default avatar')
+                throw new Error('Profile endpoints not implemented')
+              } else {
+                throw getByIdError
+              }
+            }
           } else {
             throw meError
           }
         }
         
         if (response.data.data?.displayPicture) {
-          setProfileImage(response.data.data.displayPicture)
-          console.log('✅ My Profile: Loaded display picture from API:', response.data.data.displayPicture)
+          const displayPicture = response.data.data.displayPicture
+          setProfileImage(displayPicture)
+          
+          // Save to localStorage for fallback
+          if (typeof window !== 'undefined' && user?.id) {
+            localStorage.setItem(`profile_picture_${user.id}`, displayPicture)
+          }
         } else {
-          console.log('ℹ️ My Profile: No display picture in profile data')
           setProfileImage(null)
         }
       } catch (error: any) {
-        console.error('⚠️ My Profile: Error fetching profile picture:', error)
-        console.error('Error details:', {
-          status: error.response?.status,
-          message: error.message,
-          data: error.response?.data
-        })
+        console.log('ℹ️ Client Profile: Profile endpoints not available - using default avatar')
         
-        // If profile endpoint doesn't work at all, show user info without picture
-        if (error.response?.status === 404) {
-          console.log('ℹ️ My Profile: Profile endpoints not implemented yet, will show initials')
+        // If profile endpoint doesn't work at all, try localStorage fallback
+        if (error.response?.status === 404 || error.message === 'Profile endpoints not implemented') {
+          const savedImage = localStorage.getItem(`profile_picture_${user.id}`)
+          if (savedImage) {
+            setProfileImage(savedImage)
+          } else {
+            setProfileImage(null)
+          }
+        } else {
+          setProfileImage(null)
         }
-        setProfileImage(null)
       }
     }
     
@@ -85,7 +116,6 @@ export default function MyProfilePage() {
     
     // Listen for profile update events
     const handleProfileUpdate = () => {
-      console.log('🔄 My Profile: Profile updated event received, refreshing picture...')
       fetchProfilePicture()
     }
     
@@ -143,11 +173,16 @@ export default function MyProfilePage() {
       const formData = new FormData()
       formData.append('displayPicture', file)
 
-      const response = await profileAPI.update(user!.id, formData)
+      const response = await profileAPI.updateDisplayPicture(user!.id, formData)
       
       if (response.data.data?.displayPicture) {
-        setProfileImage(response.data.data.displayPicture)
-        console.log('✅ Profile picture uploaded successfully:', response.data.data.displayPicture)
+        const displayPicture = response.data.data.displayPicture
+        setProfileImage(displayPicture)
+        
+        // Save to localStorage for fallback
+        if (typeof window !== 'undefined' && user?.id) {
+          localStorage.setItem(`profile_picture_${user.id}`, displayPicture)
+        }
         
         // Dispatch event to update all headers
         if (typeof window !== 'undefined') {
@@ -157,8 +192,26 @@ export default function MyProfilePage() {
         alert('Profile picture updated successfully!')
       }
     } catch (error: any) {
-      console.error('Error uploading profile picture:', error)
-      alert('Failed to upload profile picture. Please try again.')
+      console.error('❌ Error uploading profile picture:', {
+        error,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        message: error.message,
+        responseData: error.response?.data
+      })
+      
+      // Check if it's a 404 error (endpoint not implemented)
+      if (error.response?.status === 404) {
+        alert('Profile picture upload is not available yet. The backend endpoint is not implemented on Azure backend.')
+      } else if (error.response?.status === 401) {
+        alert('Your session has expired. Please log in again.')
+      } else if (error.response?.status === 403) {
+        alert('You do not have permission to upload profile pictures.')
+      } else {
+        alert(`Failed to upload profile picture: ${error.response?.data?.message || error.message || 'Unknown error'}`)
+      }
     } finally {
       setUploadingImage(false)
     }
@@ -166,19 +219,41 @@ export default function MyProfilePage() {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Attempting to save profile data:', formData)
+      
       const formDataObj = new FormData()
       formDataObj.append('firstName', formData.firstName)
       formDataObj.append('lastName', formData.lastName)
       formDataObj.append('phoneNumber', formData.phone)
       formDataObj.append('businessAddress', formData.location)
       
-      await profileAPI.update(user!.id, formDataObj)
-      console.log('Profile updated successfully:', formData)
+      console.log('📤 Sending profile update request to:', `/profile/${user!.id}`)
+      const response = await profileAPI.update(user!.id, formDataObj)
+      
+      console.log('✅ Profile updated successfully:', response.data)
       setIsEditing(false)
       alert('Profile updated successfully!')
-    } catch (error) {
-      console.error('Error updating profile:', error)
-      alert('Failed to update profile. Please try again.')
+    } catch (error: any) {
+      console.error('❌ Error saving profile:', {
+        error,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        message: error.message,
+        responseData: error.response?.data
+      })
+      
+      // Check if it's a 404 error (endpoint not implemented)
+      if (error.response?.status === 404) {
+        alert('Profile update feature is not available yet. The backend endpoint is not implemented on Azure backend.')
+      } else if (error.response?.status === 401) {
+        alert('Your session has expired. Please log in again.')
+      } else if (error.response?.status === 403) {
+        alert('You do not have permission to update this profile.')
+      } else {
+        alert(`Failed to update profile: ${error.response?.data?.message || error.message || 'Unknown error'}`)
+      }
     }
   }
 
@@ -251,14 +326,8 @@ export default function MyProfilePage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
-                  <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto overflow-hidden">
+                  <div className="relative w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto overflow-hidden">
                     {(() => {
-                      console.log('🖼️ My Profile Render:', { 
-                        uploadingImage, 
-                        profileImage, 
-                        hasUser: !!user, 
-                        displayName: user?.displayName 
-                      })
                       
                       if (uploadingImage) {
                         return (
@@ -269,21 +338,18 @@ export default function MyProfilePage() {
                       }
                       
                       if (profileImage) {
-                        console.log('✅ Rendering profile image:', profileImage)
                         return (
                           <Image 
                             src={profileImage} 
                             alt="Profile" 
                             fill
                             className="object-cover"
-                            onLoad={() => console.log('✅ Profile image loaded successfully')}
-                            onError={() => console.error('❌ Profile image failed to load')}
+                            onError={() => setProfileImage(null)}
                           />
                         )
                       }
                       
                       if (user?.displayName) {
-                        console.log('📝 Rendering initial:', user.displayName.charAt(0))
                         return (
                           <span className="text-4xl font-semibold text-gray-600">
                             {user.displayName.charAt(0).toUpperCase()}

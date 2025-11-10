@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { meetingAPI } from '@/lib/api'
 import { Meeting, CreateMeetingRequest, UpdateMeetingRequest } from '@/types/api'

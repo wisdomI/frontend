@@ -6,18 +6,27 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { authAPI } from '@/lib/api'
 import { useApp } from '@/contexts/AppContext'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { ButtonLoader } from '@/components/ui/Loader'
+import EmailVerificationModal from '@/components/ui/modals/EmailVerificationModal'
 
 interface LoginFormProps {
-  accountType?: 'individual' | 'vendor'
+  accountType?: 'client' | 'vendor'
 }
 
-export default function LoginForm({ accountType = 'individual' }: LoginFormProps) {
+export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const [justLoggedIn, setJustLoggedIn] = useState(false)
   const { addNotification } = useApp()
   const { isAuthenticated, user, refreshUser, setUserData } = useAuthContext()
   const router = useRouter()
   const searchParams = useSearchParams()
+  
+  // Email verification state
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('')
+  
+  // Get redirect URL from query parameters
+  const redirectUrl = searchParams.get('redirect')
   
   const [formData, setFormData] = useState({
     email: '',
@@ -38,13 +47,16 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
     if (justLoggedIn && user) {
       console.log('LoginForm: All conditions met, redirecting based on account type:', user.accountType)
       
-      // Always redirect based on user account type
+      // Use redirect URL if available, otherwise redirect based on user account type
       let redirectPath = '/auth/login' // Default fallback
       
-      if (user.accountType === 'vendor') {
+      if (redirectUrl) {
+        redirectPath = redirectUrl
+        console.log('LoginForm: Using redirect URL from query params:', redirectPath)
+      } else if (user.accountType === 'vendor') {
         redirectPath = '/vendor'
         console.log('LoginForm: Redirecting vendor to /vendor')
-      } else if (user.accountType === 'individual' || user.accountType === 'business') {
+      } else if (user.accountType === 'client' || user.accountType === 'individual' || user.accountType === 'business') {
         redirectPath = '/client/dashboard'
         console.log('LoginForm: Redirecting client to /client/dashboard')
       } else if (user.accountType === 'admin') {
@@ -88,6 +100,12 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         hasPassword: !!formData.password
       })
       
+      // Log API configuration for debugging
+      console.log('LoginForm: API configuration:', {
+        baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://backend-a3nd.onrender.com/api/v1',
+        endpoint: '/auth/login'
+      })
+      
       // Call the real API
       const response = await authAPI.login({
         email: formData.email,
@@ -95,6 +113,7 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
       })
       
       console.log('LoginForm: Login response received:', response.data)
+      console.log('LoginForm: FULL response structure:', JSON.stringify(response.data, null, 2))
       
       // Extract tokens and user data from response
       let accessToken = null
@@ -152,7 +171,7 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
       
       // Map account types to middleware roles
       let middlewareRole = userData.accountType
-      if (userData.accountType === 'individual' || userData.accountType === 'business') {
+      if (userData.accountType === 'client' || userData.accountType === 'individual' || userData.accountType === 'business') {
         middlewareRole = 'client'
       } else if (userData.accountType === 'vendor') {
         middlewareRole = 'vendor'
@@ -190,13 +209,43 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         }
       }
       
-      // Override account type based on user selection if needed
-      if (accountType === 'vendor' && userData.accountType !== 'vendor') {
-        console.log('LoginForm: Overriding account type to vendor based on user selection')
-        userData = {
-          ...userData,
-          accountType: 'vendor'
-        }
+      // Validate that the selected account type matches the backend account type
+      const backendAccountType = userData.accountType
+      const selectedAccountType = accountType
+      
+      console.log('LoginForm: Account type validation:', {
+        backendAccountType,
+        selectedAccountType,
+        match: backendAccountType === selectedAccountType
+      })
+      
+      // Check if account types match
+      if (backendAccountType !== selectedAccountType) {
+        // Clear the stored tokens since this login should not proceed
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('userAccountType')
+        document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        
+        // Show error message with the correct account type
+        const correctAccountTypeLabel = backendAccountType === 'vendor' ? 'Event Vendor' : 'Individual/Org'
+        const wrongAccountTypeLabel = selectedAccountType === 'vendor' ? 'Event Vendor' : 'Individual/Org'
+        
+        addNotification({
+          type: 'error',
+          message: `Account type mismatch! You selected "${wrongAccountTypeLabel}" but this account is registered as "${correctAccountTypeLabel}". Please select the correct account type and try again.`
+        })
+        
+        setLoading(false)
+        return
+      }
+      
+      // Store accountType in localStorage for persistence across page reloads
+      if (userData.accountType) {
+        localStorage.setItem('userAccountType', userData.accountType)
+        console.log('LoginForm: Stored accountType in localStorage:', userData.accountType)
       }
       
       // Set user data directly in AuthContext
@@ -211,9 +260,12 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
       // Determine redirect path immediately
       let redirectPath = '/auth/login' // Default fallback
       
-      if (userData.accountType === 'vendor') {
+      if (redirectUrl) {
+        redirectPath = redirectUrl
+        console.log('LoginForm: Using redirect URL from query params (immediate):', redirectPath)
+      } else if (userData.accountType === 'vendor') {
         redirectPath = '/vendor'
-      } else if (userData.accountType === 'individual' || userData.accountType === 'business') {
+      } else if (userData.accountType === 'client' || userData.accountType === 'individual' || userData.accountType === 'business') {
         redirectPath = '/client/dashboard'
       } else if (userData.accountType === 'admin') {
         redirectPath = '/dashboard/admin'
@@ -255,7 +307,85 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
       })
       
       let errorMessage = 'Failed to sign in'
-      if (error.response?.status === 403) {
+      
+      // Handle network errors first
+      if (!error.response) {
+        // Check if it's a CORS or network connectivity issue
+        if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
+          // Check if we're in development mode and offer fallback
+          const isDevelopment = process.env.NODE_ENV === 'development'
+          
+          if (isDevelopment) {
+            // Offer development fallback option
+            const useDevMode = confirm(
+              'Unable to connect to the backend server. This is likely due to:\n\n' +
+              '• Server maintenance\n' +
+              '• CORS policy restrictions\n' +
+              '• Network connectivity issues\n\n' +
+              'Would you like to use Development Mode to continue testing? (This will create a mock user session)'
+            )
+            
+            if (useDevMode) {
+              // Create mock user for development
+              const mockUserData = {
+                id: 'dev-user-123',
+                accountType: accountType,
+                email: formData.email,
+                firstName: 'Dev',
+                lastName: 'User',
+                isEmailVerified: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+              
+              // Create mock tokens
+              const mockAccessToken = btoa(JSON.stringify({
+                id: mockUserData.id,
+                email: mockUserData.email,
+                accountType: mockUserData.accountType,
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour
+              }))
+              
+              // Store mock tokens
+              localStorage.setItem('accessToken', mockAccessToken)
+              document.cookie = `authToken=${mockAccessToken}; path=/; max-age=3600; SameSite=Lax`
+              document.cookie = `userRole=${accountType}; path=/; max-age=3600; SameSite=Lax`
+              
+              // Set user data
+              setUserData(mockUserData)
+              
+              addNotification({
+                type: 'success',
+                message: 'Successfully signed in! (Development Mode)'
+              })
+              
+              // Redirect based on account type
+              let redirectPath = '/auth/login'
+              if (redirectUrl) {
+                redirectPath = redirectUrl
+              } else if (accountType === 'vendor') {
+                redirectPath = '/vendor'
+              } else if (accountType === 'client' || accountType === 'individual' || accountType === 'business') {
+                redirectPath = '/client/dashboard'
+              }
+              
+              setTimeout(() => {
+                router.push(redirectPath)
+              }, 200)
+              
+              setJustLoggedIn(true)
+              setLoading(false)
+              return
+            }
+          }
+          
+          errorMessage = 'Unable to connect to the server. This might be due to:\n• Server maintenance\n• Network connectivity issues\n• CORS policy restrictions\n\nPlease try again later or contact support if the issue persists.'
+        } else {
+          errorMessage = 'Network error. Please check your internet connection and try again.'
+        }
+        console.error('LoginForm: Network error - no response received')
+      } else if (error.response?.status === 403) {
         const message = error.response?.data?.message || ''
         console.error('LoginForm: 403 Forbidden - Server response:', error.response?.data)
         
@@ -267,8 +397,20 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
           // This is the specific error we're seeing
           errorMessage = 'Account type mismatch. Please ensure you are using the correct login credentials for your account type.'
         } else if (message.includes('Please verify your email')) {
-          // Email verification required
-          errorMessage = 'Please verify your email before logging in. Check your inbox for a verification email.'
+          // Email verification required - FIXED: Now show modal instead of just message
+          errorMessage = ''  // Clear error message since we'll show modal
+          setPendingVerificationEmail(formData.email)
+          setShowEmailVerification(true)
+          addNotification({
+            type: 'info',
+            message: 'Please verify your email to complete login'
+          })
+          setLoading(false)
+          return  // Exit early to show modal
+        } else if (message.includes('Invalid credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.'
+        } else if (message.includes('Account not found')) {
+          errorMessage = 'No account found with this email address. Please check your email or register for a new account.'
         } else {
           errorMessage = `Access denied: ${message || 'Please verify your account status or contact support.'}`
         }
@@ -279,6 +421,10 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         } else {
           errorMessage = 'Invalid credentials. Please check your email and password.'
         }
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Invalid credentials. Please check your email and password.'
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later or contact support.'
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message
       } else if (error.message) {
@@ -298,6 +444,86 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         })
       }
       setLoading(false)
+    }
+  }
+
+  // Handle email verification after verification modal
+  const handleEmailVerify = async (code: string) => {
+    try {
+      console.log('LoginForm: Verifying email with code:', code)
+      const response = await authAPI.verifyEmail({
+        email: pendingVerificationEmail,
+        code
+      })
+      
+      console.log('LoginForm: Email verification successful:', response)
+      addNotification({
+        type: 'success',
+        message: 'Email verified successfully! Please log in again.'
+      })
+      
+      setShowEmailVerification(false)
+      setPendingVerificationEmail('')
+      
+      // Clear form and show login message
+      setFormData({
+        email: pendingVerificationEmail,
+        password: formData.password,
+        rememberMe: false
+      })
+    } catch (error: any) {
+      console.error('LoginForm: Email verification failed:', error)
+      let errorMsg = 'Verification failed. Please try again.'
+      
+      if (error.response?.status === 404) {
+        errorMsg = 'Email not found. Please register again.'
+      } else if (error.response?.status === 422) {
+        errorMsg = 'Invalid verification code. Please check and try again.'
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message
+      }
+      
+      addNotification({
+        type: 'error',
+        message: errorMsg
+      })
+    }
+  }
+
+  // Handle resending verification code
+  const handleResendCode = async () => {
+    try {
+      if (!pendingVerificationEmail) {
+        addNotification({
+          type: 'error',
+          message: 'Email not found. Please try logging in again.'
+        })
+        return
+      }
+      
+      console.log('LoginForm: Resending verification code to:', pendingVerificationEmail)
+      await authAPI.resendVerificationCode({ email: pendingVerificationEmail })
+      
+      addNotification({
+        type: 'success',
+        message: 'Verification code resent! Please check your email (including spam folder).'
+      })
+    } catch (error: any) {
+      console.error('LoginForm: Resend verification code failed:', error)
+      
+      let errorMsg = 'Failed to resend code. Please try again.'
+      if (error.response?.status === 404) {
+        errorMsg = 'Email not found. Please register again.'
+      } else if (error.response?.status === 429) {
+        errorMsg = 'Too many requests. Please wait a few minutes before trying again.'
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message
+      }
+      
+      addNotification({
+        type: 'error',
+        message: errorMsg
+      })
     }
   }
 
@@ -367,7 +593,9 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
           disabled={loading}
           className="w-full h-11 rounded-full text-white bg-[#0F2D62] hover:opacity-90 transition font-semibold"
         >
-          {loading ? 'Loading...' : 'Login'}
+          <ButtonLoader loading={loading} loadingText="Signing in...">
+            Login
+          </ButtonLoader>
         </button>
 
         <div className="text-center text-sm text-gray-600">Don&apos;t have an account? <a href="/auth/register" className="text-[#032D71] font-semibold">Register</a></div>
@@ -379,10 +607,24 @@ export default function LoginForm({ accountType = 'individual' }: LoginFormProps
         </div>
 
         <div className="flex items-center justify-center gap-6">
-          <Image src="/google.svg" alt="Google" width={28} height={28} />
-          <Image src="/apple.svg" alt="Apple" width={28} height={28} />
+          <Image src="/google.svg" alt="Google" width={28} height={28} style={{ width: "auto", height: "auto" }} />
+          <Image src="/apple.svg" alt="Apple" width={28} height={28} style={{ width: "auto", height: "auto" }} />
         </div>
       </form>
+      
+      {/* Email Verification Modal - NEW */}
+      {showEmailVerification && (
+        <EmailVerificationModal
+          isOpen={showEmailVerification}
+          onClose={() => {
+            setShowEmailVerification(false)
+            setPendingVerificationEmail('')
+          }}
+          email={pendingVerificationEmail}
+          onVerify={handleEmailVerify}
+          onResend={handleResendCode}
+        />
+      )}
     </div>
   )
 }

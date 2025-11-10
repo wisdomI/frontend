@@ -6,6 +6,7 @@ import { serviceAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { ServiceOffering } from '@/types/api'
 import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiDollarSign, FiClock, FiToggleLeft, FiToggleRight, FiTag } from 'react-icons/fi'
+import { ButtonLoader } from '@/components/ui/Loader'
 
 interface ServiceManagerProps {
   userId?: string
@@ -454,7 +455,9 @@ function CreateEditServiceModal({ service, onClose, onSuccess }: CreateEditServi
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Saving...' : (service ? 'Update' : 'Create')}
+                <ButtonLoader loading={loading} loadingText="Saving...">
+                  {service ? 'Update' : 'Create'}
+                </ButtonLoader>
               </button>
             </div>
           </form>

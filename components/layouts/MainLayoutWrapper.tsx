@@ -34,11 +34,29 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
     )
   }
 
-  // For home page, render only the children (it has its own full-width layout)
+  // For home page, render with full layout including sidebar
   if (isHomePage) {
     return (
       <Providers>
-        {children}
+        <div className="flex flex-col min-h-screen overflow-x-hidden">
+          <Header />
+          <NotificationBreadcrumbWrapper />
+          
+          {/* Main content area with sidebar - unified container and gutters */}
+          <div className="flex flex-1 bg-gray-50 mt-4 sm:mt-6">
+            <Sidebar />
+            
+            {/* Main content with consistent max-width container */}
+            <main className="flex-1">
+              <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
+            </main>
+          </div>
+          
+          <Footer />
+          <NotificationContainer />
+        </div>
       </Providers>
     )
   }

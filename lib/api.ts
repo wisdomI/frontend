@@ -26,6 +26,7 @@ import {
   CreateServiceRequestData,
   CreateVendorServiceRequestData,
   CreateBidRequest,
+  UpdateBidRequest,
   CreateVendorResponseRequest,
   CreateRatingRequest,
   SendMessageRequest,
@@ -62,6 +63,9 @@ import {
   CreateInvoiceRequest,
   UpdateInvoiceRequest,
   InvoiceStats,
+  Receipt,
+  CreateReceiptRequest,
+  ReceiptStats,
   Earning,
   EarningsOverview,
   Expense,
@@ -72,10 +76,25 @@ import {
   CreateTeamRequest,
   UpdateTeamRequest,
   InviteTeamMemberRequest,
-  TeamStats
+  TeamStats,
+  ProfitAnalysis,
+  PerformanceDashboard,
+  ClientGrowth,
+  ServicePerformance,
+  Notification,
+  NotificationPreferences,
+  NotificationStats,
+  UserSettings,
+  Bank,
+  BankAccount,
+  Withdrawal,
+  WithdrawalStats,
+  Availability,
+  AvailabilityStats
 } from '@/types/api'
 
-const API_BASE_URL = 'https://backend-a3nd.onrender.com/api/v1'
+// Backend API configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-a3nd.onrender.com/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -91,6 +110,67 @@ let isRefreshing = false
 let pendingRequests: Array<(token: string | null) => void> = []
 
 const setAuthHeader = async (config: any) => {
+  // Skip adding auth headers for public endpoints
+  const publicEndpoints = [
+    // Auth endpoints
+    '/auth/login', 
+    '/auth/register', 
+    '/auth/verify-email', 
+    '/auth/resend-verification-code', 
+    '/password/reset', 
+    '/password/validate-code', 
+    '/password/reset-password',
+    // Public service browsing endpoints (GET only)
+    '/service/',
+    '/service?',
+    // Ratings (public read access)
+    '/ratings/stats/',
+    '/ratings/reviewee/',
+    // Categories (public read access for browsing)
+    '/categories/'
+  ]
+  
+  // Check if this is a GET request to public service endpoints
+  // IMPORTANT: Only GET requests to /service/ are public, POST/PUT/DELETE require auth
+  // Also, /service/me requires auth (user's own services)
+  const isPublicGetRequest = config.method?.toLowerCase() === 'get' && 
+    !config.url?.includes('/service/me') && // /service/me needs auth
+    (config.url?.includes('/service/') || 
+     config.url?.includes('/service?') || 
+     config.url?.includes('/ratings/stats/') ||
+     config.url?.includes('/ratings/reviewee/') ||
+     config.url?.includes('/categories/'))
+  
+  // Check if this is a POST/PUT/DELETE to /service/ - these need auth
+  const isServiceMutation = (config.method?.toLowerCase() === 'post' || 
+                             config.method?.toLowerCase() === 'put' || 
+                             config.method?.toLowerCase() === 'delete' || 
+                             config.method?.toLowerCase() === 'patch') &&
+    config.url?.includes('/service/')
+  
+  // Check if this is a mutation to /categories/ - these need auth
+  const isCategoryMutation = (config.method?.toLowerCase() === 'post' || 
+                              config.method?.toLowerCase() === 'put' || 
+                              config.method?.toLowerCase() === 'delete' || 
+                              config.method?.toLowerCase() === 'patch') &&
+    config.url?.includes('/categories/')
+  
+  // /service/me always needs auth (user's own services)
+  const isServiceMe = config.url?.includes('/service/me')
+  
+  const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint))
+  
+  // Only skip auth for truly public endpoints (not mutations to /service/ or /categories/, not /service/me)
+  if ((isPublicEndpoint || isPublicGetRequest) && !isServiceMutation && !isCategoryMutation && !isServiceMe) {
+    console.log('API: Skipping auth header for public endpoint:', config.url, 'method:', config.method)
+    return config
+  }
+  
+  // Log when we're adding auth to service mutations or /service/me
+  if (isServiceMutation || isServiceMe) {
+    console.log('API: Adding auth header for service endpoint:', config.url, 'method:', config.method)
+  }
+  
   const token = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
   if (token) {
     // Check if token is expired or about to expire
@@ -110,10 +190,8 @@ const setAuthHeader = async (config: any) => {
           
           if (newToken) {
             config.headers.Authorization = `Bearer ${newToken}`
-            console.log('✅ Token refreshed proactively, using new token')
             return config
           } else {
-            console.log('❌ Proactive refresh failed, request will likely fail')
             localStorage.removeItem(ACCESS_TOKEN_KEY)
             localStorage.removeItem(REFRESH_TOKEN_KEY)
           }
@@ -126,7 +204,6 @@ const setAuthHeader = async (config: any) => {
           // Don't wait for refresh, just trigger it
           refreshAccessToken().then(newToken => {
             if (newToken) {
-              console.log('✅ Proactive token refresh complete')
             }
           })
         }
@@ -137,9 +214,20 @@ const setAuthHeader = async (config: any) => {
     
     config.headers.Authorization = `Bearer ${token}`
     console.log('API: Setting Authorization header for', config.url)
+    console.log('API: Authorization header value:', config.headers.Authorization?.substring(0, 80) + '...')
   } else {
     console.log('API: No token found for request to:', config.url)
   }
+  
+  // DEBUG: Log all headers being sent (for service endpoint debugging)
+  if (config.url?.includes('/service')) {
+    console.log('🔍 SERVICE REQUEST HEADERS:', {
+      'Authorization': config.headers.Authorization ? '✅ Present (Bearer ...)' : '❌ Missing',
+      'Content-Type': config.headers['Content-Type'],
+      'All headers': Object.keys(config.headers)
+    })
+  }
+  
   return config
 }
 
@@ -167,14 +255,129 @@ async function refreshAccessToken(): Promise<string | null> {
       headers: { Authorization: `Bearer ${refreshToken}` },
     })
     
-    console.log('🔄 Token Refresh: Response received:', res.data)
+    // Log the full response structure properly
+    console.log('🔄 Token Refresh: Full response object:', res)
+    console.log('🔄 Token Refresh: Response data:', res.data)
+    console.log('🔄 Token Refresh: Response data (stringified):', JSON.stringify(res.data, null, 2))
+    console.log('🔄 Token Refresh: Response type:', typeof res.data)
+    console.log('🔄 Token Refresh: Response keys:', Object.keys(res.data || {}))
     
-    const newAccessToken: string | undefined = res?.data?.accessToken || res?.data?.data?.accessToken
+    // Try multiple possible response structures
+    const responseData = res?.data
+    
+    // Log nested structure if it exists - check ALL possible nested paths
+    if (responseData?.data) {
+      console.log('🔄 Token Refresh: Found nested data object')
+      console.log('🔄 Token Refresh: Nested data type:', typeof responseData.data)
+      console.log('🔄 Token Refresh: Nested data keys:', Object.keys(responseData.data || {}))
+      console.log('🔄 Token Refresh: Nested data (stringified):', JSON.stringify(responseData.data, null, 2))
+      
+      // Check if nested data is an object with more nesting
+      if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
+        console.log('🔄 Token Refresh: Checking deeply nested paths...')
+        console.log('🔄 Token Refresh: data.data?.accessToken:', responseData.data.data?.accessToken)
+        console.log('🔄 Token Refresh: data.data?.token:', responseData.data.data?.token)
+      }
+    }
+    
+    // Try to extract token from multiple possible locations
+    // Check direct properties first
+    console.log('🔄 Token Refresh: Checking token locations...')
+    console.log('  - responseData?.accessToken:', responseData?.accessToken ? 'FOUND' : 'not found')
+    console.log('  - responseData?.token:', responseData?.token ? 'FOUND' : 'not found')
+    console.log('  - responseData?.access_token:', responseData?.access_token ? 'FOUND' : 'not found')
+    
+    // Check nested properties
+    if (responseData?.data) {
+      console.log('  - responseData?.data?.accessToken:', responseData?.data?.accessToken ? 'FOUND' : 'not found')
+      console.log('  - responseData?.data?.token:', responseData?.data?.token ? 'FOUND' : 'not found')
+      console.log('  - responseData?.data?.access_token:', responseData?.data?.access_token ? 'FOUND' : 'not found')
+      
+      // Check if data itself is the token string
+      if (typeof responseData.data === 'string') {
+        console.log('  - responseData.data (as string):', 'FOUND (data is token string)')
+      }
+      
+      // Check deeply nested
+      if (responseData.data?.data) {
+        console.log('  - responseData?.data?.data?.accessToken:', responseData?.data?.data?.accessToken ? 'FOUND' : 'not found')
+        console.log('  - responseData?.data?.data?.token:', responseData?.data?.data?.token ? 'FOUND' : 'not found')
+      }
+    }
+    
+    // Helper function to find JWT token in any object (recursive search)
+    const findJWTInObject = (obj: any, depth = 0): string | undefined => {
+      if (depth > 3) return undefined // Prevent infinite recursion
+      if (!obj || typeof obj !== 'object') return undefined
+      
+      // Check if this object itself is a string that looks like a JWT
+      if (typeof obj === 'string' && obj.startsWith('eyJ')) {
+        return obj
+      }
+      
+      // Check all string properties for JWT-like tokens
+      for (const key in obj) {
+        const value = obj[key]
+        if (typeof value === 'string' && value.startsWith('eyJ') && value.split('.').length === 3) {
+          return value
+        }
+        // Recursively search nested objects
+        if (typeof value === 'object' && value !== null) {
+          const found = findJWTInObject(value, depth + 1)
+          if (found) return found
+        }
+      }
+      return undefined
+    }
+    
+    const newAccessToken: string | undefined = 
+      responseData?.accessToken ||                    // Direct accessToken
+      responseData?.data?.accessToken ||              // Nested in data.accessToken
+      responseData?.data?.data?.accessToken ||        // Deeply nested
+      responseData?.data?.token ||                    // Nested in data.token
+      responseData?.data?.data?.token ||              // Deeply nested token
+      responseData?.token ||                          // Direct token
+      responseData?.data?.access_token ||             // Snake case nested
+      responseData?.data?.data?.access_token ||       // Deeply nested snake case
+      responseData?.access_token ||                   // Snake case direct
+      responseData?.authToken ||                      // Alternative field name
+      responseData?.data?.authToken ||                // Nested authToken
+      responseData?.jwt ||                            // JWT field
+      responseData?.data?.jwt ||                      // Nested JWT
+      responseData?.jwtToken ||                       // JWT token field
+      responseData?.data?.jwtToken ||                 // Nested JWT token
+      (responseData?.data && typeof responseData.data === 'string' ? responseData.data : undefined) || // If data is the token itself
+      (responseData?.data?.data && typeof responseData.data.data === 'string' ? responseData.data.data : undefined) || // If data.data is the token
+      findJWTInObject(responseData) // Fallback: search entire response for JWT-like strings
+    
+    console.log('🔄 Token Refresh: Extracted token:', {
+      hasToken: !!newAccessToken,
+      tokenLength: newAccessToken?.length,
+      tokenPreview: newAccessToken ? `${newAccessToken.substring(0, 20)}...` : 'none',
+      responseStructure: {
+        hasData: !!responseData?.data,
+        dataType: typeof responseData?.data,
+        dataKeys: responseData?.data && typeof responseData.data === 'object' ? Object.keys(responseData.data) : 'not an object',
+        topLevelKeys: Object.keys(responseData || {})
+      }
+    })
+    
     if (newAccessToken && typeof window !== 'undefined') {
       localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken)
-      console.log('✅ Token Refresh: Success! New token saved')
+      console.log('✅ Token Refresh: Successfully stored new access token')
+      
+      // Also update the refresh token if provided
+      const newRefreshToken = responseData?.refreshToken || 
+                             responseData?.data?.refreshToken ||
+                             responseData?.data?.refresh_token ||
+                             responseData?.refresh_token
+      if (newRefreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
+        console.log('✅ Token Refresh: Also updated refresh token')
+      }
     } else {
       console.error('❌ Token Refresh: No access token in response:', res.data)
+      console.error('❌ Token Refresh: Full response structure:', JSON.stringify(res.data, null, 2))
     }
     return newAccessToken || null
   } catch (e: any) {
@@ -241,8 +444,25 @@ api.interceptors.response.use(
             pendingRequests = []
 
             if (newToken) {
-              originalRequest.headers.Authorization = `Bearer ${newToken}`
+              // Ensure we use the fresh token from localStorage
+              const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : newToken
+              originalRequest.headers.Authorization = `Bearer ${freshToken || newToken}`
+              console.log('✅ Token Refresh (403): Retrying request with new token:', originalRequest.url)
               return api(originalRequest)
+            } else {
+              // Token refresh failed for 403, but don't redirect for public endpoints
+              
+              const publicEndpoints = ['/service/', '/services', '/meetings', '/categories/']
+              const isPublicEndpoint = publicEndpoints.some(endpoint => 
+                originalRequest.url?.includes(endpoint)
+              )
+              
+              if (!isPublicEndpoint && typeof window !== 'undefined') {
+                localStorage.removeItem(ACCESS_TOKEN_KEY)
+                localStorage.removeItem(REFRESH_TOKEN_KEY)
+                window.location.href = '/auth/login'
+              } else {
+              }
             }
           }
         } catch (e) {
@@ -252,6 +472,18 @@ api.interceptors.response.use(
     }
 
     if (status === 401 && !originalRequest?._retry) {
+      // Check if this is a public endpoint - if so, don't try to refresh or redirect
+      const publicGetEndpoints = ['/service/', '/service?', '/ratings/stats/', '/ratings/reviewee/']
+      const isPublicGetEndpoint = originalRequest.method?.toLowerCase() === 'get' && 
+        publicGetEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
+      
+      if (isPublicGetEndpoint) {
+        console.log('🌐 401 on public endpoint - backend requires auth but frontend allows anonymous access:', originalRequest.url)
+        // Return the error without attempting refresh or redirect
+        // This allows the frontend to handle it gracefully (e.g., show "No services available")
+        return Promise.reject(error)
+      }
+      
       console.log('🔒 401 Unauthorized: Attempting token refresh for', originalRequest.url)
       
       if (isRefreshing) {
@@ -259,9 +491,13 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           pendingRequests.push((token) => {
             if (token) {
-              originalRequest.headers.Authorization = `Bearer ${token}`
+              // Ensure we use the fresh token from localStorage
+              const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : token
+              originalRequest.headers.Authorization = `Bearer ${freshToken || token}`
+              console.log('✅ Token Refresh (queued): Retrying request with new token:', originalRequest.url)
               resolve(api(originalRequest))
             } else {
+              console.error('❌ Token Refresh (queued): No token available, rejecting request')
               reject(error)
             }
           })
@@ -277,12 +513,21 @@ api.interceptors.response.use(
       pendingRequests = []
 
       if (newToken) {
-        console.log('✅ Token refreshed, retrying original request:', originalRequest.url)
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        // Ensure we use the fresh token from localStorage (in case it was updated)
+        const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : newToken
+        originalRequest.headers.Authorization = `Bearer ${freshToken || newToken}`
+        console.log('✅ Token Refresh: Retrying request with new token:', originalRequest.url)
         return api(originalRequest)
       } else {
-        console.log('❌ Token refresh failed, redirecting to login...')
-        if (typeof window !== 'undefined') {
+        console.error('❌ Token Refresh: Failed to get new token, cannot retry request')
+        
+        // Don't redirect for public endpoints that should be accessible without authentication
+        const publicEndpoints = ['/service/', '/services', '/meetings', '/categories/']
+        const isPublicEndpoint = publicEndpoints.some(endpoint => 
+          originalRequest.url?.includes(endpoint)
+        )
+        
+        if (!isPublicEndpoint && typeof window !== 'undefined') {
           localStorage.removeItem(ACCESS_TOKEN_KEY)
           localStorage.removeItem(REFRESH_TOKEN_KEY)
           window.location.href = '/auth/login'
@@ -290,9 +535,41 @@ api.interceptors.response.use(
       }
     }
 
-    // Log other errors for debugging
-    if (status) {
+    // Handle network errors (backend down)
+    if (!status && error.code === 'ERR_NETWORK') {
+      console.error('🚨 Backend server appears to be down or unreachable:', API_BASE_URL)
+      console.error('🚨 Network error details:', error.message)
+      
+      // Show user-friendly error for critical endpoints
+      const criticalEndpoints = ['/auth/login', '/auth/register', '/auth/me']
+      const isCriticalEndpoint = criticalEndpoints.some(endpoint => 
+        originalRequest.url?.includes(endpoint)
+      )
+      
+      if (isCriticalEndpoint && typeof window !== 'undefined') {
+        // Enhanced error message for better user understanding
+        console.error('🚨 Critical API endpoint failed - backend may be down')
+        console.error('🚨 This could be due to:')
+        console.error('   • Server maintenance')
+        console.error('   • CORS policy restrictions')
+        console.error('   • Network connectivity issues')
+        console.error('   • Backend service unavailable')
+      }
+      
+      return Promise.reject(error)
+    }
+
+    // Log other errors for debugging (but suppress expected errors)
+    const suppressedEndpoints = ['/profile/', '/meetings/', '/categories/stats', '/auth/', '/portfolio/user/']
+    const isSuppressedEndpoint = suppressedEndpoints.some(endpoint => 
+      originalRequest.url?.includes(endpoint)
+    )
+    
+    if (status && !isSuppressedEndpoint) {
       console.log(`⚠️ API Error ${status}:`, originalRequest.url, error.message)
+    } else if (status && isSuppressedEndpoint) {
+      // Suppress these errors completely - they're expected to fail or require special permissions
+      return Promise.reject(error)
     }
 
     return Promise.reject(error)
@@ -321,6 +598,12 @@ export const authAPI = {
   revokeRefreshToken: (data: RevokeRefreshTokenRequest) => api.post<ApiResponse>('/auth/revoke-refresh-token', data),
   logout: (data: LogoutRequest) => api.post<ApiResponse>('/auth/logout', data),
   
+  // Role Management
+  switchRole: (role: string) => api.post<ApiResponse>('/auth/switch-role', { role }),
+  addVendorRole: (vendorData: { businessName: string; businessAddress: string; businessEmail: string; businessPhone: string }) => 
+    api.post<ApiResponse>('/auth/add-vendor-role', vendorData),
+  getRoles: () => api.get<ApiResponse<any[]>>('/auth/roles'),
+  
   // User Information
   me: () => api.get<ApiResponse<User>>('/auth/me'),
   getById: (id: string) => api.get<ApiResponse<User>>(`/auth/${id}`),
@@ -344,12 +627,11 @@ export const profileAPI = {
 // Portfolio Management API (Vendors Only)
 export const portfolioAPI = {
   create: (data: FormData) => api.post<ApiResponse<Portfolio>>('/portfolio/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  getAll: (params?: SearchParams) => api.get<ApiResponse<Portfolio[]>>('/portfolio/', { params }), // Changed from /portfolio/all to /portfolio/
+  getAll: (params?: SearchParams) => api.get<ApiResponse<Portfolio[]>>('/portfolio/all', { params }),
   getById: (id: string) => api.get<ApiResponse<Portfolio>>(`/portfolio/${id}`),
   getUserPortfolios: (userId: string) => api.get<ApiResponse<Portfolio[]>>(`/portfolio/user/${userId}`),
-  // getMyPortfolios: Endpoint doesn't exist - removed
-  update: (id: string, data: FormData) => api.patch<ApiResponse<Portfolio>>(`/portfolio/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  removeMedia: (id: string) => api.delete<ApiResponse>(`/portfolio/${id}/media`),
+  update: (id: string, data: FormData) => api.patch<ApiResponse<Portfolio>>(`/portfolio/single-portfolio/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  removeMedia: (id: string, mediaUrl: string) => api.delete<ApiResponse>(`/portfolio/${id}/media`, { data: { mediaUrl } }),
   delete: (id: string) => api.delete<ApiResponse>(`/portfolio/${id}`),
 }
 
@@ -362,7 +644,7 @@ export const serviceAPI = {
   myServices: () => api.get<ApiResponse<ServiceOffering[]>>('/service/me'),
   getAll: (params?: SearchParams) => api.get<ApiResponse<ServiceOffering[]>>('/service/', { params }),
   getById: (id: string) => api.get<ApiResponse<ServiceOffering>>(`/service/${id}`),
-  userServices: () => api.get<ApiResponse<ServiceOffering[]>>('/service/user'),
+  userServices: () => api.get<ApiResponse<ServiceOffering[]>>('/service/user-services'),
   
   // Update and delete use different route (/service/:id instead of /profile/serviceOffering)
   update: (id: string, data: FormData) => api.patch<ApiResponse<ServiceOffering>>(`/service/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
@@ -390,7 +672,15 @@ export const meetingAPI = {
 
 // Service Requests API
 export const serviceRequestAPI = {
-  create: (data: FormData) => api.post<ApiResponse<ServiceRequest>>('/service-requests/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  // Basic CRUD operations
+  create: (data: FormData | any) => {
+    if (data instanceof FormData) {
+      // Don't set Content-Type manually - axios will set it with boundary automatically
+      return api.post<ApiResponse<ServiceRequest>>('/service-requests/', data);
+    } else {
+      return api.post<ApiResponse<ServiceRequest>>('/service-requests/', data);
+    }
+  },
   getAll: (params?: ServiceRequestSearchParams) => api.get<ApiResponse<ServiceRequest[]>>('/service-requests/', { params }),
   getMy: () => api.get<ApiResponse<ServiceRequest[]>>('/service-requests/my'),
   getAssigned: () => api.get<ApiResponse<ServiceRequest[]>>('/service-requests/assigned'),
@@ -399,16 +689,39 @@ export const serviceRequestAPI = {
   search: (params: ServiceRequestSearchParams) => api.get<ApiResponse<ServiceRequest[]>>('/service-requests/search', { params }),
   getStats: () => api.get<ApiResponse<ServiceRequestStats>>('/service-requests/stats'),
   getById: (id: string) => api.get<ApiResponse<ServiceRequest>>(`/service-requests/${id}`),
-  update: (id: string, data: FormData) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id: string, data: FormData | any) => {
+    if (data instanceof FormData) {
+      // Don't set Content-Type manually - axios will set it with boundary automatically
+      return api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}`, data);
+    } else {
+      return api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}`, data);
+    }
+  },
   delete: (id: string) => api.delete<ApiResponse>(`/service-requests/${id}`),
-  toggleStatus: (id: string) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/toggle-status`),
-  assignPlanner: (id: string, plannerId: string) => api.post<ApiResponse<ServiceRequest>>(`/service-requests/${id}/assign-planner`, { plannerId }),
-  updateStatus: (id: string, status: 'open' | 'in-progress' | 'completed' | 'cancelled') => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/update-status`, { status }),
+  
+  // Vendor response operations
+  vendorAccept: (id: string, data?: any) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/vendor-accept`, data),
+  vendorReject: (id: string, data?: any) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/vendor-reject`, data),
+  toggleStatus: (id: string, data?: any) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/toggle-status`, data),
+  
+  // Admin operations
+  assignPlanner: (id: string, data: { plannerId: string; notes?: string }) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/assignPlanner`, data),
+  updateStatus: (id: string, data: { status: string; notes?: string }) => api.patch<ApiResponse<ServiceRequest>>(`/service-requests/${id}/update-status`, data),
+  
+  // Vendor response management
+  getVendorResponses: (id: string) => api.get<ApiResponse<any[]>>(`/service-requests/${id}/vendor-responses/`),
+  getVendorResponseHistory: () => api.get<ApiResponse<any[]>>('/service-requests/vendor-responses/history'),
+  
+  // Bulk operations
+  bulkVendorResponses: (data: any[]) => api.patch<ApiResponse<any>>('/service-requests/bulk-vendor-responses', data),
 }
 
 // Vendor Service Requests API
 export const vendorServiceRequestAPI = {
-  create: (data: FormData) => api.post<ApiResponse<VendorServiceRequest>>('/vendor-service-requests/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (data: FormData) => {
+    // Don't set Content-Type manually - axios will set it with boundary automatically
+    return api.post<ApiResponse<VendorServiceRequest>>('/vendor-service-requests/', data);
+  },
   getAll: (params?: SearchParams) => api.get<ApiResponse<VendorServiceRequest[]>>('/vendor-service-requests/', { params }),
   getMy: () => api.get<ApiResponse<VendorServiceRequest[]>>('/vendor-service-requests/my'),
   getReceived: () => api.get<ApiResponse<VendorServiceRequest[]>>('/vendor-service-requests/received'),
@@ -417,10 +730,25 @@ export const vendorServiceRequestAPI = {
   search: (params: ServiceRequestSearchParams) => api.get<ApiResponse<VendorServiceRequest[]>>('/vendor-service-requests/search', { params }),
   getStats: () => api.get<ApiResponse<ServiceRequestStats>>('/vendor-service-requests/stats'),
   getById: (id: string) => api.get<ApiResponse<VendorServiceRequest>>(`/vendor-service-requests/${id}`),
-  update: (id: string, data: FormData) => api.patch<ApiResponse<VendorServiceRequest>>(`/vendor-service-requests/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id: string, data: FormData) => {
+    // Don't set Content-Type manually - axios will set it with boundary automatically
+    return api.patch<ApiResponse<VendorServiceRequest>>(`/vendor-service-requests/${id}`, data);
+  },
   delete: (id: string) => api.delete<ApiResponse>(`/vendor-service-requests/${id}`),
   toggleStatus: (id: string) => api.patch<ApiResponse<VendorServiceRequest>>(`/vendor-service-requests/${id}/toggle-status`),
   respond: (id: string, response: { response: 'accepted' | 'declined' | 'counter_offer' }) => api.patch<ApiResponse<VendorServiceRequest>>(`/vendor-service-requests/${id}/respond`, response),
+}
+
+// Vendor Response API
+export const vendorResponseAPI = {
+  getAll: (params?: SearchParams) => api.get<ApiResponse<VendorResponse[]>>('/service-requests/vendor-responses/', { params }),
+  getById: (id: string) => api.get<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}`),
+  create: (data: any) => api.post<ApiResponse<VendorResponse>>('/service-requests/vendor-responses/', data),
+  update: (id: string, data: any) => api.patch<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse>(`/service-requests/vendor-responses/${id}`),
+  withdraw: (id: string) => api.patch<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}/withdraw`),
+  getHistory: () => api.get<ApiResponse<VendorResponse[]>>('/service-requests/vendor-responses/history'),
+  getStats: () => api.get<ApiResponse<any>>('/service-requests/vendor-responses/stats'),
 }
 
 // Invoice Management API
@@ -432,9 +760,27 @@ export const invoiceAPI = {
   getStats: () => api.get<ApiResponse<InvoiceStats>>('/invoices/stats'),
   update: (id: string, data: UpdateInvoiceRequest) => api.patch<ApiResponse<Invoice>>(`/invoices/${id}`, data),
   delete: (id: string) => api.delete<ApiResponse>(`/invoices/${id}`),
-  sendToClient: (id: string) => api.post<ApiResponse>(`/invoices/${id}/send`),
-  markAsPaid: (id: string) => api.patch<ApiResponse<Invoice>>(`/invoices/${id}/mark-paid`),
-  markAsOverdue: (id: string) => api.patch<ApiResponse<Invoice>>(`/invoices/${id}/mark-overdue`),
+  download: (id: string) => api.get<ApiResponse<Blob>>(`/invoices/${id}/download`),
+  view: (id: string) => api.get<ApiResponse<Invoice>>(`/invoices/${id}/view`),
+  updatePaymentStatus: (id: string, data: { status: string; notes?: string }) => api.patch<ApiResponse<Invoice>>(`/invoices/${id}/payment-status`, data),
+  markOverdue: () => api.post<ApiResponse>('/invoices/mark-overdue'),
+  pay: (id: string) => api.get<ApiResponse>(`/invoices/pay/${id}`),
+  getNextInstallment: (id: string) => api.get<ApiResponse<any>>(`/invoices/${id}/next-installment`),
+  payInstallment: (data: { installmentId: string; email: string; amount: string; callbackUrl?: string }) => api.post<ApiResponse>('/invoices/installment/pay', data),
+  markInstallmentOverdue: () => api.post<ApiResponse>('/invoices/installments/mark-overdue'),
+  getReminders: () => api.get<ApiResponse>('/invoices/installments/reminders'),
+  markReminderAsSent: (installmentId: string) => api.get<ApiResponse>(`/invoices/installments/${installmentId}/reminder-sent`),
+}
+
+// Receipt API
+export const receiptAPI = {
+  create: (data: CreateReceiptRequest) => api.post<ApiResponse<Receipt>>('/receipts/', data),
+  getAll: (params?: SearchParams) => api.get<ApiResponse<Receipt[]>>('/receipts/', { params }),
+  getById: (id: string) => api.get<ApiResponse<Receipt>>(`/receipts/${id}`),
+  getByNumber: (receiptNumber: string) => api.get<ApiResponse<Receipt>>(`/receipts/number/${receiptNumber}`),
+  getStats: () => api.get<ApiResponse<ReceiptStats>>('/receipts/stats'),
+  generateFromInvoice: (invoiceId: string) => api.post<ApiResponse<Receipt>>(`/receipts/generate-from-invoice/${invoiceId}`),
+  download: (id: string) => api.get<ApiResponse<Blob>>(`/receipts/${id}/download`),
 }
 
 // Earnings API
@@ -482,29 +828,37 @@ export const teamsAPI = {
 
 // Bidding System API
 export const bidAPI = {
-  create: (data: FormData) => api.post<ApiResponse<Bid>>('/bids/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  // Create bid - POST /bids/details (as per API spec)
+  create: (data: CreateBidRequest) => api.post<ApiResponse<Bid>>('/bids/details', data),
+  
+  // Get bids - GET /bids
   getAll: (params?: SearchParams) => api.get<ApiResponse<Bid[]>>('/bids/', { params }),
+  
+  // Get bids with details - GET /bids/details
   getWithDetails: (params?: SearchParams) => api.get<ApiResponse<Bid[]>>('/bids/details', { params }),
+  
+  // Get bid stats - GET /bids/stats
   getStats: () => api.get<ApiResponse<BidStats>>('/bids/stats'),
+  
+  // Get bid by ID - GET /bids/:id
   getById: (id: string) => api.get<ApiResponse<Bid>>(`/bids/${id}`),
-  update: (id: string, data: Partial<Bid>) => api.put<ApiResponse<Bid>>(`/bids/${id}`, data),
+  
+  // Update bid - PATCH /bids/:id
+  update: (id: string, data: UpdateBidRequest) => api.patch<ApiResponse<Bid>>(`/bids/${id}`, data),
+  
+  // Withdraw bid - PATCH /bids/:id/withdraw
   withdraw: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/${id}/withdraw`),
-  delete: (id: string) => api.delete<ApiResponse>(`/bids/${id}`),
-  accept: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/requester/${id}/accept`),
-  reject: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/requester/${id}/reject`),
+  
+  // Delete bid - DELETE /bids/:id/withdraw (as per API spec)
+  delete: (id: string) => api.delete<ApiResponse>(`/bids/${id}/withdraw`),
+  
+  // Accept bid - PATCH /bids/:id/accept
+  accept: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/${id}/accept`),
+  
+  // Reject bid - PATCH /bids/:id/reject
+  reject: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/${id}/reject`),
 }
 
-// Vendor Responses API
-export const vendorResponseAPI = {
-  create: (data: CreateVendorResponseRequest) => api.post<ApiResponse<VendorResponse>>('/vendor-responses/', data),
-  getAll: (params?: SearchParams) => api.get<ApiResponse<VendorResponse[]>>('/vendor-responses/', { params }),
-  getRequests: (params?: SearchParams) => api.get<ApiResponse<VendorServiceRequest[]>>('/vendor-responses/requests', { params }),
-  getStats: () => api.get<ApiResponse<VendorResponseStats>>('/vendor-responses/stats'),
-  getById: (id: string) => api.get<ApiResponse<VendorResponse>>(`/vendor-responses/${id}`),
-  update: (id: string, data: Partial<CreateVendorResponseRequest>) => api.put<ApiResponse<VendorResponse>>(`/vendor-responses/${id}`, data),
-  withdraw: (id: string) => api.patch<ApiResponse<VendorResponse>>(`/vendor-responses/${id}/withdraw`),
-  delete: (id: string) => api.delete<ApiResponse>(`/vendor-responses/${id}`),
-}
 
 // Rating & Reviews API
 export const ratingAPI = {
@@ -566,6 +920,7 @@ export const categoryAPI = {
   toggleStatus: (id: string) => api.patch<ApiResponse<Category>>(`/categories/${id}/toggle-status`),
   getHierarchy: () => api.get<ApiResponse<Category[]>>('/categories/hierarchy'),
   getMain: () => api.get<ApiResponse<Category[]>>('/categories/main'),
+  getParents: () => api.get<ApiResponse<Category[]>>('/categories/parents'),
   getById: (id: string) => api.get<ApiResponse<Category>>(`/categories/${id}`),
   getSubcategories: (parentId: string) => api.get<ApiResponse<Category[]>>(`/categories/${parentId}/subcategories`),
 }
@@ -667,6 +1022,104 @@ export const vendorSubscriptionAPI = {
   updatePaymentMethod: (data: any) => api.put<ApiResponse<any>>('/vendor/subscription/payment-method', data),
 }
 
+// Financial Analytics API
+export const financialAnalyticsAPI = {
+  getProfitAnalysis: () => api.get<ApiResponse<ProfitAnalysis>>('/financial-analytics/profit-analysis'),
+}
+
+// Performance Analytics API
+export const performanceAnalyticsAPI = {
+  getDashboard: () => api.get<ApiResponse<PerformanceDashboard>>('/analytics/dashboard/'),
+  getClientGrowth: () => api.get<ApiResponse<ClientGrowth>>('/analytics/client-growth/'),
+  getEarnings: () => api.get<ApiResponse<any>>('/analytics/client-growth/'), // Note: Same endpoint as client growth in docs
+  getServicePerformance: () => api.get<ApiResponse<ServicePerformance>>('/analytics/client-growth/'), // Note: Same endpoint as client growth in docs
+  getInsights: () => api.get<ApiResponse<any>>('/analytics/client-growth/'), // Note: Same endpoint as client growth in docs
+  getAnalytics: () => api.get<ApiResponse<any>>('/analytics/'),
+  getMonthlyTrends: () => api.get<ApiResponse<any>>('/analytics/'),
+  getTopPerformingServices: () => api.get<ApiResponse<any>>('/analytics/'),
+  getReport: () => api.get<ApiResponse<any>>('/analytics/'),
+}
+
+// Progress/Availability API
+export const availabilityAPI = {
+  getAll: () => api.get<ApiResponse<Availability[]>>('/service-requests/'),
+  getById: (id: string) => api.get<ApiResponse<Availability>>(`/service-requests/${id}`),
+  findAvailableVendors: () => api.get<ApiResponse<any>>('/service-requests/vendors/available'),
+  getStats: () => api.get<ApiResponse<AvailabilityStats>>('/service-requests/stats'),
+}
+
+// Notification API
+export const notificationAPI = {
+  create: (data: Partial<Notification>) => api.post<ApiResponse<Notification>>('/notifications/', data),
+  getAll: () => api.get<ApiResponse<Notification[]>>('/notifications/'),
+  getById: (id: string) => api.get<ApiResponse<Notification>>(`/notifications/${id}`),
+  markAsRead: (id: string) => api.patch<ApiResponse<Notification>>(`/notifications/${id}/read`),
+  markAllAsRead: () => api.patch<ApiResponse<any>>('/notifications/read-all'),
+  getStats: () => api.get<ApiResponse<NotificationStats>>('/notifications/stats/overview'),
+  createPreferences: (data: NotificationPreferences) => api.post<ApiResponse<NotificationPreferences>>('/notifications/preferences', data),
+  getPreferences: () => api.get<ApiResponse<NotificationPreferences>>('/notifications/preferences'),
+  updatePreferences: (data: Partial<NotificationPreferences>) => api.patch<ApiResponse<NotificationPreferences>>('/notifications/preferences', data),
+}
+
+// Settings API
+export const settingsAPI = {
+  getAll: () => api.get<ApiResponse<UserSettings>>('/settings/'),
+  createPin: (data: { pin: string; confirmPin: string }) => api.post<ApiResponse<any>>('/settings/pin/create', data),
+  changePin: (data: { oldPin: string; newPin: string; confirmNewPin: string }) => api.patch<ApiResponse<any>>('/settings/pin/change', data),
+  verifyPin: (data: { pin: string }) => api.post<ApiResponse<any>>('/settings/pin/verify', data),
+  updateNotificationSettings: (data: Partial<NotificationPreferences>) => api.patch<ApiResponse<NotificationPreferences>>('/settings/notification', data),
+  updateProfileSettings: (data: Partial<UserSettings>) => api.patch<ApiResponse<UserSettings>>('/settings/profile', data),
+}
+
+// Withdrawal/Bank Management API
+export const withdrawalAPI = {
+  getAllBanks: () => api.get<ApiResponse<Bank[]>>('/withdrawal/banks'),
+  resolveAccount: (data: { accountNumber: string; bankCode: string }) => api.get<ApiResponse<any>>('/withdrawal/banks/resolve-account', { params: data }),
+  createBankAccount: (data: Partial<BankAccount>) => api.post<ApiResponse<BankAccount>>('/withdrawal/bank-accounts', data),
+  getBankAccounts: () => api.get<ApiResponse<BankAccount[]>>('/withdrawal/bank-accounts'),
+  getBankAccountById: (id: string) => api.get<ApiResponse<BankAccount>>(`/withdrawal/bank-accounts/${id}`),
+  updateBankAccount: (id: string, data: Partial<BankAccount>) => api.patch<ApiResponse<BankAccount>>(`/withdrawal/bank-accounts/${id}`, data),
+  deleteBankAccount: (id: string) => api.delete<ApiResponse<any>>(`/withdrawal/bank-accounts/${id}`),
+  withdraw: (data: { bankAccountId: string; amount: number; pin: string }) => api.post<ApiResponse<Withdrawal>>('/withdrawal/withdraw', data),
+  verifyPin: (data: { withdrawalId: string; pin: string }) => api.post<ApiResponse<any>>('/withdrawal/withdraw/verify-pin', data),
+  getAllWithdrawals: () => api.get<ApiResponse<Withdrawal[]>>('/withdrawal/withdraw/'),
+  getWithdrawalById: (id: string) => api.get<ApiResponse<Withdrawal>>(`/withdrawal/withdraw/${id}`),
+  getWithdrawalStats: () => api.get<ApiResponse<WithdrawalStats>>('/withdrawal/withdraw/stats/summary'),
+  // Admin endpoints
+  getAllWithdrawalsAdmin: () => api.get<ApiResponse<Withdrawal[]>>('/withdrawal/admin/withdrawals'),
+  updateWithdrawalStatus: (id: string, data: { status: string }) => api.patch<ApiResponse<Withdrawal>>(`/withdrawal/admin/withdrawals/${id}/status`, data),
+}
+
+// Enhanced Earnings API (from documentation)
+export const enhancedEarningsAPI = {
+  getSummary: () => api.get<ApiResponse<EarningsOverview>>('/earnings/summary'),
+  getStatsOverview: () => api.get<ApiResponse<EarningsOverview>>('/earnings/stats/overview'),
+  getAnalytics: () => api.get<ApiResponse<any>>('/earnings/analytics'),
+  getComparison: () => api.get<ApiResponse<any>>('/earnings/comparison'),
+  search: (params?: any) => api.get<ApiResponse<Earning[]>>('/earnings/search', { params }),
+  getByStatus: (status: string) => api.get<ApiResponse<Earning[]>>(`/earnings/status/${status}`),
+  getByDateRange: (params?: any) => api.get<ApiResponse<Earning[]>>('/earnings/data-range', { params }),
+  getAll: () => api.get<ApiResponse<Earning[]>>('/earnings/'),
+  getById: (id: string) => api.get<ApiResponse<Earning>>(`/earnings/${id}`),
+}
+
+// Payments API
+export const paymentsAPI = {
+  getAll: () => api.get<ApiResponse<any[]>>('/payments/'),
+  deleteById: (id: string) => api.delete<ApiResponse<any>>(`/payments/${id}`),
+  createAccount: (data: any) => api.post<ApiResponse<any>>('/payments/', data),
+}
+
+// Travel API (placeholder - endpoints not fully documented yet)
+export const travelAPI = {
+  // These endpoints will be implemented when the backend travel endpoints are documented
+  getAll: () => api.get<ApiResponse<any[]>>('/travel/'),
+  getById: (id: string) => api.get<ApiResponse<any>>(`/travel/${id}`),
+  create: (data: any) => api.post<ApiResponse<any>>('/travel/', data),
+  update: (id: string, data: any) => api.patch<ApiResponse<any>>(`/travel/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse<any>>(`/travel/${id}`),
+}
+
 // Additional missing endpoints from documentation
 
 
@@ -685,7 +1138,6 @@ export const checkTokenStatus = () => {
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
   
   if (!accessToken) {
-    console.log('🔍 Token Status: No access token found')
     return { hasToken: false }
   }
   
@@ -706,7 +1158,6 @@ export const checkTokenStatus = () => {
       expiresAt: new Date(payload.exp * 1000).toLocaleString()
     }
     
-    console.log('🔍 Token Status:', status)
     return status
   } catch (e) {
     console.error('❌ Token Status: Could not decode token')

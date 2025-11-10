@@ -8,6 +8,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiX, FiCalendar } from 'react-icons/fi'
 import ClientPageHeader from '@/components/client/ClientPageHeader'
 import { meetingAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { ButtonLoader } from '@/components/ui/Loader'
 
 // Setup the localizer for react-big-calendar
 const localizer = momentLocalizer(moment)
@@ -514,7 +515,9 @@ export default function ScheduleMeetingsPage() {
                     disabled={loading}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Creating...' : 'Create Meeting'}
+                    <ButtonLoader loading={loading} loadingText="Creating...">
+                      Create Meeting
+                    </ButtonLoader>
                   </button>
                 </div>
               </div>
@@ -681,7 +684,9 @@ export default function ScheduleMeetingsPage() {
                     disabled={loading}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Creating...' : 'Create Meeting'}
+                    <ButtonLoader loading={loading} loadingText="Creating...">
+                      Create Meeting
+                    </ButtonLoader>
                   </button>
                 </div>
               </div>
@@ -843,7 +848,11 @@ export default function ScheduleMeetingsPage() {
                     className="flex items-center gap-2 px-4 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiTrash2 className="w-4 h-4" />
-                    <span>{loading ? 'Deleting...' : 'Delete Meeting'}</span>
+                    <span>
+                      <ButtonLoader loading={loading} loadingText="Deleting...">
+                        Delete Meeting
+                      </ButtonLoader>
+                    </span>
                   </button>
                   <div className="flex items-center gap-3">
                     <button
@@ -860,7 +869,9 @@ export default function ScheduleMeetingsPage() {
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? 'Updating...' : 'Update Meeting'}
+                      <ButtonLoader loading={loading} loadingText="Updating...">
+                        Update Meeting
+                      </ButtonLoader>
                     </button>
                   </div>
                 </div>

@@ -9,214 +9,91 @@ import { HiShare } from 'react-icons/hi2'
 import { HiOutlineLocationMarker } from 'react-icons/hi'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
 import { useFilterContext } from '@/contexts/FilterContext'
+import { useLandingPageData, trackServiceView } from '@/hooks/useLandingPageData'
+import { ServiceOffering } from '@/types/api'
 // Using string paths for Next.js Image component
 const vendorImage = '/images/vendor-img1.jpg'
 const vendorImage2 = '/images/vendor-img2.jpg'
-
-const services = [
-  {
-    id: "ruthie-bridal-makeovers",
-    verified: true,
-    title: "Bridal Make Up Artists",
-    vendorName: "Ruthie Bridal Makeovers",
-    rating: 3,
-    reviews: 120,
-    location: "Abuja, Nigeria",
-    status: "Top Rated",
-    category: "beauty",
-    subCategory: "makeup-hairstylists"
-  },
-  {
-    id: "opes-event-decor",
-    verified: true,
-    title: "Wedding Hall Decoration / Backdrops",
-    vendorName: "Ope's Event Decor",
-    rating: 4,
-    reviews: 20,
-    location: "Victoria Island, Lagos",
-    status: "Most Booked",
-    category: "decoration",
-    subCategory: "aisle-backdrop"
-  },
-  {
-    id: "uk-cakes-cream",
-    verified: true,
-    title: "Book us for all types of Event Cakes",
-    vendorName: "UK Cakes & Cream",
-    rating: 5,
-    reviews: 50,
-    location: "Victoria Island, Lagos",
-    status: "Best Valued",
-    category: "catering",
-    subCategory: "cakes"
-  },
-  {
-    id: "elite-photography",
-    verified: true,
-    title: "Professional Wedding Photography",
-    vendorName: "Elite Photography Studio",
-    rating: 4,
-    reviews: 85,
-    location: "Ikoyi, Lagos",
-    status: "Rising Star",
-    category: "media",
-    subCategory: "photographers"
-  },
-  {
-    id: "royal-catering",
-    verified: true,
-    title: "Premium Event Catering Services",
-    vendorName: "Royal Catering Company",
-    rating: 5,
-    reviews: 150,
-    location: "Victoria Island, Lagos",
-    status: "Top Rated",
-    category: "catering",
-    subCategory: "local-continental"
-  },
-  {
-    id: "sound-system-pro",
-    verified: true,
-    title: "Professional Sound & Lighting",
-    vendorName: "Sound System Pro",
-    rating: 4,
-    reviews: 75,
-    location: "Surulere, Lagos",
-    status: "Most Booked",
-    category: "rentals",
-    subCategory: "sound-systems"
-  },
-  {
-    id: "floral-designs",
-    verified: true,
-    title: "Elegant Floral Arrangements",
-    vendorName: "Floral Designs by Sarah",
-    rating: 5,
-    reviews: 95,
-    location: "Garki, Abuja",
-    status: "Best Valued",
-    category: "decoration",
-    subCategory: "floral"
-  },
-  {
-    id: "luxury-transport",
-    verified: true,
-    title: "Luxury Wedding Transportation",
-    vendorName: "Luxury Transport Services",
-    rating: 4,
-    reviews: 60,
-    location: "Maitama, Abuja",
-    status: "Rising Star",
-    category: "logistics",
-    subCategory: "chauffer"
-  },
-  {
-    id: "event-planning",
-    verified: true,
-    title: "Complete Event Planning Services",
-    vendorName: "Perfect Events Nigeria",
-    rating: 5,
-    reviews: 200,
-    location: "Victoria Island, Lagos",
-    status: "Top Rated",
-    category: "logistics",
-    subCategory: "planners"
-  },
-  {
-    id: "dj-services",
-    verified: true,
-    title: "Professional DJ Services",
-    vendorName: "DJ Master Pro",
-    rating: 4,
-    reviews: 110,
-    location: "Lekki, Lagos",
-    status: "Most Booked",
-    category: "entertainment",
-    subCategory: "djs"
-  },
-  {
-    id: "venue-rental",
-    verified: true,
-    title: "Premium Event Venues",
-    vendorName: "Grand Venue Solutions",
-    rating: 5,
-    reviews: 180,
-    location: "Asokoro, Abuja",
-    status: "Best Valued",
-    category: "venue",
-    subCategory: "venues"
-  },
-  {
-    id: "security-services",
-    verified: true,
-    title: "Event Security Services",
-    vendorName: "Secure Events Ltd",
-    rating: 4,
-    reviews: 45,
-    location: "Wuse 2, Abuja",
-    status: "Rising Star",
-    category: "support",
-    subCategory: "bouncers"
-  },
-  {
-    id: "videography",
-    verified: true,
-    title: "Wedding Videography Services",
-    vendorName: "Cinematic Moments",
-    rating: 5,
-    reviews: 130,
-    location: "Victoria Island, Lagos",
-    status: "Top Rated",
-    category: "media",
-    subCategory: "videographers"
-  },
-  {
-    id: "decorations",
-    verified: true,
-    title: "Event Decorations & Setup",
-    vendorName: "Decor Masters",
-    rating: 4,
-    reviews: 90,
-    location: "Ikeja, Lagos",
-    status: "Most Booked",
-    category: "decoration",
-    subCategory: "stylists"
-  },
-  {
-    id: "catering-services",
-    verified: true,
-    title: "Gourmet Catering Services",
-    vendorName: "Chef's Delight Catering",
-    rating: 5,
-    reviews: 160,
-    location: "Garki, Abuja",
-    status: "Best Valued",
-    category: "catering",
-    subCategory: "small-chops"
-  }
-];
 
 const PopularServices: React.FC = () => {
   const router = useRouter();
   const [viewType, setViewType] = useState<'list' | 'grid'>('grid');
   const { selectedCategory, selectedSubCategory, clearFilters } = useFilterContext();
+  
+  // Fetch popular services from API
+  const { popularServices, loading, error } = useLandingPageData();
+  
+  
+  // Show appropriate message when no services are available
+  const showNoServicesMessage = !loading && popularServices.length === 0;
+
+  // Transform API data to match component expectations
+  const transformedServices = useMemo(() => {
+    return popularServices.map((service: ServiceOffering) => {
+      // Extract vendor name from User data
+      const vendorName = service.User?.businessName || 
+                        (service.User?.firstName && service.User?.lastName 
+                          ? `${service.User.firstName} ${service.User.lastName}`
+                          : service.User?.firstName || 
+                            service.User?.lastName || 
+                            'Vendor Name')
+      
+      // Extract location from Profile data
+      const location = service.Profile?.city && service.Profile?.country 
+                      ? `${service.Profile.city}, ${service.Profile.country}`
+                      : service.Profile?.city || 
+                        service.Profile?.country ||
+                        service.User?.businessAddress || 
+                        'Location not specified'
+      
+      // Use rating from backend or default to 0 if not available
+      const rating = service.averageRating || 0
+      const reviews = service.totalReviews || 0
+      
+      // Check if vendor is verified
+      const verified = service.User?.isVerified || false
+      
+      return {
+        id: service.id,
+        title: service.serviceName,
+        vendorName,
+        rating,
+        reviews,
+        location,
+        status: service.isActive ? 'Active' : 'Inactive',
+        verified,
+        category: service.categoryIds?.[0] || 'general',
+        subCategory: service.categoryIds?.[1] || 'general',
+        categoryIds: service.categoryIds || [],
+        description: service.description,
+        price: service.price,
+        pricingTitle: service.pricingTitle,
+        mediaUrl: service.mediaUrl,
+        createdAt: service.createdAt,
+        userId: service.userId,
+        vendorId: service.userId
+      }
+    });
+  }, [popularServices]);
 
   // Filter services based on selected category and subcategory
   const filteredServices = useMemo(() => {
     if (!selectedCategory && !selectedSubCategory) {
-      return services;
+      return transformedServices;
     }
 
-    return services.filter(service => {
+    return transformedServices.filter((service) => {
       if (selectedSubCategory) {
-        return service.subCategory === selectedSubCategory;
+        // Check if any of the service's category IDs match the selected subcategory
+        return service.categoryIds.some((id: string) => id === selectedSubCategory);
       }
       if (selectedCategory) {
-        return service.category === selectedCategory;
+        // Check if any of the service's category IDs match the selected category
+        return service.categoryIds.some((id: string) => id === selectedCategory);
       }
       return true;
     });
-  }, [selectedCategory, selectedSubCategory]);
+  }, [selectedCategory, selectedSubCategory, transformedServices]);
 
   const handleSeeMore = () => {
     router.push('/services/popular');
@@ -236,9 +113,13 @@ const PopularServices: React.FC = () => {
     );
   };
 
-  const ServiceCard = ({ service, viewType }: { service: typeof services[0], viewType: 'list' | 'grid' }) => {
+  const ServiceCard = ({ service, viewType }: { service: any, viewType: 'list' | 'grid' }) => {
     const [current, setCurrent] = useState(0)
-    const images = [vendorImage, vendorImage2, vendorImage]
+    
+    // Use API images if available, otherwise fallback to default images
+    const apiImages = service.mediaUrl && service.mediaUrl.length > 0 ? service.mediaUrl : []
+    const fallbackImages = [vendorImage, vendorImage2, vendorImage]
+    const images = apiImages.length > 0 ? apiImages : fallbackImages
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -247,10 +128,33 @@ const PopularServices: React.FC = () => {
       return () => clearInterval(interval)
     }, [images.length])
 
+    // Handle card click to navigate to service details page
+    const handleCardClick = () => {
+      // Track service view for recently viewed functionality
+      trackServiceView(service.id)
+      
+      // Navigate to service details page like e-commerce product cards
+      const serviceId = service.id
+      if (serviceId) {
+        router.push(`/services/${serviceId}`)
+      }
+    }
+
     return (
-      <div className={`bg-white rounded-xl hover:shadow-lg transition-shadow ${
-        viewType === 'grid' ? 'w-full max-w-sm mx-auto' : 'w-full'
-      }`}>
+      <div 
+        className={`bg-white rounded-xl hover:shadow-lg transition-shadow cursor-pointer ${
+          viewType === 'grid' ? 'w-full max-w-sm mx-auto' : 'w-full'
+        }`}
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleCardClick()
+          }
+        }}
+      >
         {viewType === 'grid' ? (
           /* Grid View - Vertical Layout */
           <>
@@ -266,7 +170,7 @@ const PopularServices: React.FC = () => {
                 />
                 {/* Carousel dots - centered at bottom */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-2">
-                  {images.map((_, index) => (
+                  {images.map((_: any, index: number) => (
                     <span
                       key={index}
                       className={`w-2 h-2 rounded-full ${
@@ -310,7 +214,7 @@ const PopularServices: React.FC = () => {
                 />
                 {/* Carousel dots - centered at bottom */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                  {images.map((_, index) => (
+                  {images.map((_: any, index: number) => (
                     <span
                       key={index}
                       className={`w-1.5 h-1.5 rounded-full ${
@@ -352,13 +256,22 @@ const PopularServices: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <p className="text-blue-600 font-semibold text-xs sm:text-sm">{service.vendorName}</p>
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <IoChatbubbleEllipsesOutline className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <BsHeart className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
-                    <button className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <HiShare className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
                   </div>
@@ -368,9 +281,13 @@ const PopularServices: React.FC = () => {
                 <div className="flex items-center gap-2 text-gray-600 text-xs sm:text-sm">
                   <span className="font-semibold">Rating:</span>
                   <div className="flex items-center gap-1">
-                    {renderStars(service.rating)}
+                    {renderStars(Math.round(service.rating))}
                   </div>
-                  <span className="text-gray-500">({service.reviews})</span>
+                  {service.reviews > 0 ? (
+                    <span className="text-gray-500">({service.reviews} {service.reviews === 1 ? 'review' : 'reviews'})</span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">No reviews yet</span>
+                  )}
                 </div>
 
                 {/* Location */}
@@ -404,13 +321,22 @@ const PopularServices: React.FC = () => {
             <div className="flex justify-between items-center">
               <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
               <div className="flex items-center gap-2">
-                <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                <button 
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                 </button>
-                <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                <button 
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <BsHeart className="w-4 h-4" />
                 </button>
-                <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                <button 
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <HiShare className="w-4 h-4" />
                 </button>
               </div>
@@ -420,9 +346,13 @@ const PopularServices: React.FC = () => {
             <div className="flex items-center gap-2 text-gray-600 text-sm">
               <span className="font-semibold">Rating:</span>
               <div className="flex items-center gap-1">
-                {renderStars(service.rating)}
+                {renderStars(Math.round(service.rating))}
               </div>
-              <span className="text-gray-500">({service.reviews})</span>
+              {service.reviews > 0 ? (
+                <span className="text-gray-500">({service.reviews} {service.reviews === 1 ? 'review' : 'reviews'})</span>
+              ) : (
+                <span className="text-gray-400 text-xs">No reviews yet</span>
+              )}
             </div>
 
             {/* Location */}
@@ -519,14 +449,27 @@ const PopularServices: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.5-.9-6.1-2.4l-.7.7A8.962 8.962 0 0012 16c2.34 0 4.5-.9 6.1-2.4l-.7-.7z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2 font-asul">Nothing in this category</h3>
-          <p className="text-gray-500 mb-4">No services found for the selected category. Try selecting a different category or clear the filter.</p>
-          <button
-            onClick={clearFilters}
-            className="bg-event-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Clear Filter
-          </button>
+          {showNoServicesMessage ? (
+            <>
+              {error ? (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2 font-asul">Services Temporarily Unavailable</h3>
+                  <p className="text-gray-500 mb-4">We&apos;re working to make our services available to everyone. Please check back later.</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2 font-asul">Nothing in this category</h3>
+                  <p className="text-gray-500 mb-4">No services found for the selected category. Try selecting a different category or clear the filter.</p>
+                  <button
+                    onClick={clearFilters}
+                    className="bg-event-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Clear Filter
+                  </button>
+                </>
+              )}
+            </>
+          ) : null}
         </div>
       )}
 

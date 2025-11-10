@@ -18,6 +18,7 @@ export default function SignUpModal({ onClose, onContinue, accountType }: SignUp
     lastName: '',
     businessName: '',
     businessAddress: '',
+    businessEmail: '',
     email: '',
     phoneNumber: '',
     password: '',
@@ -145,6 +146,20 @@ export default function SignUpModal({ onClose, onContinue, accountType }: SignUp
                   value={formData.businessAddress}
                   onChange={handleInputChange}
                   placeholder="Enter Company Address"
+                  className="mt-1 w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium">
+                  Business Email
+                </label>
+                <input
+                  type="email"
+                  name="businessEmail"
+                  value={formData.businessEmail}
+                  onChange={handleInputChange}
+                  placeholder="Enter Business Email"
                   className="mt-1 w-full border rounded-lg px-3 py-2"
                 />
               </div>

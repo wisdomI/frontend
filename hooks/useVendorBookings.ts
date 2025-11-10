@@ -30,7 +30,7 @@ export function useVendorBookings(options: UseVendorBookingsOptions = {}) {
         id: request.id,
         status: request.status === 'accepted' ? 'active' : request.status,
         clientName: `${request.client?.firstName || ''} ${request.client?.lastName || ''}`.trim() || 'Unknown Client',
-        clientAvatar: request.client?.profilePicture || '/images/avatar1.jpg',
+        clientAvatar: request.client?.profileImage || request.client?.displayPicture || request.client?.profilePicture || '/images/avatar1.jpg',
         eventTitle: request.eventTitle || 'Untitled Event',
         eventType: request.eventType || 'Event',
         eventDate: request.eventStartDate ? new Date(request.eventStartDate).toLocaleDateString() : 'TBD',
@@ -93,9 +93,17 @@ export function useVendorBookings(options: UseVendorBookingsOptions = {}) {
       if (response.ok) {
         const data = await response.json()
         setStats(data.data)
+      } else if (response.status === 404) {
+        // Handle 404 gracefully - endpoint not implemented yet
+        console.warn('Vendor analytics endpoint not implemented yet, using fallback stats')
+        setStats({
+          activeBookings: 0,
+          completedBookings: 0,
+          totalBookings: 0
+        })
       } else {
-        // Fallback: create mock stats since vendor-specific endpoints may not be fully implemented
-        console.log('Vendor analytics endpoint not available, using fallback stats')
+        // Other errors - still use fallback but log the issue
+        console.warn('Vendor analytics endpoint unavailable, using fallback stats')
         setStats({
           activeBookings: 0,
           completedBookings: 0,
@@ -103,11 +111,19 @@ export function useVendorBookings(options: UseVendorBookingsOptions = {}) {
         })
       }
     } catch (err: any) {
+      // Handle network errors or other issues gracefully
       if (err?.response?.status === 403) {
-        console.error('403 Forbidden - user may not have proper permissions for stats:', err)
+        console.warn('403 Forbidden - user may not have proper permissions for stats, using fallback')
       } else {
-        console.error('Error fetching booking stats:', err)
+        console.warn('Error fetching booking stats, using fallback:', err)
       }
+      
+      // Always provide fallback stats
+      setStats({
+        activeBookings: 0,
+        completedBookings: 0,
+        totalBookings: 0
+      })
     }
   }, [])
 
@@ -120,7 +136,7 @@ export function useVendorBookings(options: UseVendorBookingsOptions = {}) {
       const serviceRequestStatus = status === 'active' ? 'in-progress' : status
       
       // Update the service request status
-      const response = await serviceRequestAPI.updateStatus(bookingId, serviceRequestStatus)
+      const response = await serviceRequestAPI.updateStatus(bookingId, { status: serviceRequestStatus })
       
       // Refresh bookings list
       await fetchBookings()
@@ -208,7 +224,7 @@ export function useVendorBookings(options: UseVendorBookingsOptions = {}) {
       fetchMeetings()
       fetchStats()
     }
-  }, [autoFetch, fetchBookings, fetchMeetings, fetchStats])
+  }, [autoFetch])
 
   return {
     bookings,

@@ -8,6 +8,7 @@ import { useProfileCompletion } from '@/hooks/useProfileCompletion'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useApp } from '@/contexts/AppContext'
 import { profileAPI, portfolioAPI, serviceAPI } from '@/lib/api'
+import { useWithdrawal } from '@/hooks/useWithdrawal'
 import AddPortfolioModal from '@/components/ui/modals/AddPortfolioModal'
 import AddServiceOfferingModal from '@/components/ui/modals/AddServiceOfferingModal'
 import AddTravelInfoModal from '@/components/ui/modals/AddTravelInfoModal'
@@ -65,6 +66,11 @@ const ProfileSetupPage = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [completedSteps, setCompletedSteps] = useState(profileStatus.completedSteps.length > 0 ? profileStatus.completedSteps : ['business-details'])
   const [saving, setSaving] = useState(false)
+  
+  // Bank Management
+  const { bankAccounts, loading: loadingBankAccounts, deleteBankAccount, refetchBankAccounts } = useWithdrawal()
+  const [showAddBankModal, setShowAddBankModal] = useState(false)
+  const [deletingBankId, setDeletingBankId] = useState<string | null>(null)
   
   // Form data state
   const [businessDetails, setBusinessDetails] = useState<BusinessDetails>({
@@ -319,7 +325,7 @@ const ProfileSetupPage = () => {
     }
   }
 
-  const validateCurrentStep = (): { isValid: boolean; message: string } => {
+  const validateCurrentStep = (): { isValid: boolean; message: string; warning?: string } => {
     switch (activeStep) {
       case 'business-details':
         if (!businessDetails.businessName.trim()) {
@@ -349,7 +355,14 @@ const ProfileSetupPage = () => {
         return { isValid: true, message: '' }
       
       case 'payment-setup':
-        // Payment setup validation
+        // Bank account is required for profile completion but can be added later
+        if (!bankAccounts || bankAccounts.length === 0) {
+          return { 
+            isValid: true, 
+            message: '',
+            warning: 'You need to add at least one bank account to complete your profile setup and receive payments. You can add it now or come back later.'
+          }
+        }
         return { isValid: true, message: '' }
       
       default:
@@ -367,6 +380,15 @@ const ProfileSetupPage = () => {
         alert(validation.message)
         setSaving(false)
         return
+      }
+      
+      // Show warning if applicable (e.g., for payment-setup without bank account)
+      if ((validation as any).warning && activeStep === 'payment-setup') {
+        const confirmed = confirm((validation as any).warning + '\n\nDo you want to continue without adding a bank account?')
+        if (!confirmed) {
+          setSaving(false)
+          return
+        }
       }
       
       // Save current step data to API
@@ -405,8 +427,10 @@ const ProfileSetupPage = () => {
         })
         
         try {
+          // Try to update existing profile first
+          console.log('🔄 Attempting to update existing profile...')
           const response = await profileAPI.update(user?.id || '', formData)
-          console.log('✅ Profile saved successfully to database!', response.data)
+          console.log('✅ Profile updated successfully in database!', response.data)
           console.log('📥 Data returned from backend:', response.data.data)
           console.log('🔍 Check if address is in response:', (response.data.data as any)?.address)
           console.log('🔍 Check if displayPicture is in response:', (response.data.data as any)?.displayPicture)
@@ -427,8 +451,35 @@ const ProfileSetupPage = () => {
           console.error('❌ Error message:', error.response?.data?.message)
           console.error('❌ Error code:', error.code)
           
-          // Handle API errors gracefully
-          if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+          // If profile doesn't exist (404), create it instead
+          if (error.response?.status === 404 && error.response?.data?.errorType === 'PROFILE_NOT_FOUND') {
+            console.log('ℹ️ Profile not found, creating new profile...')
+            try {
+              const createResponse = await profileAPI.create(formData)
+              console.log('✅ Profile created successfully in database!', createResponse.data)
+              console.log('📥 Data returned from backend:', createResponse.data.data)
+              
+              // Dispatch event to update header and other components
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('profileUpdated'))
+                console.log('🔄 Dispatched profileUpdated event')
+              }
+              
+              addNotification({
+                type: 'success',
+                message: 'Profile created successfully in database!'
+              })
+            } catch (createError: any) {
+              console.error('❌ Profile creation failed:', createError)
+              addNotification({
+                type: 'error',
+                message: createError.response?.data?.message || 'Failed to create profile. Please try again.'
+              })
+              throw createError
+            }
+          }
+          // Handle other errors
+          else if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
             addNotification({
               type: 'error',
               message: 'CORS Error: Backend is blocking requests from localhost. Backend team needs to enable CORS for http://localhost:3000'
@@ -440,11 +491,6 @@ const ProfileSetupPage = () => {
               message: 'Profile update API is currently restricted for vendors. Backend team needs to add "vendor" to allowedAccountTypes.'
             })
             console.error('🚨 ACCESS CONTROL: Backend must add "vendor" to allowedAccountTypes for PATCH /profile/:id')
-          } else if (error.response?.status === 404) {
-            addNotification({
-              type: 'error',
-              message: 'Profile endpoint not found. Backend may not have implemented this endpoint yet.'
-            })
           } else {
             addNotification({
               type: 'error',
@@ -526,23 +572,23 @@ const ProfileSetupPage = () => {
   const renderBusinessDetails = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
-        <div className="space-y-6">
+      {/* Left Column */}
+      <div className="space-y-6">
         {/* Business Display Picture */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Business Display Picture</label>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
               {displayPicturePreview ? (
-                <Image src={displayPicturePreview} alt="Business Logo" fill className="object-cover" />
+                <Image src={displayPicturePreview} alt="Business Logo" fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
               ) : (user?.businessName || user?.firstName || user?.displayName) ? (
-                <span className="text-gray-600 text-sm font-semibold">
-                  {(user?.businessName || user?.firstName || user?.displayName || 'V').charAt(0).toUpperCase()}
-                </span>
-              ) : (
-                <span className="text-gray-500 text-sm">Business Logo</span>
-              )}
-            </div>
+              <span className="text-gray-600 text-sm font-semibold">
+                {(user?.businessName || user?.firstName || user?.displayName || 'V').charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <span className="text-gray-500 text-sm">Business Logo</span>
+            )}
+          </div>
             <div className="flex flex-col gap-2">
               <input
                 type="file"
@@ -698,8 +744,8 @@ const ProfileSetupPage = () => {
                 <span className="text-gray-500">Size: {(displayPicture.size/1024).toFixed(0)}kb</span>
                 <button onClick={() => setDisplayPicture(null)} className="text-red-600 hover:text-red-700" aria-label="Remove file">
                   <FiTrash2 className="w-4 h-4" />
-                </button>
-              </div>
+            </button>
+          </div>
             </div>
           )}
         </div>
@@ -764,15 +810,15 @@ const ProfileSetupPage = () => {
                 <div className="relative flex-1">
                   <FiLink className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input type="url" defaultValue="http://eventhub.com" className="w-full pl-9 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                </div>
+            </div>
                 <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50" aria-label="Copy">
                   <FiCopy className="w-4 h-4 text-gray-600" />
-                </button>
+              </button>
               </div>
             ))}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   )
@@ -860,7 +906,7 @@ const ProfileSetupPage = () => {
         {loadingServices ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
+      </div>
         ) : serviceOfferings && serviceOfferings.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {serviceOfferings.filter(service => service).map((service, index) => (
@@ -1019,6 +1065,39 @@ const ProfileSetupPage = () => {
     </div>
   )
 
+  const handleDeleteBankAccount = async (bankAccountId: string) => {
+    if (!confirm('Are you sure you want to delete this bank account?')) {
+      return
+    }
+
+    try {
+      setDeletingBankId(bankAccountId)
+      await deleteBankAccount(bankAccountId)
+      addNotification({
+        type: 'success',
+        message: 'Bank account deleted successfully',
+      })
+      await refetchBankAccounts()
+    } catch (error: any) {
+      console.error('Error deleting bank account:', error)
+      addNotification({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete bank account',
+      })
+    } finally {
+      setDeletingBankId(null)
+    }
+  }
+
+  const handleBankAccountAdded = async () => {
+    addNotification({
+      type: 'success',
+      message: 'Bank account added successfully',
+    })
+    await refetchBankAccounts()
+    setShowAddBankModal(false)
+  }
+
   const renderPaymentSetup = () => (
     <div className="space-y-6">
       <div>
@@ -1026,32 +1105,98 @@ const ProfileSetupPage = () => {
         <p className="text-gray-600 mb-6">Save your Bank details for fast withdrawal of earnings</p>
       </div>
 
-      <div className="bg-white rounded-lg p-6 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              🏦
-            </div>
-            <h4 className="font-medium">Local Bank Details</h4>
-          </div>
-          <div className="flex gap-2">
-            <button className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
-              ✏️
-            </button>
-            <button className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
-              🗑️
-            </button>
-          </div>
+      {/* Loading State */}
+      {loadingBankAccounts && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-        
-        <div className="space-y-2">
-          <p className="font-medium">Access Bank</p>
-          <p className="text-gray-600">1234567890</p>
-          <p className="text-gray-600">Jane Doe</p>
-        </div>
-      </div>
+      )}
 
-      <AddBankDetailsModal />
+      {/* Bank Accounts List */}
+      {!loadingBankAccounts && bankAccounts && bankAccounts.length > 0 && (
+        <div className="space-y-4">
+          {bankAccounts.map((account) => (
+            <div key={account.id} className="bg-white rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    🏦
+                  </div>
+                  <h4 className="font-medium">Bank Account</h4>
+                  {account.isVerified && (
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1">
+                      <FiCheck className="w-3 h-3" />
+                      Verified
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDeleteBankAccount(account.id)}
+                    disabled={deletingBankId === account.id}
+                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Delete bank account"
+                  >
+                    {deletingBankId === account.id ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                    ) : (
+                      <FiTrash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="font-medium text-gray-900">{account.bankName}</p>
+                <p className="text-gray-600">{account.accountNumber}</p>
+                <p className="text-gray-600">{account.accountName}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loadingBankAccounts && (!bankAccounts || bankAccounts.length === 0) && (
+        <div className="bg-white rounded-lg p-12 border-2 border-dashed border-gray-300 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            🏦
+          </div>
+          <h4 className="text-lg font-medium text-gray-900 mb-2">No Bank Account Added</h4>
+          <p className="text-gray-500 mb-6">Add your bank account to receive payments and withdraw earnings</p>
+        </div>
+      )}
+
+      {/* Warning if no bank accounts */}
+      {!loadingBankAccounts && (!bankAccounts || bankAccounts.length === 0) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="text-amber-600 mt-0.5">⚠️</div>
+            <div>
+              <h4 className="font-medium text-amber-900 mb-1">Bank Account Required</h4>
+              <p className="text-sm text-amber-700">
+                You need to add at least one bank account to complete your profile setup and receive payments. 
+                You can add it now or come back later.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Bank Account Button */}
+      <button
+        onClick={() => setShowAddBankModal(true)}
+        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+      >
+        {bankAccounts && bankAccounts.length > 0 ? 'Add Another Bank Account' : 'Add Bank Account'}
+      </button>
+
+      {/* Add Bank Details Modal */}
+      <AddBankDetailsModal
+        isOpen={showAddBankModal}
+        onClose={() => setShowAddBankModal(false)}
+        onSuccess={handleBankAccountAdded}
+      />
     </div>
   )
 
@@ -1191,25 +1336,25 @@ const ProfileSetupPage = () => {
             const isDisabled = !previousStepsCompleted && !step.completed
             
             return (
-              <button
-                key={step.id}
+            <button
+              key={step.id}
                 onClick={() => {
                   if (!isDisabled) {
                     setActiveStep(step.id)
                   }
                 }}
                 disabled={isDisabled}
-                className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-                  step.active
-                    ? 'border-blue-600 text-blue-600'
+              className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+                step.active
+                  ? 'border-blue-600 text-blue-600'
                     : isDisabled
                     ? 'border-transparent text-gray-300 cursor-not-allowed'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
                 title={isDisabled ? 'Complete previous steps first' : ''}
-              >
-                {step.label}
-              </button>
+            >
+              {step.label}
+            </button>
             )
           })}
         </div>

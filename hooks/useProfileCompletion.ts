@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { profileAPI } from '@/lib/api'
+import { profileAPI, withdrawalAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 interface ProfileCompletionStatus {
@@ -33,8 +33,14 @@ export const useProfileCompletion = () => {
         setLoading(true)
         setError(null)
         
-        const response = await profileAPI.me()
-        const profile = response.data.data
+        // Fetch profile and bank accounts in parallel
+        const [profileResponse, bankAccountsResponse] = await Promise.allSettled([
+          profileAPI.me(),
+          withdrawalAPI.getBankAccounts()
+        ])
+        
+        const profile = profileResponse.status === 'fulfilled' ? profileResponse.value.data.data : null
+        const bankAccounts = bankAccountsResponse.status === 'fulfilled' ? bankAccountsResponse.value.data.data : []
         
         if (profile) {
           // Determine completion based on profile data
@@ -42,7 +48,11 @@ export const useProfileCompletion = () => {
           if ((profile as any).businessName) completedSteps.push('business-details')
           if ((profile as any).services && (profile as any).services.length > 0) completedSteps.push('service-offering')
           if ((profile as any).isEmailVerified) completedSteps.push('verification')
-          if ((profile as any).bankDetails) completedSteps.push('payment-setup')
+          
+          // Check if bank accounts exist for payment-setup completion
+          if (bankAccounts && Array.isArray(bankAccounts) && bankAccounts.length > 0) {
+            completedSteps.push('payment-setup')
+          }
           
           const totalSteps = 4
           const percentage = Math.round((completedSteps.length / totalSteps) * 100)

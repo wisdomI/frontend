@@ -24,9 +24,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getPerformanceMetrics(params)
       setPerformanceMetrics(response.data.data)
-    } catch (err) {
-      setError('Failed to fetch performance metrics')
-      console.error('Error fetching performance metrics:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Performance metrics endpoint not implemented yet, using null')
+        setPerformanceMetrics(null)
+      } else {
+        setError('Failed to fetch performance metrics')
+        console.error('Error fetching performance metrics:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -38,9 +43,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getEngagementMetrics()
       setEngagementMetrics(response.data.data)
-    } catch (err) {
-      setError('Failed to fetch engagement metrics')
-      console.error('Error fetching engagement metrics:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Engagement metrics endpoint not implemented yet, using null')
+        setEngagementMetrics(null)
+      } else {
+        setError('Failed to fetch engagement metrics')
+        console.error('Error fetching engagement metrics:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -52,9 +62,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getClientInsights()
       setClientInsights(response.data.data)
-    } catch (err) {
-      setError('Failed to fetch client insights')
-      console.error('Error fetching client insights:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Client insights endpoint not implemented yet, using null')
+        setClientInsights(null)
+      } else {
+        setError('Failed to fetch client insights')
+        console.error('Error fetching client insights:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -66,9 +81,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getRevenueAnalytics(params)
       setRevenueAnalytics(response.data.data)
-    } catch (err) {
-      setError('Failed to fetch revenue analytics')
-      console.error('Error fetching revenue analytics:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Revenue analytics endpoint not implemented yet, using null')
+        setRevenueAnalytics(null)
+      } else {
+        setError('Failed to fetch revenue analytics')
+        console.error('Error fetching revenue analytics:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -80,9 +100,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getServicePerformance()
       setServicePerformance(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch service performance')
-      console.error('Error fetching service performance:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Service performance endpoint not implemented yet, using empty array')
+        setServicePerformance([])
+      } else {
+        setError('Failed to fetch service performance')
+        console.error('Error fetching service performance:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -94,9 +119,14 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getEventTypeAnalytics()
       setEventTypeAnalytics(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch event type analytics')
-      console.error('Error fetching event type analytics:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Event type analytics endpoint not implemented yet, using empty array')
+        setEventTypeAnalytics([])
+      } else {
+        setError('Failed to fetch event type analytics')
+        console.error('Error fetching event type analytics:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -108,10 +138,15 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getConversionMetrics()
       return response.data.data
-    } catch (err) {
-      setError('Failed to fetch conversion metrics')
-      console.error('Error fetching conversion metrics:', err)
-      throw err
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Conversion metrics endpoint not implemented yet')
+        return null
+      } else {
+        setError('Failed to fetch conversion metrics')
+        console.error('Error fetching conversion metrics:', err)
+        throw err
+      }
     } finally {
       setLoading(false)
     }
@@ -123,10 +158,15 @@ export function useVendorAnalytics(options: UseVendorAnalyticsOptions = {}) {
       setError(null)
       const response = await vendorAnalyticsAPI.getProfileViews()
       return response.data.data
-    } catch (err) {
-      setError('Failed to fetch profile views')
-      console.error('Error fetching profile views:', err)
-      throw err
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.warn('Profile views endpoint not implemented yet')
+        return null
+      } else {
+        setError('Failed to fetch profile views')
+        console.error('Error fetching profile views:', err)
+        throw err
+      }
     } finally {
       setLoading(false)
     }

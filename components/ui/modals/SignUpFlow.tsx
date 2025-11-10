@@ -48,6 +48,7 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
         // For business/vendor accounts, add business fields
         registrationPayload.businessName = formData.businessName
         registrationPayload.businessAddress = formData.businessAddress || 'Lagos, Nigeria'
+        registrationPayload.businessEmail = formData.businessEmail || formData.email
       }
 
       console.log('Registering user with:', registrationPayload)
@@ -61,9 +62,10 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
       setContact(formData.email)
       setType('email')
       
+      // FIXED: Provide clear instruction to check email
       addNotification({
         type: 'success',
-        message: 'Registration successful! Please verify your email.'
+        message: 'Registration successful! A verification code has been sent to your email. Please check your inbox (and spam folder).'
       })
       
       setStep('choice')
@@ -148,15 +150,33 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
           onResend={async () => {
             try {
               if (registrationData?.email) {
-                await authAPI.resendVerificationCode(registrationData.email)
+                // FIXED: Pass object with email property, not just the email string
+                await authAPI.resendVerificationCode({ email: registrationData.email })
                 addNotification({
                   type: 'success',
-                  message: 'Verification code resent successfully!'
+                  message: 'Verification code resent successfully! Please check your email (including spam folder).'
+                })
+              } else {
+                addNotification({
+                  type: 'error',
+                  message: 'Email not found. Please register again.'
                 })
               }
             } catch (error: any) {
               console.error('Resend verification error:', error)
-              const errorMessage = error.response?.data?.message || error.message || 'Failed to resend verification code'
+              
+              // FIXED: Provide more detailed error messages
+              let errorMessage = 'Failed to resend verification code'
+              if (error.response?.status === 404) {
+                errorMessage = 'Email not found. Please register again.'
+              } else if (error.response?.status === 429) {
+                errorMessage = 'Too many requests. Please wait a few minutes before requesting again.'
+              } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              
               addNotification({
                 type: 'error',
                 message: errorMessage
@@ -187,7 +207,7 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <LoginForm accountType={selectedAccountType} />
+            <LoginForm accountType={selectedAccountType === 'individual' ? 'client' : 'vendor'} />
           </div>
         </div>
       )}

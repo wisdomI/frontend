@@ -1,7 +1,42 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { FiSearch, FiCalendar, FiMapPin, FiTag, FiUsers, FiClock, FiFilter } from 'react-icons/fi'
-import ServiceRequestModal from '../../../components/ui/modals/ServiceRequestModal'
+import ServiceRequestModal, { MarketplaceServiceRequest } from '../../../components/ui/modals/ServiceRequestModal'
+import PlaceBidModal from '../../../components/ui/modals/PlaceBidModal'
+import { useServiceRequests } from '@/hooks/useServiceRequests'
+import { useVendorServiceRequests } from '@/hooks/useVendorServiceRequests'
+import { useCategories } from '@/hooks/useCategories'
+import { categoryAPI } from '@/lib/api'
+import type { Category, ServiceRequest } from '@/types/api'
+
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+
+interface MarketplaceDisplayRequest extends MarketplaceServiceRequest {
+  eventType?: string
+  eventDate?: Date | null
+  locationCity?: string
+}
+
+const flattenCategories = (categories: Category[] = []) => {
+  const map = new Map<string, string>()
+
+  const traverse = (items: Category[]) => {
+    items.forEach((category) => {
+      if (!category?.id) {
+        return
+      }
+
+      map.set(category.id, category.name)
+
+      if (Array.isArray(category.subcategories) && category.subcategories.length > 0) {
+        traverse(category.subcategories)
+      }
+    })
+  }
+
+  traverse(categories)
+  return map
+}
 
 const MarketplacePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -10,143 +45,288 @@ const MarketplacePage = () => {
   const [selectedBudget, setSelectedBudget] = useState('All Budget')
   const [selectedLocation, setSelectedLocation] = useState('All Locations')
   const [selectedEventType, setSelectedEventType] = useState('All Event Types')
-  const [selectedServiceRequest, setSelectedServiceRequest] = useState(null)
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState<MarketplaceServiceRequest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isPlaceBidModalOpen, setIsPlaceBidModalOpen] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
-  const serviceRequests = [
-    {
-      id: 1,
-      title: "Wedding Catering Service Needed",
-      location: "Ajah, Lagos",
-      date: "Feb 28, 2025",
-      description: "We need premium catering for our dream wedding reception. Expecting 200 guests with traditional Nigerian and international dishes. Service should include setup, service staff, cleanup, and professional presentation. We're looking for a caterer who can handle both traditional Nigerian cuisine and international options to accommodate our diverse guest list.",
-      tags: ["Traditional Cuisine", "200 Guests", "Full Service", "Setup Included"],
-      budget: "₦80,000 - ₦120,000",
-      guestCount: 200,
-      requirements: [
-        "Full buffet setup with chafing dishes and serving stations",
-        "Professional serving staff (minimum 4 servers)",
-        "Traditional Nigerian dishes: Jollof rice, pepper soup, grilled chicken, beef stew",
-        "International options: Pasta station, salad bar, grilled fish",
-        "Vegetarian and dietary restriction accommodations",
-        "Elegant presentation and table setup",
-        "Complete cleanup after event",
-        "Must arrive 3 hours before event for setup",
-        "Professional uniforms for all staff",
-        "Quality assurance and food safety certifications"
-      ],
-      clientInfo: {
-        name: "Sparrow123",
-        rating: 4.5,
-        eventsHosted: 12,
-        totalSpent: "₦2.1M",
-        paymentHistory: "Always pays on time",
-        communication: "Responsive and clear",
-        reviews: "Professional and organized",
-        memberSince: "January 2023",
-        avatar: "S"
-      },
-      samples: ["sample1", "sample2"]
-    },
-    {
-      id: 2,
-      title: "Birthday Party DJ and Sound System",
-      location: "Ajah, Lagos", 
-      date: "18th February, 2025",
-      description: "Looking for DJ services for a 30th birthday celebration. Expecting 80-100 guests. Need a mix of Afrobeats, Hip-hop, and party classics. Quality sound system and microphone for speeches required. Outdoor event.",
-      tags: ["Afrobeats", "100 Guests", "Outdoor", "Setup Included"],
-      budget: "₦150,000 - ₦300,000",
-      guestCount: 100,
-      requirements: [
-        "Professional DJ with Afrobeats, Hip-hop, and party classics playlist",
-        "Quality sound system suitable for outdoor event",
-        "Wireless microphone for speeches and announcements",
-        "Setup and breakdown included",
-        "Backup equipment available",
-        "Professional lighting effects",
-        "Music mixing and transitions",
-        "Guest interaction and requests handling"
-      ],
-      clientInfo: {
-        name: "PartyPlanner2025",
-        rating: 4.8,
-        eventsHosted: 8,
-        totalSpent: "₦1.5M",
-        paymentHistory: "Always pays on time",
-        communication: "Very responsive",
-        reviews: "Excellent service",
-        memberSince: "March 2023",
-        avatar: "P"
-      },
-      samples: ["sample1", "sample2"]
-    },
-    {
-      id: 3,
-      title: "Corporate Event Photography",
-      location: "Ajah, Lagos",
-      date: "18th February, 2025", 
-      description: "Professional photography needed for 2-day annual company conference. Coverage includes keynote speeches, panel discussions, and networking sessions. Both candid and formal group photos required. Final images needed within 48 hours.",
-      tags: ["Corporate", "2 Days", "Group Photos", "Fast Turnaround"],
-      budget: "₦200,000 - ₦400,000",
-      guestCount: 150,
-      requirements: [
-        "Professional photography for 2-day conference",
-        "Coverage of keynote speeches and panel discussions",
-        "Candid and formal group photos",
-        "High-resolution images delivered within 48 hours",
-        "Professional editing and color correction",
-        "Multiple photographers for comprehensive coverage",
-        "Backup equipment and memory cards",
-        "Corporate event experience preferred"
-      ],
-      clientInfo: {
-        name: "CorporateEventsNG",
-        rating: 4.7,
-        eventsHosted: 25,
-        totalSpent: "₦4.2M",
-        paymentHistory: "Always pays on time",
-        communication: "Professional and clear",
-        reviews: "High quality work",
-        memberSince: "January 2022",
-        avatar: "C"
-      },
-      samples: ["sample1", "sample2"]
-    },
-    {
-      id: 4,
-      title: "Corporate Event Photography",
-      location: "Ajah, Lagos",
-      date: "18th February, 2025",
-      description: "Professional photography needed for corporate event. Coverage includes keynote speeches, panel discussions, and networking sessions.",
-      tags: ["Corporate", "Professional", "Event Coverage", "High Quality"],
-      budget: "₦180,000 - ₦350,000",
-      guestCount: 120,
-      requirements: [
-        "Professional event photography",
-        "Keynote speech coverage",
-        "Panel discussion documentation",
-        "Networking session photos",
-        "High-quality image delivery",
-        "Professional editing included",
-        "Timely delivery of final images"
-      ],
-      clientInfo: {
-        name: "BusinessEventsLagos",
-        rating: 4.6,
-        eventsHosted: 18,
-        totalSpent: "₦3.1M",
-        paymentHistory: "Always pays on time",
-        communication: "Clear and professional",
-        reviews: "Reliable service",
-        memberSince: "June 2022",
-        avatar: "B"
-      },
-      samples: ["sample1", "sample2"]
-    }
-  ]
+  const { requests: openRequests, loading: openLoading, error: openError } = useServiceRequests({ viewType: 'open' })
+  const { requests: directRequests, loading: directLoading, error: directError } = useVendorServiceRequests({ viewType: 'received', autoFetch: true })
+  const { categories: categoryHierarchy } = useCategories()
 
-  const handleOpenBid = (serviceRequest: any) => {
+  const categoryNameMap = useMemo(() => flattenCategories(categoryHierarchy), [categoryHierarchy])
+  const [serviceNameOverrides, setServiceNameOverrides] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    const combinedRequests = [
+      ...(Array.isArray(openRequests) ? openRequests : []),
+      ...(Array.isArray(directRequests) ? directRequests : []),
+    ]
+
+    const missingIds = new Set<string>()
+
+    combinedRequests.forEach((request) => {
+      const collectCandidate = (candidate: unknown) => {
+        if (!candidate) {
+          return
+        }
+
+        if (typeof candidate === 'string') {
+          const trimmed = candidate.trim()
+          if (UUID_REGEX.test(trimmed) && !categoryNameMap.get(trimmed) && !serviceNameOverrides[trimmed]) {
+            missingIds.add(trimmed)
+          }
+          return
+        }
+
+        if (typeof candidate === 'object') {
+          const id = (candidate as { id?: string }).id
+          if (id && UUID_REGEX.test(id) && !categoryNameMap.get(id) && !serviceNameOverrides[id]) {
+            missingIds.add(id)
+          }
+        }
+      }
+
+      const servicesArray = Array.isArray(request.servicesNeeded)
+        ? request.servicesNeeded
+        : request.servicesNeeded
+        ? [request.servicesNeeded]
+        : []
+
+      servicesArray.forEach(collectCandidate)
+
+      if (Array.isArray((request as any).services)) {
+        ;(request as any).services.forEach(collectCandidate)
+      }
+    })
+
+    if (missingIds.size === 0) {
+      return
+    }
+
+    let cancelled = false
+
+    const fetchMissingNames = async () => {
+      const resolvedEntries: Record<string, string> = {}
+
+      for (const id of missingIds) {
+        try {
+          const response = await categoryAPI.getById(id)
+          const category = response.data?.data
+          if (category?.name) {
+            resolvedEntries[id] = category.name
+          }
+        } catch (err) {
+          console.warn('Failed to resolve category name for ID', id, err)
+        }
+      }
+
+      if (!cancelled && Object.keys(resolvedEntries).length > 0) {
+        setServiceNameOverrides((prev) => ({
+          ...prev,
+          ...resolvedEntries,
+        }))
+      }
+    }
+
+    fetchMissingNames()
+
+    return () => {
+      cancelled = true
+    }
+  }, [openRequests, directRequests, categoryNameMap, serviceNameOverrides])
+
+  const resolveServiceName = useCallback((service: unknown) => {
+    if (!service) {
+      return undefined
+    }
+
+    if (typeof service === 'string') {
+      const normalized = service.trim()
+      const mappedName = categoryNameMap.get(normalized) || serviceNameOverrides[normalized]
+
+      if (mappedName) {
+        return mappedName
+      }
+
+      const looksLikeUuid = UUID_REGEX.test(normalized)
+      if (looksLikeUuid) {
+        return serviceNameOverrides[normalized]
+      }
+
+      return normalized
+    }
+
+    if (typeof service === 'object') {
+      const id = (service as { id?: string }).id
+      if (id) {
+        const mappedName = categoryNameMap.get(id) || serviceNameOverrides[id]
+        if (mappedName) {
+          return mappedName
+        }
+      }
+
+      const name =
+        (service as { name?: string }).name ||
+        (service as { title?: string }).title ||
+        (service as { label?: string }).label ||
+        (service as { serviceName?: string }).serviceName
+
+      if (typeof name === 'string' && name.trim().length > 0) {
+        return name.trim()
+      }
+    }
+
+    return undefined
+  }, [categoryNameMap, serviceNameOverrides])
+
+  const transformRequest = useCallback((request: ServiceRequest): MarketplaceDisplayRequest => {
+    const eventDate = request.eventStartDate ? new Date(request.eventStartDate) : null
+    const formattedDate = eventDate
+      ? eventDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+      : undefined
+    const rawServices = Array.isArray(request.servicesNeeded)
+      ? request.servicesNeeded
+      : request.servicesNeeded
+      ? [request.servicesNeeded as unknown as string]
+      : []
+    let normalizedServices = rawServices
+      .map(resolveServiceName)
+      .filter((serviceName): serviceName is string => typeof serviceName === 'string' && serviceName.length > 0)
+
+    if (normalizedServices.length === 0 && Array.isArray((request as any).services)) {
+      normalizedServices = (request as any).services
+        .map((service: any) => resolveServiceName(service))
+        .filter((serviceName: unknown): serviceName is string => typeof serviceName === 'string' && serviceName.length > 0)
+    }
+    const rawDescription = (request as any).description
+    const description =
+      (request as any).additionalInformation ||
+      (request as any).additionalInfo ||
+      (request as any).additional_details ||
+      (typeof rawDescription === 'string' ? rawDescription : undefined) ||
+      'No additional information provided.'
+
+    return {
+      id: request.id,
+      title: request.eventTitle || 'Untitled Event',
+      location: request.eventLocation || request.eventCity || 'Location TBD',
+      date: formattedDate,
+      description,
+      tags: normalizedServices,
+      budget: request.budgetRange || undefined,
+      guestCount: typeof request.numberOfGuests === 'number' ? request.numberOfGuests : undefined,
+      requirements: normalizedServices,
+      samples: request.images || [],
+      eventType: request.eventType,
+      eventDate,
+      locationCity: request.eventCity || request.eventLocation || undefined
+    }
+  }, [resolveServiceName])
+
+  const transformedRequests = useMemo<MarketplaceDisplayRequest[]>(() => {
+    const combinedRequests = [
+      ...(Array.isArray(openRequests) ? openRequests : []),
+      ...(Array.isArray(directRequests) ? directRequests : []),
+    ]
+
+    const uniqueRequests = combinedRequests.reduce<ServiceRequest[]>((acc, current) => {
+      if (!current?.id) {
+        return acc
+      }
+
+      const exists = acc.some((request) => request.id === current.id)
+      if (!exists) {
+        acc.push(current)
+      }
+
+      return acc
+    }, [])
+
+    return uniqueRequests.map(transformRequest)
+  }, [openRequests, directRequests, transformRequest])
+
+  const filteredRequests = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase()
+    const category = selectedCategory.toLowerCase()
+    const budget = selectedBudget.toLowerCase()
+    const location = selectedLocation.toLowerCase()
+    const eventType = selectedEventType.toLowerCase()
+
+    const today = new Date()
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+    const isWithinDateFilter = (eventDate?: Date | null) => {
+      if (!selectedDate || selectedDate === '' || !eventDate) return true
+      const diffInDays = Math.floor((eventDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24))
+
+      switch (selectedDate) {
+        case 'today':
+          return diffInDays === 0
+        case 'tomorrow':
+          return diffInDays === 1
+        case 'this-week':
+          return diffInDays >= 0 && diffInDays < 7
+        case 'next-week':
+          return diffInDays >= 7 && diffInDays < 14
+        case 'this-month':
+          return (
+            eventDate.getMonth() === today.getMonth() &&
+            eventDate.getFullYear() === today.getFullYear()
+          )
+        default:
+          return true
+      }
+    }
+
+    return transformedRequests.filter((request) => {
+      const matchesSearch =
+        !search ||
+        request.title.toLowerCase().includes(search) ||
+        (request.location && request.location.toLowerCase().includes(search)) ||
+        (request.description && request.description.toLowerCase().includes(search)) ||
+        (request.eventType && request.eventType.toLowerCase().includes(search)) ||
+        (request.tags && request.tags.some(tag => tag.toLowerCase().includes(search)))
+
+      const matchesCategory =
+        selectedCategory === 'All Categories' ||
+        (request.tags && request.tags.some(tag => tag.toLowerCase().includes(category))) ||
+        (request.eventType && request.eventType.toLowerCase().includes(category))
+
+      const matchesBudget =
+        selectedBudget === 'All Budget' ||
+        (request.budget && request.budget.toLowerCase().includes(budget))
+
+      const matchesLocation =
+        selectedLocation === 'All Locations' ||
+        (request.location && request.location.toLowerCase().includes(location))
+
+      const matchesEventType =
+        selectedEventType === 'All Event Types' ||
+        (request.eventType && request.eventType.toLowerCase() === eventType)
+
+      const matchesDate = isWithinDateFilter(request.eventDate)
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesBudget &&
+        matchesLocation &&
+        matchesEventType &&
+        matchesDate
+      )
+    })
+  }, [
+    transformedRequests,
+    searchTerm,
+    selectedCategory,
+    selectedBudget,
+    selectedLocation,
+    selectedEventType,
+    selectedDate
+  ])
+
+  const handleOpenBid = (serviceRequest: MarketplaceServiceRequest) => {
     setSelectedServiceRequest(serviceRequest)
     setIsModalOpen(true)
   }
@@ -154,6 +334,16 @@ const MarketplacePage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedServiceRequest(null)
+    setIsPlaceBidModalOpen(false)
+  }
+
+  const handlePlaceBid = (serviceRequest: MarketplaceServiceRequest) => {
+    setSelectedServiceRequest(serviceRequest)
+    setIsPlaceBidModalOpen(true)
+  }
+
+  const handleClosePlaceBidModal = () => {
+    setIsPlaceBidModalOpen(false)
   }
 
   const renderFilters = () => (
@@ -293,45 +483,90 @@ const MarketplacePage = () => {
 
             {/* Service Request Cards */}
             <div className="space-y-4 sm:space-y-6">
-              {serviceRequests.map((request) => (
-                <div key={request.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{request.title}</h3>
-                      <div className="flex flex-col sm:flex-row sm:items-center text-gray-600 mb-2 gap-1 sm:gap-4">
-                        <div className="flex items-center">
-                          <FiMapPin className="w-4 h-4 mr-2" />
-                          <span>{request.location}</span>
+              {openLoading || directLoading ? (
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 text-center text-gray-600">
+                  Loading marketplace requests...
+                </div>
+              ) : openError || directError ? (
+                <div className="bg-white rounded-lg shadow-md border border-red-200 p-6 text-center text-red-600">
+                  Failed to load marketplace requests.
+                </div>
+              ) : filteredRequests.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 text-center text-gray-600">
+                  No service requests found for the selected filters.
+                </div>
+              ) : (
+                filteredRequests.map((request) => (
+                  <div key={request.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{request.title}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center text-gray-600 mb-2 gap-1 sm:gap-4">
+                          {request.location && (
+                            <div className="flex items-center">
+                              <FiMapPin className="w-4 h-4 mr-2" />
+                              <span>{request.location}</span>
+                            </div>
+                          )}
+                          {request.date && (
+                            <div className="flex items-center">
+                              <FiCalendar className="w-4 h-4 mr-2" />
+                              <span>{request.date}</span>
+                            </div>
+                          )}
+                          {request.guestCount !== undefined && (
+                            <div className="flex items-center">
+                              <FiUsers className="w-4 h-4 mr-2" />
+                              <span>{request.guestCount} Guests</span>
+                            </div>
+                          )}
+                          {request.eventType && (
+                            <div className="flex items-center">
+                              <FiTag className="w-4 h-4 mr-2" />
+                              <span>{request.eventType}</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center">
-                          <FiCalendar className="w-4 h-4 mr-2" />
-                          <span>{request.date}</span>
-                        </div>
+                        {request.description && (
+                          <p className="text-gray-700 mb-4 leading-relaxed text-sm sm:text-base">{request.description}</p>
+                        )}
+                        
+                        {/* Tags */}
+                        {request.tags && request.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {request.tags.map((tag, index) => (
+                              <span key={index} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 text-xs sm:text-sm rounded-full">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-gray-700 mb-4 leading-relaxed text-sm sm:text-base">{request.description}</p>
                       
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {request.tags.map((tag, index) => (
-                          <span key={index} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 text-xs sm:text-sm rounded-full">
-                            {tag}
-                          </span>
-                        ))}
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                        {request.budget && (
+                          <div className="text-green-600 font-semibold text-sm sm:text-base">
+                            {request.budget}
+                          </div>
+                        )}
+                        <button 
+                          onClick={() => handleOpenBid(request)}
+                          className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => handlePlaceBid(request)}
+                          className="w-full sm:w-auto border border-green-600 text-green-600 hover:bg-green-50 px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base"
+                        >
+                          Place Bid
+                        </button>
                       </div>
-                    </div>
-                    
-                    {/* Action Button */}
-                    <div className="sm:text-right">
-                      <button 
-                        onClick={() => handleOpenBid(request)}
-                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base"
-                      >
-                        Open for Bids
-                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -367,11 +602,24 @@ const MarketplacePage = () => {
 
       {/* Service Request Modal */}
       {selectedServiceRequest && (
-        <ServiceRequestModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          serviceRequest={selectedServiceRequest}
-        />
+        <>
+          <ServiceRequestModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            serviceRequest={selectedServiceRequest}
+          />
+          <PlaceBidModal
+            isOpen={isPlaceBidModalOpen}
+            onClose={handleClosePlaceBidModal}
+            serviceRequest={{
+              id: selectedServiceRequest.id,
+              title: selectedServiceRequest.title,
+              location: selectedServiceRequest.location,
+              date: selectedServiceRequest.date,
+              budget: selectedServiceRequest.budget
+            }}
+          />
+        </>
       )}
     </div>
   )

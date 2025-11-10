@@ -6,6 +6,8 @@ import PaymentModal from '@/components/ui/modals/PaymentModal'
 import InvoiceModal from '@/components/ui/modals/InvoiceModal'
 import PaymentSuccessModal from '@/components/ui/modals/PaymentSuccessModal'
 import ClientPageHeader from '@/components/client/ClientPageHeader'
+import InvoiceReceipt from '@/components/ui/InvoiceReceipt'
+import { Invoice } from '@/types/api'
 
 interface Transaction {
   id: string
@@ -129,6 +131,7 @@ export default function PaymentBillingsPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showInvoiceModal, setShowInvoiceModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showEventHubReceipt, setShowEventHubReceipt] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [showDropdown, setShowDropdown] = useState<string | null>(null)
   const [isStatusOpen, setIsStatusOpen] = useState(false)
@@ -177,6 +180,11 @@ export default function PaymentBillingsPage() {
   const handlePaymentSuccess = () => {
     setShowPaymentModal(false)
     setShowSuccessModal(true)
+  }
+
+  const handleViewEventHubReceipt = (transaction: Transaction) => {
+    setSelectedTransaction(transaction)
+    setShowEventHubReceipt(true)
   }
 
   const filteredTransactions = transactions.filter(transaction => {
@@ -487,9 +495,53 @@ export default function PaymentBillingsPage() {
           actionText="View receipt"
           onAction={() => {
             setShowSuccessModal(false)
-            setShowInvoiceModal(true)
+            if (selectedTransaction) {
+              setShowEventHubReceipt(true)
+            }
           }}
         />
+      )}
+
+      {/* EventHub Style Receipt Modal */}
+      {showEventHubReceipt && selectedTransaction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Payment Receipt</h2>
+              <button
+                onClick={() => setShowEventHubReceipt(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6">
+              <InvoiceReceipt 
+                data={{
+                  id: selectedTransaction.id,
+                  invoiceNumber: selectedTransaction.invoiceNumber,
+                  userId: 'user-123',
+                  clientEmail: 'client@example.com',
+                  clientName: 'Client Name',
+                  dueDate: new Date().toISOString(),
+                  paymentPattern: 'full_upfront',
+                  items: [
+                    { description: selectedTransaction.vendor, quantity: 1, amount: selectedTransaction.amount, total: selectedTransaction.amount }
+                  ],
+                  subtotal: selectedTransaction.amount,
+                  discount: 0,
+                  total: selectedTransaction.amount,
+                  status: selectedTransaction.status === 'unpaid' ? 'draft' : selectedTransaction.status as 'paid' | 'draft' | 'cancelled',
+                  notes: 'Payment completed successfully',
+                  createdAt: selectedTransaction.dateTime,
+                  updatedAt: new Date().toISOString()
+                }} 
+                type="invoice" 
+                showActions={true} 
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,356 +1,307 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { authAPI } from '@/lib/api'
 
 export default function AuthDebugger() {
   const { user, isAuthenticated, loading } = useAuthContext()
-  const [token, setToken] = useState<string | null>(null)
-  const [tokenPayload, setTokenPayload] = useState<any>(null)
-  const [apiTest, setApiTest] = useState<any>(null)
-  const [profileTest, setProfileTest] = useState<any>(null)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('accessToken')
-      setToken(storedToken)
+  const [testCredentials, setTestCredentials] = useState({
+    email: '',
+    password: ''
+  })
+  const testBackendHealth = async () => {
+    try {
+      console.log('🏥 Testing backend health...')
       
-      if (storedToken) {
-        try {
-          const payload = JSON.parse(atob(storedToken.split('.')[1]))
-          setTokenPayload(payload)
-        } catch (e) {
-          console.error('Failed to decode token:', e)
+      // First test a simple GET request to see if the backend is reachable
+      const baseUrl = 'https://backend-a3nd.onrender.com/api/v1'
+      
+      // Test 1: Simple GET request
+      console.log('🏥 Testing GET request to base URL...')
+      const getResponse = await fetch(baseUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      console.log('🏥 GET response:', {
+        status: getResponse.status,
+        statusText: getResponse.statusText,
+        headers: Object.fromEntries(getResponse.headers.entries()),
+        ok: getResponse.ok
+      })
+      
+      // Test 2: POST to login endpoint
+      console.log('🏥 Testing POST request to login endpoint...')
+      const postResponse = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'test@example.com',
+          password: 'testpassword'
+        })
+      })
+      
+      console.log('🏥 POST response:', {
+        status: postResponse.status,
+        statusText: postResponse.statusText,
+        headers: Object.fromEntries(postResponse.headers.entries()),
+        ok: postResponse.ok
+      })
+      
+      const postText = await postResponse.text()
+      console.log('🏥 POST response body:', postText)
+      
+      return {
+        getTest: {
+          status: getResponse.status,
+          statusText: getResponse.statusText,
+          headers: Object.fromEntries(getResponse.headers.entries()),
+          ok: getResponse.ok
+        },
+        postTest: {
+          status: postResponse.status,
+          statusText: postResponse.statusText,
+          headers: Object.fromEntries(postResponse.headers.entries()),
+          body: postText,
+          ok: postResponse.ok
         }
       }
+    } catch (error: any) {
+      console.error('🏥 Backend health check failed:', error)
+      return { error: error.message }
     }
+  }
+
+  const [backendHealth, setBackendHealth] = useState<any>(null)
+  const [isCheckingHealth, setIsCheckingHealth] = useState(false)
+  const [testResult, setTestResult] = useState<any>(null)
+  const [isTesting, setIsTesting] = useState(false)
+
+  const handleHealthCheck = async () => {
+    setIsCheckingHealth(true)
+    const result = await testBackendHealth()
+    setBackendHealth(result)
+    setIsCheckingHealth(false)
+  }
+
+  const handleTestLogin = async () => {
+    if (!testCredentials.email || !testCredentials.password) {
+      alert('Please enter test credentials')
+      return
+    }
+
+    setIsTesting(true)
+    setTestResult(null)
+
+    try {
+      console.log('🧪 Testing login with credentials:', {
+        email: testCredentials.email,
+        passwordLength: testCredentials.password.length
+      })
+
+      const response = await authAPI.login({
+        email: testCredentials.email,
+        password: testCredentials.password
+      })
+
+      console.log('🧪 Test login successful:', response.data)
+      setTestResult({
+        success: true,
+        data: response.data,
+        status: response.status
+      })
+    } catch (error: any) {
+      console.error('🧪 Test login failed:', error)
+      console.error('🧪 Full error object:', {
+        message: error.message,
+        name: error.name,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers,
+        data: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+          headers: error.config?.headers,
+          data: error.config?.data
+        }
+      })
+      
+      setTestResult({
+        success: false,
+        error: {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+          headers: error.response?.headers,
+          config: {
+            url: error.config?.url,
+            method: error.config?.method,
+            baseURL: error.config?.baseURL,
+            headers: error.config?.headers
+          }
+        }
+      })
+    } finally {
+      setIsTesting(false)
+    }
+  }
+
+  const [tokenStatus, setTokenStatus] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  const checkTokenStatus = () => {
+    if (typeof window === 'undefined') return null
+    
+    const accessToken = localStorage.getItem('accessToken')
+    const refreshToken = localStorage.getItem('refreshToken')
+    
+    if (!accessToken) {
+      return { hasToken: false }
+    }
+    
+    try {
+      const payload = JSON.parse(atob(accessToken.split('.')[1]))
+      const now = Math.floor(Date.now() / 1000)
+      const expiresIn = payload.exp - now
+      const isExpired = payload.exp < now
+      
+      return {
+        hasToken: true,
+        hasRefreshToken: !!refreshToken,
+        isExpired,
+        expiresIn,
+        expiresInMinutes: Math.floor(expiresIn / 60),
+        userId: payload.id,
+        accountType: payload.accountType,
+        email: payload.email,
+        issuedAt: new Date(payload.iat * 1000).toLocaleString(),
+        expiresAt: new Date(payload.exp * 1000).toLocaleString()
+      }
+    } catch (e) {
+      return { hasToken: true, error: 'Invalid token format' }
+    }
+  }
+
+  // Set client flag on mount to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+    setTokenStatus(checkTokenStatus())
   }, [])
 
-  const testApiCall = async () => {
-    try {
-      const response = await fetch('https://backend-a3nd.onrender.com/api/v1/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      const data = await response.json()
-      setApiTest({
-        status: response.status,
-        statusText: response.statusText,
-        data: data
-      })
-    } catch (error) {
-      setApiTest({
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+  // Update token status when auth state changes
+  useEffect(() => {
+    if (isClient) {
+      setTokenStatus(checkTokenStatus())
     }
-  }
-
-  const testProfileCall = async () => {
-    try {
-      const response = await fetch('https://backend-a3nd.onrender.com/api/v1/profile/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      const data = await response.json()
-      setProfileTest({
-        status: response.status,
-        statusText: response.statusText,
-        data: data
-      })
-    } catch (error) {
-      setProfileTest({
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
-    }
-  }
-
-  const testVendorEndpoints = async () => {
-    const endpoints = [
-      // Core Auth & Profile
-      { path: '/auth/me', name: 'Auth Profile' },
-      { path: '/profile/me', name: 'User Profile' },
-      
-      // Portfolio Management
-      { path: '/portfolio/my', name: 'My Portfolios' },
-      { path: '/portfolio/all', name: 'All Portfolios' },
-      
-      // Service Management
-      { path: '/service/my', name: 'My Services' },
-      { path: '/service/all', name: 'All Services' },
-      
-      // Service Requests
-      { path: '/service-request/my', name: 'My Service Requests' },
-      { path: '/service-request/all', name: 'All Service Requests' },
-      
-      // Vendor Specific
-      { path: '/vendor-service-request/my', name: 'Vendor Service Requests' },
-      { path: '/vendor-response/my', name: 'Vendor Responses' },
-      
-      // Vendor Analytics & Performance
-      { path: '/vendor/analytics/performance', name: 'Vendor Analytics Performance' },
-      { path: '/vendor/analytics/engagement', name: 'Vendor Analytics Engagement' },
-      { path: '/vendor/analytics/clients', name: 'Vendor Analytics Clients' },
-      { path: '/vendor/analytics/revenue', name: 'Vendor Analytics Revenue' },
-      { path: '/vendor/analytics/services', name: 'Vendor Analytics Services' },
-      { path: '/vendor/analytics/event-types', name: 'Vendor Analytics Event Types' },
-      
-      // Vendor Business
-      { path: '/vendor/earnings', name: 'Vendor Earnings' },
-      { path: '/vendor/earnings/stats', name: 'Vendor Earnings Stats' },
-      { path: '/vendor/withdrawals', name: 'Vendor Withdrawals' },
-      { path: '/vendor/bank-details', name: 'Vendor Bank Details' },
-      
-      // Vendor Team Management
-      { path: '/vendor/team/staff', name: 'Vendor Team Staff' },
-      { path: '/vendor/team/roles', name: 'Vendor Team Roles' },
-      
-      // Vendor Subscription
-      { path: '/vendor/subscription/status', name: 'Vendor Subscription Status' },
-      { path: '/vendor/subscription/plans', name: 'Vendor Subscription Plans' },
-      { path: '/vendor/subscription/billing', name: 'Vendor Subscription Billing' },
-      
-      // Other Features
-      { path: '/bid/my', name: 'My Bids' },
-      { path: '/rating/my', name: 'My Ratings' },
-      { path: '/meeting/my', name: 'My Meetings' },
-      { path: '/message/conversations', name: 'Message Conversations' },
-      { path: '/category/', name: 'Categories' }
-    ]
-    
-    const results = []
-    let missingEndpoints = 0
-    let workingEndpoints = 0
-    
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(`https://backend-a3nd.onrender.com/api/v1${endpoint.path}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        
-        if (response.status === 404) {
-          results.push({
-            endpoint: endpoint.path,
-            name: endpoint.name,
-            status: 404,
-            statusText: 'Not Found',
-            message: '❌ Endpoint not implemented on backend',
-            type: 'missing'
-          })
-          missingEndpoints++
-        } else {
-          const data = await response.json()
-          results.push({
-            endpoint: endpoint.path,
-            name: endpoint.name,
-            status: response.status,
-            statusText: response.statusText,
-            data: data,
-            message: response.status === 200 ? '✅ Working' : `⚠️ Status: ${response.status}`,
-            type: 'working'
-          })
-          workingEndpoints++
-        }
-      } catch (error) {
-        results.push({
-          endpoint: endpoint.path,
-          name: endpoint.name,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          message: '❌ Network/Parse Error',
-          type: 'error'
-        })
-      }
-    }
-    
-    setProfileTest({
-      type: 'vendor_endpoints_test',
-      results: results,
-      summary: {
-        total: endpoints.length,
-        working: workingEndpoints,
-        missing: missingEndpoints,
-        errors: endpoints.length - workingEndpoints - missingEndpoints
-      }
-    })
-  }
-
-  if (!isAuthenticated && !loading) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 className="text-red-800 font-semibold">Authentication Debugger</h3>
-        <p className="text-red-600">User is not authenticated</p>
-      </div>
-    )
-  }
+  }, [user, isAuthenticated, isClient])
 
   return (
-    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
-      <h3 className="text-blue-800 font-semibold">Authentication Debugger</h3>
+    <div className="p-4 bg-gray-100 rounded-lg space-y-4">
+      <h3 className="text-lg font-semibold">🔧 Authentication Debugger</h3>
       
-      <div>
-        <h4 className="font-medium text-blue-700">User State:</h4>
-        <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
-          {JSON.stringify({ user, isAuthenticated, loading }, null, 2)}
+      {/* Current Auth State */}
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-medium mb-2">Current Auth State:</h4>
+        <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto">
+          {JSON.stringify({
+            user: user ? {
+              id: user.id,
+              email: user.email,
+              accountType: user.accountType,
+              isEmailVerified: user.isEmailVerified
+            } : null,
+            isAuthenticated,
+            loading
+          }, null, 2)}
         </pre>
       </div>
 
-      <div>
-        <h4 className="font-medium text-blue-700">Token:</h4>
-        <p className="text-xs text-gray-600 break-all">
-          {token ? `${token.substring(0, 50)}...` : 'No token found'}
-        </p>
-      </div>
-
-      <div>
-        <h4 className="font-medium text-blue-700">Token Payload:</h4>
-        <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
-          {JSON.stringify(tokenPayload, null, 2)}
+      {/* Token Status */}
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-medium mb-2">Token Status:</h4>
+        <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto">
+          {isClient ? (tokenStatus ? JSON.stringify(tokenStatus, null, 2) : 'Loading...') : 'Loading...'}
         </pre>
-        
-        {/* Check for missing fields */}
-        {tokenPayload && (
-          <div className="mt-2">
-            <h5 className="font-medium text-red-700 text-sm">Missing Fields:</h5>
-            <ul className="text-xs text-red-600 space-y-1">
-              {!tokenPayload.email && <li>• email</li>}
-              {!tokenPayload.firstName && <li>• firstName</li>}
-              {!tokenPayload.lastName && <li>• lastName</li>}
-              {!tokenPayload.businessName && <li>• businessName</li>}
-              {!tokenPayload.accountType && <li>• accountType</li>}
-              {!tokenPayload.email && !tokenPayload.firstName && !tokenPayload.lastName && !tokenPayload.businessName && !tokenPayload.accountType && (
-                <li className="text-green-600">All required fields are present!</li>
-              )}
-            </ul>
-            
-            {/* Explanation */}
-            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-              <p className="text-yellow-800 font-medium">Why are fields missing?</p>
-              <ul className="text-yellow-700 mt-1 space-y-1">
-                <li>• JWT token only contains basic info (ID, timestamps)</li>
-                <li>• User profile data is stored separately in the database</li>
-                <li>• Try the &quot;Test Profile API&quot; button to fetch complete profile</li>
-                <li>• User may need to complete profile setup</li>
-              </ul>
-            </div>
-            
-            {/* Backend Access Issue */}
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs">
-              <p className="text-red-800 font-medium">⚠️ Backend Access Issue:</p>
-              <ul className="text-red-700 mt-1 space-y-1">
-                <li>• Generic endpoints reject vendor accounts (403 Forbidden)</li>
-                <li>• Some vendor endpoints return HTML (404 Not Found)</li>
-                <li>• Backend vendor support is partially implemented</li>
-                <li>• Use &quot;Test Vendor Endpoints&quot; to find working endpoints</li>
-              </ul>
-            </div>
-          </div>
-        )}
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      {/* Test Login */}
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-medium mb-2">Test Login:</h4>
+        <div className="space-y-2">
+          <input
+            type="email"
+            placeholder="Test email"
+            value={testCredentials.email}
+            onChange={(e) => setTestCredentials(prev => ({ ...prev, email: e.target.value }))}
+            className="w-full p-2 border rounded text-sm"
+          />
+          <input
+            type="password"
+            placeholder="Test password"
+            value={testCredentials.password}
+            onChange={(e) => setTestCredentials(prev => ({ ...prev, password: e.target.value }))}
+            className="w-full p-2 border rounded text-sm"
+          />
         <button 
-          onClick={testApiCall}
-          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+            onClick={handleTestLogin}
+            disabled={isTesting}
+            className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
         >
-          Test Auth API
+            {isTesting ? 'Testing...' : 'Test Login'}
         </button>
-        <button 
-          onClick={testProfileCall}
-          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-        >
-          Test Profile API
-        </button>
-        <button 
-          onClick={testVendorEndpoints}
-          className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
-        >
-          Test Vendor Endpoints
-        </button>
+        </div>
       </div>
 
-      {apiTest && (
-        <div>
-          <h4 className="font-medium text-blue-700">Auth API Test Result:</h4>
-          <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
-            {JSON.stringify(apiTest, null, 2)}
+      {/* Test Result */}
+      {testResult && (
+        <div className="bg-white p-3 rounded border">
+          <h4 className="font-medium mb-2">Test Result:</h4>
+          <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto">
+            {JSON.stringify(testResult, null, 2)}
           </pre>
         </div>
       )}
 
-      {profileTest && (
-        <div>
-          <h4 className="font-medium text-green-700">
-            {profileTest.type === 'vendor_endpoints_test' ? 'Vendor Endpoints Test Results:' : 'Profile API Test Result:'}
-          </h4>
-          
-          {profileTest.type === 'vendor_endpoints_test' && profileTest.summary ? (
-            <div className="space-y-3">
-              {/* Summary */}
-              <div className="bg-gray-50 p-3 rounded border">
-                <h5 className="font-medium text-gray-800 mb-2">Summary:</h5>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Total Endpoints:</span>
-                    <span className="font-medium">{profileTest.summary.total}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>✅ Working:</span>
-                    <span className="font-medium text-green-600">{profileTest.summary.working}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>❌ Missing (404):</span>
-                    <span className="font-medium text-red-600">{profileTest.summary.missing}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>⚠️ Errors:</span>
-                    <span className="font-medium text-yellow-600">{profileTest.summary.errors}</span>
-                  </div>
-                </div>
+      {/* Backend Health Check */}
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-medium mb-2">Backend Health Check:</h4>
+        <button
+          onClick={handleHealthCheck}
+          disabled={isCheckingHealth}
+          className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50 mb-2"
+        >
+          {isCheckingHealth ? 'Checking...' : 'Test Backend'}
+        </button>
+        {backendHealth && (
+          <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto">
+            {JSON.stringify(backendHealth, null, 2)}
+          </pre>
+        )}
               </div>
               
-              {/* Detailed Results */}
-              <div className="space-y-2">
-                {profileTest.results.map((result: any, index: number) => (
-                  <div key={index} className={`p-2 rounded border text-xs ${
-                    result.type === 'working' ? 'bg-green-50 border-green-200' :
-                    result.type === 'missing' ? 'bg-red-50 border-red-200' :
-                    'bg-yellow-50 border-yellow-200'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{result.name}</span>
-                      <span className="text-gray-600">{result.endpoint}</span>
-                    </div>
-                    <div className="mt-1">
-                      <span className={`inline-block px-2 py-1 rounded text-xs ${
-                        result.type === 'working' ? 'bg-green-100 text-green-800' :
-                        result.type === 'missing' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {result.message}
-                      </span>
-                      {result.status && (
-                        <span className="ml-2 text-gray-600">Status: {result.status}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {/* API Info */}
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-medium mb-2">API Configuration:</h4>
+        <div className="text-xs space-y-1">
+          <div>Base URL: {process.env.NEXT_PUBLIC_API_URL || 'https://backend-a3nd.onrender.com/api/v1'}</div>
+          <div>Login Endpoint: /auth/login</div>
+          <div>Full URL: {(process.env.NEXT_PUBLIC_API_URL || 'https://backend-a3nd.onrender.com/api/v1')}/auth/login</div>
+          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+            <div className="font-medium text-yellow-800">Available Roles:</div>
+            <div className="text-yellow-700">• client - Regular users/clients</div>
+            <div className="text-yellow-700">• vendor - Event vendors/service providers</div>
             </div>
-          ) : (
-            <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
-              {JSON.stringify(profileTest, null, 2)}
-            </pre>
-          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

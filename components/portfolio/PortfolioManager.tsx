@@ -6,6 +6,7 @@ import { portfolioAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Portfolio } from '@/types/api'
 import { FiPlus, FiEdit, FiTrash2, FiEye, FiImage, FiTag, FiCalendar } from 'react-icons/fi'
+import { ButtonLoader } from '@/components/ui/Loader'
 
 interface PortfolioManagerProps {
   userId?: string
@@ -61,9 +62,9 @@ export default function PortfolioManager({ userId, isOwnPortfolio = false }: Por
   }
 
   // Remove media from portfolio
-  const handleRemoveMedia = async (portfolioId: string) => {
+  const handleRemoveMedia = async (portfolioId: string, mediaUrl: string) => {
     try {
-      await portfolioAPI.removeMedia(portfolioId)
+      await portfolioAPI.removeMedia(portfolioId, mediaUrl)
       await fetchPortfolios() // Refresh the list
     } catch (err) {
       setError('Failed to remove media')
@@ -338,7 +339,9 @@ function CreateEditPortfolioModal({ portfolio, onClose, onSuccess }: CreateEditP
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Saving...' : (portfolio ? 'Update' : 'Create')}
+                <ButtonLoader loading={loading} loadingText="Saving...">
+                  {portfolio ? 'Update' : 'Create'}
+                </ButtonLoader>
               </button>
             </div>
           </form>

@@ -16,8 +16,8 @@ export default function ClientPage() {
       return
     }
 
-    // Redirect to client dashboard as the main landing page
-    console.log('ClientPage: Redirecting to dashboard for user:', user.id)
+    // Redirect to client dashboard as the main landing page for all client types
+    console.log('ClientPage: Redirecting to dashboard for user:', user.id, 'accountType:', user.accountType)
     router.push('/client/dashboard')
   }, [router, user, isAuthenticated, loading])
 

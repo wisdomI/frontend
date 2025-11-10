@@ -31,7 +31,15 @@ export const usePortfolio = () => {
       const response = await portfolioAPI.getUserPortfolios(userId)
       setPortfolios(response.data.data)
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch user portfolios')
+      // If it's a 403 error, it means the user doesn't have permission to view this portfolio
+      // This is expected for some users, so we'll gracefully handle it
+      if (err.response?.status === 403) {
+        console.log('🔍 Portfolio API requires special permissions - skipping portfolio fetch')
+        setError(null) // Don't show error for expected permission requirements
+        setPortfolios([]) // Clear portfolios so fallback is used
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch user portfolios')
+      }
     } finally {
       setLoading(false)
     }
@@ -94,6 +102,20 @@ export const usePortfolio = () => {
     }
   }
 
+  const removeMediaFromPortfolio = async (id: string, mediaUrl: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+      await portfolioAPI.removeMedia(id, mediaUrl)
+      await fetchMyPortfolios() // Refresh the list
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to remove media from portfolio')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const deletePortfolio = async (id: string) => {
     try {
       setLoading(true)
@@ -134,6 +156,7 @@ export const usePortfolio = () => {
     fetchUserPortfolios,
     createPortfolio,
     updatePortfolio,
+    removeMediaFromPortfolio,
     deletePortfolio,
     getPortfolioById,
   }

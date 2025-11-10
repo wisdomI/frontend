@@ -1,109 +1,178 @@
-import { Mail, Phone, MapPin } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaXTwitter, FaTiktok, FaYoutube } from "react-icons/fa6";
+'use client';
+
+import Link from 'next/link';
 import Image from 'next/image';
+import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
 export default function Footer() {
+  const quickLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Contact Us', href: '/contact' },
+    { name: 'How it Works', href: '/how-it-works' },
+    { name: 'Blog & News', href: '/blog' },
+    { name: 'Our Team', href: '/team' },
+    { name: 'Investors', href: '/investors' },
+    { name: 'Help & Support', href: '/support' },
+    { name: 'Mediakit', href: '/mediakit' },
+    { name: 'FAQ', href: '/faq' },
+    { name: 'Careers', href: '/careers' },
+  ];
+
+  const legalLinks = [
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Payment Policy', href: '/payment-policy' },
+    { name: 'Vendor Agreement', href: '/vendor-agreement' },
+    { name: 'Client Agreement', href: '/client-agreement' },
+    { name: 'Dispute Resolution', href: '/dispute-resolution' },
+  ];
+
   return (
-    <footer className="bg-event-blue text-white">
-      <div className="container mx-auto px-4 py-10">
-        {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {/* Brand & Description */}
-          <div className="md:col-span-1">
-            <div className="mb-4">
-              <Image 
-                src="/images/FooterLogo.png" 
-                alt="EventHub" 
-                width={120}
-                height={24}
-                className="h-6 w-30"
-              />
+    <footer className="bg-brand-900 text-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="py-16">
+          {/* Use a 12-col grid so the left side can be wider */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-12">
+            {/* Left Section - wider (spans 5 of 12 on large screens) */}
+            <div className="lg:col-span-5">
+              <Link href="/" className="block mb-6">
+                <Image
+                  src="/images/FooterLogo.png"
+                  alt="EventHub Logo"
+                  width={150}
+                  height={50}
+                  className=""
+                  style={{ width: "auto", height: "auto" }}
+                  priority
+                />
+              </Link>
+
+              <div className="text-sm leading-relaxed font-raleway max-w-md">
+                <p className="mb-4">
+                  Event Hub is a trusted digital marketplace in Nigeria that simplifies discovering, verifying, booking,
+                  and coordinating event service providers like caterers, photographers, decorators, and wedding dress vendors.
+                </p>
+                <p className="mb-4">
+                  It offers seamless service discovery, secure payments, trusted reviews, verified profiles, and transparent
+                  communication—all in one app.
+                </p>
+              </div>
+
+              {/* Contact Info: horizontal / side-by-side */}
+              <div className="mt-6">
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 rounded-full bg-white">
+                      <Mail className="h-4 w-4 text-brand-900" />
+                    </div>
+                    <span className="text-sm">hello@eventhub.ng</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 rounded-full bg-white">
+                      <Phone className="h-4 w-4 text-brand-900" />
+                    </div>
+                    <span className="text-sm">+234 809 123 4567</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 rounded-full bg-white">
+                      <MapPin className="h-4 w-4 text-brand-900" />
+                    </div>
+                    <span className="text-sm">Lagos, Nigeria</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-blue-100 text-sm leading-relaxed mb-4">
-              Event Hub is a trusted digital marketplace in Nigeria that simplifies discovering, 
-              verifying, booking, and coordinating event service providers like caterers, photographers, 
-              decorators, and dress vendors.
-            </p>
-            <p className="text-blue-100 text-sm leading-relaxed mb-6">
-              It offers seamless service discovery, secure payments, trusted reviews, verified profiles, 
-              and transparent communication—all in one app.
-            </p>
 
-            {/* Contact Info */}
-            <div className="space-y-3  ">
-              <div className="flex items-center gap-2">
-                <Mail className="w-5 h-5 " /> hello@eventhub.ng
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-5 h-5  " /> +234 809 123 4567
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 " /> Lagos, Nigeria
-              </div>
+            {/* Quick Links (narrower) */}
+            <div className="lg:col-span-2">
+              <h3 className="font-semibold mb-4 font-raleway">Quick Links</h3>
+              <ul className="space-y-2">
+                {quickLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm hover:text-gray-300 transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold mb-4 font-asul">Quick Links</h4>
-            <ul className="space-y-2 text-blue-100 text-sm">
-              <li><a href="/" className="hover:text-white">Home</a></li>
-              <li><a href="/about" className="hover:text-white">About Us</a></li>
-              <li><a href="/how-it-works" className="hover:text-white">How it Works</a></li>
-              <li><a href="/blog" className="hover:text-white">Blog</a></li>
-              <li><a href="/dispute" className="hover:text-white">Dispute Resolution</a></li>
-              <li><a href="/faq" className="hover:text-white">FAQ</a></li>
-              <li><a href="/contact" className="hover:text-white">Contact Us</a></li>
-              <li><a href="/careers" className="hover:text-white">Careers</a></li>
-            </ul>
-          </div>
+            {/* Legal Information (narrower) */}
+            <div className="lg:col-span-2">
+              <h3 className="font-semibold mb-4 font-raleway">Legal Information</h3>
+              <ul className="space-y-2">
+                {legalLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm hover:text-gray-300 transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Legal Info */}
-          <div>
-            <h4 className="font-semibold mb-4 font-asul">Legal Information</h4>
-            <ul className="space-y-2 text-blue-100 text-sm">
-              <li><a href="/privacy" className="hover:text-white">Privacy Policy</a></li>
-              <li><a href="/vendor-agreement" className="hover:text-white">Vendor Agreement</a></li>
-              <li><a href="/safety" className="hover:text-white">Safety Guidelines</a></li>
-              <li><a href="/terms" className="hover:text-white">Terms & Condition</a></li>
-              <li><a href="/cookies" className="hover:text-white">Cookie Policy</a></li>
-            </ul>
-          </div>
+            {/* Newsletter (spans remaining 3 cols) */}
+            <div className="lg:col-span-3">
+              <h3 className="font-semibold mb-3 font-raleway">Subscribe Newsletter</h3>
+              <p className="text-sm mb-6 font-raleway">Get the latest Vendor update & Event tips</p>
 
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-semibold mb-4 font-asul">Subscribe Newsletter</h4>
-            <p className="text-blue-100 text-sm mb-4">
-              Get the latest Vendor update & Event tips
-            </p>
-            <form className="flex mb-4">
-              <input
-                type="email"
-                placeholder="Enter email address"
-                className="flex-1 px-4 py-2 rounded-l-lg text-gray-800 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-yellow-500 text-white px-5 py-2 rounded-r-lg font-semibold hover:bg-yellow-600"
-              >
-                Subscribe
-              </button>
-            </form>
+              {/* Newsletter form: white rounded input + yellow pill Subscribe button */}
+              <form onSubmit={(e) => e.preventDefault()} className="mb-8">
+                <div className="flex w-full max-w-md bg-white rounded-md overflow-hidden shadow-sm">
+                  <input
+                    type="email"
+                    aria-label="Email address"
+                    placeholder="Enter email address"
+                    className="flex-1 px-3 sm:px-4 py-3 text-gray-700 placeholder-gray-400 border-none outline-none text-sm min-w-0"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 sm:px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-sm whitespace-nowrap flex-shrink-0"
+                  >
+                    Subscribe
+                  </button>
+                </div>
+              </form>
 
-            {/* Social Icons */}
-            <div className="flex gap-4 text-white text-lg">
-              <FaFacebookF className="cursor-pointer hover:text-yellow-400" />
-              <FaInstagram className="cursor-pointer hover:text-yellow-400" />
-              <FaXTwitter className="cursor-pointer hover:text-yellow-400" />
-              <FaTiktok className="cursor-pointer hover:text-yellow-400" />
-              <FaYoutube className="cursor-pointer hover:text-yellow-400" />
+              {/* Social Media Icons */}
+              <div className="flex items-center space-x-4">
+                <Link href="https://www.facebook.com/eventhubglobal" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <Facebook className="h-5 w-5 text-white" />
+                  <span className="sr-only">Facebook</span>
+                </Link>
+                <Link href="https://www.instagram.com/eventhubglobal" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)' }}>
+                  <Instagram className="h-5 w-5 text-white" />
+                  <span className="sr-only">Instagram</span>
+                </Link>
+                <Link href="https://x.com/eventhubglobal" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-black rounded flex items-center justify-center hover:bg-gray-800 transition-colors">
+                  <Twitter className="h-5 w-5 text-white" />
+                  <span className="sr-only">X (Twitter)</span>
+                </Link>
+                <Link href="https://www.tiktok.com/@eventhubglobal" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-black rounded flex items-center justify-center hover:bg-gray-800 transition-colors">
+                  <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                  </svg>
+                  <span className="sr-only">TikTok</span>
+                </Link>
+                <Link href="https://www.youtube.com/@eventhubglobal" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-red-600 rounded flex items-center justify-center hover:bg-red-700 transition-colors">
+                  <Youtube className="h-5 w-5 text-white" />
+                  <span className="sr-only">YouTube</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Copyright */}
-        <div className="border-t border-blue-200/20 mt-10 pt-6 text-center text-blue-100 text-sm">
-          © 2025 EventHub. All rights reserved.
+        {/* Bottom Footer - Copyright */}
+        <div className="border-t border-brand-800 py-6">
+          <div className="text-center">
+            <div className="text-sm">
+              © 2025. EventHub. All right reserved.
+            </div>
+          </div>
         </div>
       </div>
     </footer>

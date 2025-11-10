@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { FiX } from 'react-icons/fi'
 
 interface ClientSidebarProps {
@@ -11,6 +11,7 @@ interface ClientSidebarProps {
 
 export default function ClientSidebar({ onClose }: ClientSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const menuItems = [
     {
@@ -134,7 +135,12 @@ export default function ClientSidebar({ onClose }: ClientSidebarProps) {
                   ? 'bg-blue-600 text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={onClose}
+              onClick={(e) => {
+                // Ensure navigation works by preventing any interference
+                e.preventDefault()
+                router.push(item.href)
+                onClose?.()
+              }}
             >
               {'iconActiveSrc' in item ? (
                 <Image 

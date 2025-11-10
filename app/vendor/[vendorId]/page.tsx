@@ -335,7 +335,24 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {servicesData.map((service) => (
-                <div key={service.id} className="space-y-4">
+                <div 
+                  key={service.id} 
+                  className="space-y-4 cursor-pointer"
+                  onClick={() => {
+                    if (service.id) {
+                      window.location.href = `/services/${service.id}`
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (service.id) {
+                        window.location.href = `/services/${service.id}`
+                      }
+                    }
+                  }}
+                >
                   <Image 
                     src={service.image} 
                     alt={service.title}
@@ -346,12 +363,6 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                   <div>
                     <h4 className="font-bold text-gray-900 mb-2">{service.title}</h4>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">{service.description}</p>
-                    <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
-                      <span>View Pricing</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
                   </div>
                 </div>
               ))}

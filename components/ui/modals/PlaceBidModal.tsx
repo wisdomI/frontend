@@ -2,16 +2,18 @@
 import React, { useState } from 'react'
 import { FiX, FiCalendar, FiUpload, FiTrash2, FiCloud } from 'react-icons/fi'
 
+export type PlaceBidMarketplaceRequest = {
+  id: string | number
+  title: string
+  location?: string
+  date?: string
+  budget?: string
+}
+
 interface PlaceBidModalProps {
   isOpen: boolean
   onClose: () => void
-  serviceRequest: {
-    id: number
-    title: string
-    location: string
-    date: string
-    budget: string
-  }
+  serviceRequest: PlaceBidMarketplaceRequest
 }
 
 const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
@@ -65,7 +67,10 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Place Your Bid</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Place Your Bid</h2>
+            <p className="text-sm text-gray-500 mt-1">{serviceRequest.title}</p>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"

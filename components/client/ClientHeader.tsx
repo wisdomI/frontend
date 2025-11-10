@@ -20,6 +20,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
+  const [cachedUserName, setCachedUserName] = useState<string | null>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const messageRef = useRef<HTMLDivElement>(null)
   const logoutRef = useRef<HTMLDivElement>(null)
@@ -44,25 +45,53 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
     }
   }, [])
 
-  // Fetch profile picture
+  // Cache user name for consistency
   useEffect(() => {
-    const fetchProfilePicture = async () => {
+    const displayName = user?.firstName || user?.businessName || user?.displayName
+    if (displayName) {
+      setCachedUserName(displayName)
+      // Store in localStorage for persistence across navigations
+      if (typeof window !== 'undefined' && user?.id) {
+        localStorage.setItem(`cached_user_name_${user.id}`, displayName)
+      }
+    }
+  }, [user?.firstName, user?.businessName, user?.displayName, user?.id])
+
+  // Fetch profile picture with proper interval management (OPTIMIZED)
+  useEffect(() => {
+    const fetchProfileData = async () => {
       if (user?.id && isAuthenticated) {
         try {
           const response = await profileAPI.me()
           if (response.data.data?.displayPicture) {
             setProfilePicture(response.data.data.displayPicture)
-            console.log('✅ ClientHeader: Loaded display picture from API:', response.data.data.displayPicture)
-          } else {
-            console.log('ℹ️ ClientHeader: No display picture in profile')
-            setProfilePicture(null)
+            if (typeof window !== 'undefined' && user?.id) {
+              localStorage.setItem(`profile_picture_${user.id}`, response.data.data.displayPicture)
+            }
+          }
+          // Also cache user name if available
+          const name = (response.data.data as any)?.firstName || (response.data.data as any)?.businessName || (response.data.data as any)?.displayName
+          if (name) {
+            setCachedUserName(name)
+            if (typeof window !== 'undefined' && user?.id) {
+              localStorage.setItem(`cached_user_name_${user.id}`, name)
+            }
           }
         } catch (error: any) {
-          console.error('Error fetching profile picture:', error)
-          
-          // Handle API not available - use localStorage fallback
           if (error.response?.status === 404) {
-            const savedImage = localStorage.getItem(`profile_picture_${user.id}`)
+            // Use localStorage fallback
+            const savedImage = typeof window !== 'undefined' ? localStorage.getItem(`profile_picture_${user.id}`) : null
+            if (savedImage) {
+              setProfilePicture(savedImage)
+            }
+            // Get cached name if available
+            const cachedName = typeof window !== 'undefined' ? localStorage.getItem(`cached_user_name_${user.id}`) : null
+            if (cachedName) {
+              setCachedUserName(cachedName)
+            }
+          } else if (error.response?.status === 403) {
+            // Access restricted - use localStorage fallback
+            const savedImage = typeof window !== 'undefined' ? localStorage.getItem(`profile_picture_${user.id}`) : null
             if (savedImage) {
               setProfilePicture(savedImage)
             }
@@ -71,24 +100,23 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
       }
     }
     
-    fetchProfilePicture()
+    fetchProfileData()
+    
+    // OPTIMIZED: Reduced refresh interval from 30s to 5 minutes
+    const intervalId = setInterval(fetchProfileData, 300000)
     
     // Listen for profile update events
     const handleProfileUpdate = () => {
-      console.log('🔄 ClientHeader: Profile updated event received, refreshing picture...')
-      fetchProfilePicture()
+      fetchProfileData()
     }
     
     window.addEventListener('profileUpdated', handleProfileUpdate)
     
-    // Refresh profile picture every 30 seconds to catch updates
-    const interval = setInterval(fetchProfilePicture, 30000)
-    
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate)
-      clearInterval(interval)
+      clearInterval(intervalId)
     }
-  }, [user, isAuthenticated])
+  }, [user?.id, isAuthenticated])
 
   const handleSwitchToVendor = () => {
     console.log('Switching to vendor profile...')
@@ -213,9 +241,9 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
                 fill
                 className="object-cover"
               />
-            ) : (user?.firstName || user?.businessName || user?.displayName) ? (
+            ) : (cachedUserName) ? (
               <span className="text-gray-600 font-medium text-sm">
-                {(user?.firstName || user?.businessName || user?.displayName || 'U').charAt(0).toUpperCase()}
+                {cachedUserName.charAt(0).toUpperCase()}
               </span>
             ) : (
               <FiUser className="w-4 h-4 text-gray-600" />
@@ -225,7 +253,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
 
         {/* User Name */}
         <span className="hidden sm:block text-sm font-medium text-gray-900">
-          {user?.firstName || user?.businessName || user?.displayName || 'User'}
+          {cachedUserName || 'User'}
         </span>
 
         {/* Logout Button */}

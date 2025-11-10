@@ -155,7 +155,7 @@ export function useVendorServiceRequests(options: UseVendorServiceRequestsOption
       fetchRequests()
       fetchStats()
     }
-  }, [autoFetch, fetchRequests, fetchStats])
+  }, [autoFetch, viewType])
 
   return {
     requests,

@@ -6,6 +6,8 @@ import { FiEye, FiEdit2, FiTrash2, FiChevronRight, FiChevronLeft, FiX } from 're
 import EditServiceRequestModal from '@/components/ui/modals/EditServiceRequestModal'
 import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal'
 import { useServiceRequests } from '@/hooks/useServiceRequests'
+import { useVendorServiceRequests } from '@/hooks/useVendorServiceRequests'
+import { useCategories } from '@/hooks/useCategories'
 import { useApi } from '@/hooks/useApi'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { serviceRequestAPI } from '@/lib/api'
@@ -15,8 +17,33 @@ export default function ClientDashboardPage() {
   const [activeTab, setActiveTab] = useState('service-request-posts')
   
   // API hooks - Use 'my' to get only the client's service requests
-  const { requests: serviceRequestsData, loading: serviceRequestsLoading, error: serviceRequestsError, fetchRequests: refetchServiceRequests } = useServiceRequests({ viewType: 'my' })
-  const { data: dashboardStats, loading: statsLoading } = useApi(() => serviceRequestAPI.getStats().then(res => res.data))
+  const { 
+    requests: serviceRequestsData, 
+    loading: serviceRequestsLoading, 
+    error: serviceRequestsError, 
+    fetchRequests: refetchServiceRequests,
+    createRequest,
+    updateRequest,
+    deleteRequest,
+    getStats
+  } = useServiceRequests({ viewType: 'my' })
+  
+  // Vendor service requests hook - Get vendor service requests sent by this client
+  const { 
+    requests: vendorServiceRequestsData, 
+    loading: vendorServiceRequestsLoading, 
+    error: vendorServiceRequestsError, 
+    fetchRequests: refetchVendorServiceRequests,
+    deleteRequest: deleteVendorServiceRequest
+  } = useVendorServiceRequests({ viewType: 'my', autoFetch: true })
+  
+  // Categories hook - Get categories for mapping IDs to names
+  const { categories, loading: categoriesLoading } = useCategories({ autoFetch: true })
+  
+  const { data: dashboardStats, loading: statsLoading } = useApi(async () => {
+    const result = await getStats()
+    return { data: result, message: 'Success' }
+  })
   
   // Log to verify we're fetching the right data
   useEffect(() => {
@@ -27,6 +54,28 @@ export default function ClientDashboardPage() {
       error: serviceRequestsError
     })
   }, [serviceRequestsData, serviceRequestsLoading, serviceRequestsError])
+  
+  // Log vendor service requests
+  useEffect(() => {
+    console.log('📊 Client Dashboard: Vendor service requests loaded:', {
+      count: vendorServiceRequestsData?.length || 0,
+      requests: vendorServiceRequestsData,
+      loading: vendorServiceRequestsLoading,
+      error: vendorServiceRequestsError
+    })
+  }, [vendorServiceRequestsData, vendorServiceRequestsLoading, vendorServiceRequestsError])
+  
+  // Function to map category IDs to category names
+  const getCategoryNames = (categoryIds: string[] | string): string[] => {
+    if (!categoryIds || !Array.isArray(categoryIds)) {
+      return []
+    }
+    
+    return categoryIds.map(id => {
+      const category = categories.find(cat => cat.id === id)
+      return category ? category.name : id // Fallback to ID if category not found
+    }).filter(name => name) // Remove any undefined values
+  }
   
   // Transform API data to component format
   const transformServiceRequest = (request: any) => ({
@@ -39,14 +88,36 @@ export default function ClientDashboardPage() {
     eventLocation: request.eventLocation,
     totalVisits: request.viewCount || 0,
     numberOfGuests: request.numberOfGuests,
-    servicesNeeded: request.servicesNeeded || [],
+    servicesNeeded: getCategoryNames(request.servicesNeeded || []),
     budget: request.budgetRange,
     additionalInfo: request.additionalInfo || '',
     offersCount: request.bidsCount || 0,
-    status: request.status
+    status: request.status,
+    type: 'service-request'
+  })
+
+  // Transform vendor service request data to component format
+  const transformVendorServiceRequest = (request: any) => ({
+    id: request.id,
+    title: request.eventTitle,
+    image: request.eventImage || "/images/party-setup.jpg",
+    postedTime: `Sent ${new Date(request.createdAt).toLocaleDateString()}`,
+    eventType: request.eventType,
+    eventDate: new Date(request.eventStartDate).toLocaleDateString(),
+    eventLocation: request.eventLocation,
+    totalVisits: request.viewCount || 0,
+    numberOfGuests: request.numberOfGuests,
+    servicesNeeded: getCategoryNames(request.servicesNeeded || []),
+    budget: request.budgetRange,
+    additionalInfo: request.additionalInfo || '',
+    offersCount: request.vendorResponses?.length || 0,
+    status: request.status,
+    type: 'vendor-service-request',
+    vendorName: request.vendor?.businessName || request.vendor?.firstName + ' ' + request.vendor?.lastName || 'Vendor'
   })
 
   const serviceRequests = serviceRequestsData?.map(transformServiceRequest) || []
+  const vendorServiceRequests = vendorServiceRequestsData?.map(transformVendorServiceRequest) || []
 
   // Modal states
   const [editModalOpen, setEditModalOpen] = useState(false)
@@ -97,22 +168,18 @@ export default function ClientDashboardPage() {
     setIsDeleting(true)
     
     try {
-      // Call API to delete service request
-      const response = await fetch(`/api/v1/service-requests/${selectedRequest.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      })
-      
-      if (response.ok) {
-        // Refetch data to get updated service requests
+      if (selectedRequest.type === 'vendor-service-request') {
+        // Delete vendor service request
+        await deleteVendorServiceRequest(selectedRequest.id)
+        refetchVendorServiceRequests()
+      } else {
+        // Delete regular service request
+        await deleteRequest(selectedRequest.id)
         refetchServiceRequests()
+      }
+      
         setDeleteModalOpen(false)
         setSelectedRequest(null)
-      } else {
-        console.error('Failed to delete service request')
-      }
     } catch (error) {
       console.error('Error deleting service request:', error)
     } finally {
@@ -166,7 +233,7 @@ export default function ClientDashboardPage() {
             <nav className="-mb-px flex flex-wrap space-x-2 sm:space-x-4 lg:space-x-8 px-3 sm:px-4 lg:px-6">
               <button
                 onClick={() => setActiveTab('service-request-posts')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex items-center gap-2 ${
                   activeTab === 'service-request-posts'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -174,10 +241,19 @@ export default function ClientDashboardPage() {
               >
                 <span className="hidden xs:inline">Service Request Posts</span>
                 <span className="xs:hidden">Posts</span>
+                {serviceRequests.length > 0 && (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === 'service-request-posts'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {serviceRequests.length}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('direct-service-request')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex items-center gap-2 ${
                   activeTab === 'direct-service-request'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -185,13 +261,24 @@ export default function ClientDashboardPage() {
               >
                 <span className="hidden sm:inline">Direct Service Request</span>
                 <span className="sm:hidden">Direct Request</span>
+                {vendorServiceRequests.length > 0 && (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === 'direct-service-request'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {vendorServiceRequests.length}
+                  </span>
+                )}
               </button>
             </nav>
           </div>
 
           {/* Posts List */}
           <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {serviceRequestsLoading ? (
+            {activeTab === 'service-request-posts' ? (
+              // Regular Service Requests Tab
+              serviceRequestsLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Loading service requests...</p>
@@ -206,101 +293,29 @@ export default function ClientDashboardPage() {
               </div>
             ) : (
               serviceRequests.map((request: any) => (
-              <div key={request.id} className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-                <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-                  {/* Image */}
-                  <div className="lg:w-48 flex-shrink-0">
-                    <div className="relative w-full h-24 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
-                      <Image src={request.image} alt={request.title} fill className="object-cover" />
-                    </div>
-                  </div>
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 font-asul">{request.title}</h3>
-                        <p className="text-xs sm:text-sm text-gray-500">{request.postedTime}</p>
-                      </div>
-                      <div className="flex space-x-1 sm:space-x-2">
-                        <button 
-                          onClick={() => handleEditClick(request)}
-                          className="p-1 sm:p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-                          title="Edit service request"
-                        >
-                          <FiEdit2 className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteClick(request)}
-                          className="p-1 sm:p-2 rounded-full hover:bg-gray-100 text-red-600 transition-colors"
-                          title="Delete service request"
-                        >
-                          <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                      <div>
-                        <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Event Type:</span> {request.eventType}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Event Date:</span> {request.eventDate}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          <span className="font-medium">Event Location:</span> {request.eventLocation}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          <span className="font-medium">No. of Guests:</span> {request.numberOfGuests}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mb-3 sm:mb-4">
-                      <span className="font-medium text-gray-700 text-xs sm:text-sm block mb-1">Services Needed:</span>
-                      <div className="flex flex-wrap gap-1 sm:gap-2">
-                        {request.servicesNeeded.map((service: any, index: number) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                            {service}
-                            <button className="ml-1 text-blue-600 hover:text-blue-800">
-                              <FiX className="w-2 h-2 sm:w-3 sm:h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Budget */}
-                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                      <span className="font-medium">Budget:</span> {request.budget}
-                    </p>
-
-                    {/* Additional Information */}
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      <span className="font-medium">Additional Information:</span> {request.additionalInfo}
-                    </p>
-                  </div>
+                  <ServiceRequestCard key={request.id} request={request} />
+                ))
+              )
+            ) : (
+              // Direct Service Requests Tab
+              vendorServiceRequestsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading direct service requests...</p>
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-100 mt-3 sm:mt-4">
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-                    <span>Total Visits: <span className="font-semibold text-gray-900">{request.totalVisits}</span></span>
-                    <span>Offers: <span className="font-semibold text-blue-600">{request.offersCount}</span></span>
-                  </div>
-                  <button className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm relative">
-                    <FiEye className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>View all Offers</span>
-                    {request.offersCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] sm:text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
-                        {request.offersCount}
-                      </span>
-                    )}
-                  </button>
+              ) : vendorServiceRequestsError ? (
+                <div className="text-center py-8">
+                  <p className="text-red-600">Failed to load direct service requests</p>
                 </div>
-              </div>
-              ))
+              ) : vendorServiceRequests.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">No direct service requests found</p>
+                </div>
+              ) : (
+                vendorServiceRequests.map((request: any) => (
+                  <ServiceRequestCard key={request.id} request={request} />
+                ))
+              )
             )}
           </div>
         </div>
@@ -370,5 +385,151 @@ export default function ClientDashboardPage() {
         isDeleting={isDeleting}
       />
     </div>
+  )
+}
+
+// Service Request Card Component
+function ServiceRequestCard({ request }: { request: any }) {
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleEditClick = (request: any) => {
+    setEditModalOpen(true)
+  }
+
+  const handleDeleteClick = (request: any) => {
+    setDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true)
+    // Delete logic will be handled by parent component
+    setIsDeleting(false)
+  }
+
+  const handleCloseModals = () => {
+    setEditModalOpen(false)
+    setDeleteModalOpen(false)
+  }
+
+  return (
+    <>
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+                  {/* Image */}
+                  <div className="lg:w-48 flex-shrink-0">
+                    <div className="relative w-full h-24 sm:h-32 bg-gray-200 rounded-lg overflow-hidden">
+                      <Image src={request.image} alt={request.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 font-asul">{request.title}</h3>
+                        <p className="text-xs sm:text-sm text-gray-500">{request.postedTime}</p>
+                {request.type === 'vendor-service-request' && (
+                  <p className="text-xs sm:text-sm text-blue-600 font-medium">Sent to: {request.vendorName}</p>
+                )}
+                      </div>
+                      <div className="flex space-x-1 sm:space-x-2">
+                {request.type === 'service-request' && (
+                        <button 
+                          onClick={() => handleEditClick(request)}
+                          className="p-1 sm:p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+                          title="Edit service request"
+                        >
+                          <FiEdit2 className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                        </button>
+                )}
+                        <button 
+                          onClick={() => handleDeleteClick(request)}
+                          className="p-1 sm:p-2 rounded-full hover:bg-gray-100 text-red-600 transition-colors"
+                          title="Delete service request"
+                        >
+                          <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">
+                          <span className="font-medium">Event Type:</span> {request.eventType}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1">
+                          <span className="font-medium">Event Date:</span> {request.eventDate}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          <span className="font-medium">Event Location:</span> {request.eventLocation}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          <span className="font-medium">No. of Guests:</span> {request.numberOfGuests}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-3 sm:mb-4">
+                      <span className="font-medium text-gray-700 text-xs sm:text-sm block mb-1">Services Needed:</span>
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
+                        {request.servicesNeeded.map((service: any, index: number) => (
+                          <span key={index} className="bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full flex items-center">
+                            {service}
+                            <button className="ml-1 text-blue-600 hover:text-blue-800">
+                              <FiX className="w-2 h-2 sm:w-3 sm:h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Budget */}
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                      <span className="font-medium">Budget:</span> {request.budget}
+                    </p>
+
+                    {/* Additional Information */}
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      <span className="font-medium">Additional Information:</span> {request.additionalInfo}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-100 mt-3 sm:mt-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                    <span>Total Visits: <span className="font-semibold text-gray-900">{request.totalVisits}</span></span>
+                    <span>Offers: <span className="font-semibold text-blue-600">{request.offersCount}</span></span>
+                  </div>
+                  <button className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm relative">
+                    <FiEye className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span>View all Offers</span>
+                    {request.offersCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] sm:text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
+                        {request.offersCount}
+                      </span>
+                    )}
+                  </button>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <EditServiceRequestModal
+        isOpen={editModalOpen}
+        onClose={handleCloseModals}
+        serviceRequest={request}
+        onSave={() => {}}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleDeleteConfirm}
+        serviceTitle={request?.title || ''}
+        isDeleting={isDeleting}
+      />
+    </>
   )
 }
