@@ -1,6 +1,10 @@
 'use client'
-import React, { useState } from 'react'
-import { FiX, FiCalendar, FiUpload, FiTrash2, FiCloud } from 'react-icons/fi'
+import React, { useEffect, useMemo, useState } from 'react'
+import { FiX, FiTrash2, FiCloud, FiAlertCircle } from 'react-icons/fi'
+import { toast } from 'react-hot-toast'
+import { bidAPI } from '@/lib/api'
+import type { CreateBidRequest } from '@/types/api'
+import SimpleDatePicker from '@/components/ui/SimpleDatePicker'
 
 export type PlaceBidMarketplaceRequest = {
   id: string | number
@@ -22,42 +26,175 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
   serviceRequest
 }) => {
   const [bidAmount, setBidAmount] = useState('')
-  const [startDate, setStartDate] = useState('12/05/2025')
-  const [endDate, setEndDate] = useState('23/05/2025')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [proposalDetails, setProposalDetails] = useState('')
   const [additionalServices, setAdditionalServices] = useState('')
-  const [uploadedFiles, setUploadedFiles] = useState([
-    { id: 1, name: 'Cake Image.jpeg', size: '854kb' },
-    { id: 2, name: 'Cake Image.jpeg', size: '854kb' }
-  ])
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      setBidAmount('')
+      setStartDate('')
+      setEndDate('')
+      setProposalDetails('')
+      setAdditionalServices('')
+      setUploadedFiles([])
+      setErrorMessage(null)
+    }
+  }, [isOpen, serviceRequest?.id])
+
+  const parsedAdditionalServices = useMemo(() => {
+    if (!additionalServices.trim()) {
+      return []
+    }
+
+    return additionalServices
+      .split(/[\n,]/)
+      .map(service => service.trim())
+      .filter(Boolean)
+  }, [additionalServices])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files) {
-      const newFiles = Array.from(files).map((file, index) => ({
-        id: uploadedFiles.length + index + 1,
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(0)}kb`
-      }))
-      setUploadedFiles([...uploadedFiles, ...newFiles])
+      const newFiles = Array.from(files)
+      setUploadedFiles(prev => [...prev, ...newFiles])
     }
   }
 
-  const handleFileRemove = (fileId: number) => {
-    setUploadedFiles(uploadedFiles.filter(file => file.id !== fileId))
+  const handleFileRemove = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, idx) => idx !== index))
   }
 
-  const handleSubmitBid = () => {
-    // Handle bid submission logic here
-    console.log('Bid submitted:', {
-      bidAmount,
-      startDate,
-      endDate,
-      proposalDetails,
-      additionalServices,
-      uploadedFiles
-    })
-    onClose()
+  const formatDateForApi = (value: string) => {
+    if (!value) return null
+
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) {
+      return null
+    }
+
+    const pad = (num: number) => num.toString().padStart(2, '0')
+
+    return [
+      `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}`,
+      'T',
+      `${pad(parsed.getHours())}:${pad(parsed.getMinutes())}:${pad(parsed.getSeconds())}`,
+    ].join('')
+  }
+
+  const handleSubmitBid = async () => {
+    if (isSubmitting) return
+
+    setErrorMessage(null)
+
+    const sanitizedAmount = bidAmount.replace(/[^\d.]/g, '')
+    const numericAmount = parseFloat(sanitizedAmount)
+
+    if (!serviceRequest?.id) {
+      setErrorMessage('Invalid service request. Please refresh and try again.')
+      return
+    }
+
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      setErrorMessage('Enter a valid bid amount greater than zero.')
+      return
+    }
+
+    if (!startDate || !endDate) {
+      setErrorMessage('Select both a start and an end date.')
+      return
+    }
+
+    const startIso = formatDateForApi(startDate)
+    const endIso = formatDateForApi(endDate)
+
+    if (!startIso || !endIso) {
+      setErrorMessage('Provided dates are invalid. Please use the date picker.')
+      return
+    }
+
+    if (new Date(startIso).getTime() >= new Date(endIso).getTime()) {
+      setErrorMessage('End date must be after the start date.')
+      return
+    }
+
+    if (!proposalDetails.trim()) {
+      setErrorMessage('Add some proposal details to describe your offer.')
+      return
+    }
+
+    const payload: CreateBidRequest = {
+      serviceRequestId: String(serviceRequest.id),
+      bidAmount: numericAmount,
+      startDate: startIso,
+      endDate: endIso,
+      proposedDetails: proposalDetails.trim(),
+      additionalServices: parsedAdditionalServices
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      let response
+      if (uploadedFiles.length > 0) {
+        const formData = new FormData()
+        formData.append('serviceRequestId', payload.serviceRequestId)
+        formData.append('bidAmount', payload.bidAmount.toString())
+        formData.append('startDate', payload.startDate)
+        formData.append('endDate', payload.endDate)
+        formData.append('proposedDetails', payload.proposedDetails)
+
+        if (payload.additionalServices.length > 0) {
+          payload.additionalServices.forEach((service, index) => {
+            formData.append(`additionalServices[${index}]`, service)
+          })
+        }
+
+        uploadedFiles.forEach((file) => {
+          formData.append('images', file)
+        })
+
+        response = await bidAPI.create(formData)
+      } else {
+        response = await bidAPI.create(payload)
+      }
+      
+      console.log('✅ Bid submitted successfully:', response.data)
+      console.log('📤 Bid sent to backend endpoint: POST /bids/')
+      console.log('📋 Clients can view this bid on: /client/bidding (Received Bids tab)')
+      toast.success('Bid submitted successfully')
+      onClose()
+    } catch (error: any) {
+      const responseData = error?.response?.data
+      const message =
+        responseData?.message ||
+        (Array.isArray(responseData?.errors) ? responseData.errors.join(', ') : undefined) ||
+        responseData?.error ||
+        error?.message ||
+        'Failed to submit bid. Please try again.'
+
+      console.error('❌ Bid submission failed', {
+        payload,
+        hasFiles: uploadedFiles.length > 0,
+        response: responseData,
+        status: error?.response?.status,
+        fullError: error,
+      })
+      
+      // Log the full error response for debugging
+      if (responseData) {
+        console.error('Backend error details:', JSON.stringify(responseData, null, 2))
+      }
+
+      setErrorMessage(message)
+      toast.error(`Unable to submit bid: ${message}`)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!isOpen) return null
@@ -88,7 +225,9 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
                 Your Bid Amount (₦)
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
+                step="0.01"
                 placeholder="Enter your bid amount"
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
@@ -98,33 +237,14 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
 
             {/* Delivery Timeline */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Timeline</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                    />
-                    <FiCalendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                    />
-                    <FiCalendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  </div>
-                </div>
-              </div>
+              <SimpleDatePicker
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                label="Delivery Timeline"
+                required
+              />
             </div>
 
             {/* Proposal Details */}
@@ -172,14 +292,14 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
               {/* Uploaded Files */}
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2">
-                  {uploadedFiles.map((file) => (
-                    <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                        <p className="text-xs text-gray-500">Size: {file.size}</p>
+                        <p className="text-xs text-gray-500">Size: {`${(file.size / 1024).toFixed(0)}kb`}</p>
                       </div>
                       <button
-                        onClick={() => handleFileRemove(file.id)}
+                        onClick={() => handleFileRemove(index)}
                         className="text-red-500 hover:text-red-700 transition-colors"
                       >
                         <FiTrash2 className="w-4 h-4" />
@@ -206,13 +326,27 @@ const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
           </div>
         </div>
 
+        {errorMessage && (
+          <div className="flex items-center gap-2 px-6 text-sm text-red-600">
+            <FiAlertCircle className="w-4 h-4" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* Submit Button */}
         <div className="p-6 border-t border-gray-200">
           <button
             onClick={handleSubmitBid}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
-            Submit Bid
+            {isSubmitting && (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8h4z"></path>
+              </svg>
+            )}
+            <span>{isSubmitting ? 'Submitting Bid...' : 'Submit Bid'}</span>
           </button>
         </div>
       </div>

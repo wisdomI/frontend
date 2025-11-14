@@ -209,18 +209,33 @@ export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
         }
       }
       
+      // Normalize account types for comparison
+      // Backend returns "individual", "business", "organization" for client accounts
+      // Frontend uses "client" for all client account types
+      const normalizeAccountType = (type: string): string => {
+        const clientTypes = ['individual', 'business', 'organization', 'client']
+        if (clientTypes.includes(type?.toLowerCase())) {
+          return 'client'
+        }
+        return type?.toLowerCase() || type
+      }
+      
       // Validate that the selected account type matches the backend account type
       const backendAccountType = userData.accountType
       const selectedAccountType = accountType
+      const normalizedBackendType = normalizeAccountType(backendAccountType)
+      const normalizedSelectedType = normalizeAccountType(selectedAccountType)
       
       console.log('LoginForm: Account type validation:', {
         backendAccountType,
         selectedAccountType,
-        match: backendAccountType === selectedAccountType
+        normalizedBackendType,
+        normalizedSelectedType,
+        match: normalizedBackendType === normalizedSelectedType
       })
       
-      // Check if account types match
-      if (backendAccountType !== selectedAccountType) {
+      // Check if account types match (using normalized values)
+      if (normalizedBackendType !== normalizedSelectedType) {
         // Clear the stored tokens since this login should not proceed
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -230,8 +245,15 @@ export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
         document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
         
         // Show error message with the correct account type
-        const correctAccountTypeLabel = backendAccountType === 'vendor' ? 'Event Vendor' : 'Individual/Org'
-        const wrongAccountTypeLabel = selectedAccountType === 'vendor' ? 'Event Vendor' : 'Individual/Org'
+        const getAccountTypeLabel = (type: string): string => {
+          const normalized = normalizeAccountType(type)
+          if (normalized === 'vendor') return 'Event Vendor'
+          if (normalized === 'client') return 'Individual/Organization'
+          return type
+        }
+        
+        const correctAccountTypeLabel = getAccountTypeLabel(backendAccountType)
+        const wrongAccountTypeLabel = getAccountTypeLabel(selectedAccountType)
         
         addNotification({
           type: 'error',

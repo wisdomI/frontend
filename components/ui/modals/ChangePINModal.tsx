@@ -7,12 +7,24 @@ interface ChangePINModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  onSubmit: (payload: {
+    oldPin: string
+    newPin: string
+    confirmNewPin: string
+  }) => Promise<void>
 }
 
-export default function ChangePINModal({ isOpen, onClose, onSuccess }: ChangePINModalProps) {
+export default function ChangePINModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  onSubmit,
+}: ChangePINModalProps) {
   const [oldPin, setOldPin] = useState('')
   const [newPin, setNewPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (!isOpen) return null
 
@@ -22,9 +34,18 @@ export default function ChangePINModal({ isOpen, onClose, onSuccess }: ChangePIN
     }
   }
 
-  const handleContinue = () => {
-    if (oldPin.length === 4 && newPin.length === 4 && confirmPin.length === 4 && newPin === confirmPin) {
+  const handleContinue = async () => {
+    if (!isFormValid || submitting) return
+
+    try {
+      setSubmitting(true)
+      setError(null)
+      await onSubmit({ oldPin, newPin, confirmNewPin: confirmPin })
       onSuccess()
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to change PIN')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -117,10 +138,12 @@ export default function ChangePINModal({ isOpen, onClose, onSuccess }: ChangePIN
             </div>
           </div>
 
+          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            disabled={!isFormValid}
+            disabled={!isFormValid || submitting}
             className={`w-full py-3 font-semibold rounded-lg transition-colors ${
               isFormValid
                 ? 'text-white'
@@ -128,7 +151,7 @@ export default function ChangePINModal({ isOpen, onClose, onSuccess }: ChangePIN
             }`}
             style={{ backgroundColor: isFormValid ? '#032D71' : undefined }}
           >
-            Continue
+            {submitting ? 'Saving...' : 'Continue'}
           </button>
         </div>
       </div>

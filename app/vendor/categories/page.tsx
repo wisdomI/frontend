@@ -1,221 +1,242 @@
 'use client'
 
-import { useState } from 'react'
-import { FiPlus, FiFilter, FiSearch, FiEdit2, FiTrash2, FiToggleLeft, FiToggleRight } from 'react-icons/fi'
+import React, { useState } from 'react'
+import { FiRefreshCw, FiToggleLeft, FiToggleRight, FiTrash2, FiEdit2 } from 'react-icons/fi'
+import { ButtonLoader } from '@/components/ui/Loader'
 import { useCategories } from '@/hooks/useCategories'
-import VendorPageHeader from '@/components/vendor/VendorPageHeader'
 
 export default function VendorCategoriesPage() {
-  const { categories, mainCategories, hierarchy, loading, error } = useCategories()
-  const [activeTab, setActiveTab] = useState<'all' | 'main' | 'hierarchy'>('all')
-  const [showFilter, setShowFilter] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<any>(null)
+  const {
+    hierarchy,
+    stats,
+    loading,
+    error,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    toggleCategoryStatus,
+    fetchHierarchy,
+    fetchStats,
+  } = useCategories({ autoFetch: true })
 
-  const tabs = [
-    { id: 'all', label: 'All Categories', count: categories.length },
-    { id: 'main', label: 'Main Categories', count: mainCategories.length },
-    { id: 'hierarchy', label: 'Hierarchy View', count: hierarchy.length },
-  ]
-
-  const filteredCategories = categories.filter(category => {
-    const matchesSearch = category.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         category.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+  const [formState, setFormState] = useState({
+    name: '',
+    description: '',
+    parentId: '',
   })
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const getStatusIcon = (isActive: boolean) => {
-    return isActive ? 
-      <FiToggleRight className="w-5 h-5 text-green-500" /> : 
-      <FiToggleLeft className="w-5 h-5 text-gray-400" />
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      if (editingId) {
+        await updateCategory(editingId, formState)
+      } else {
+        await createCategory(formState)
+      }
+      setFormState({ name: '', description: '', parentId: '' })
+      setEditingId(null)
+      await fetchStats()
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-  }
-
-  if (loading) {
-    return (
-      <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
-        <VendorPageHeader
-          breadcrumbs={[{ label: 'Categories', isActive: true }]}
-          title="Category Management"
-        />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
-        <VendorPageHeader
-          breadcrumbs={[{ label: 'Categories', isActive: true }]}
-          title="Category Management"
-        />
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      </div>
-    )
-  }
-
-  const renderCategories = (categoriesToRender: any[]) => {
-    return categoriesToRender.map((category) => (
-      <div key={category.id} className="bg-gray-50 rounded-xl p-4 sm:p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2">
-              <h3 className="font-semibold text-gray-900 text-lg">
-                {category.name || 'Unnamed Category'}
-              </h3>
-              {getStatusIcon(category.isActive)}
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(category.isActive)}`}>
-                {category.isActive ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mb-2">
-              {category.description || 'No description available'}
-            </p>
-            {category.parentCategory && (
-              <p className="text-xs text-blue-600">
-                Parent: {category.parentCategory.name}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>ID:</span>
-            <span className="font-mono">{category.id}</span>
-          </div>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Created:</span>
-            <span>{category.createdAt ? new Date(category.createdAt).toLocaleDateString() : 'Unknown'}</span>
-          </div>
-          {category.subcategoriesCount && (
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Subcategories:</span>
-              <span>{category.subcategoriesCount}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => setEditingCategory(category)}
-            className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-          >
-            <FiEdit2 className="w-4 h-4 mr-2 inline" />
-            Edit
-          </button>
-          <button className="px-3 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors">
-            <FiTrash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    ))
-  }
+  const categoriesFlat = hierarchy
+    .map(parent => [parent, ...(parent.subcategories || [])])
+    .flat()
 
   return (
-    <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
-      <VendorPageHeader
-        breadcrumbs={[{ label: 'Categories', isActive: true }]}
-        title="Category Management"
-      />
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 font-asul">Category Manager</h1>
+          <p className="text-gray-600 mt-1">
+            Create and curate categories to keep the marketplace organised.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            fetchHierarchy()
+            fetchStats()
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+        >
+          <FiRefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
+      </div>
 
-      {/* Search and Filter Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard label="Total Categories" value={stats.totalCategories} />
+          <StatCard label="Active Categories" value={stats.activeCategories} />
+          <StatCard label="Sub Categories" value={stats.subcategories} />
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {editingId ? 'Edit Category' : 'Create Category'}
+        </h2>
+        <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
             <input
-              type="text"
-              placeholder="Search categories..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              value={formState.name}
+              onChange={e => setFormState(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowFilter(!showFilter)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <FiFilter className="w-4 h-4 mr-2" />
-              Filter
-            </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-            >
-              <FiPlus className="w-4 h-4 mr-2" />
-              New Category
-            </button>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              rows={3}
+              value={formState.description}
+              onChange={e => setFormState(prev => ({ ...prev, description: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="mt-4">
-          <div className="inline-flex bg-[#0B2E6F] rounded-lg p-1">
-            {tabs.map((tab) => (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
+            <select
+              value={formState.parentId}
+              onChange={e => setFormState(prev => ({ ...prev, parentId: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Top level</option>
+              {hierarchy.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end">
+            <div className="flex gap-3">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2 text-sm font-semibold rounded-md ${
-                  activeTab === tab.id ? 'bg-white text-[#0B2E6F]' : 'text-white'
-                }`}
+                type="submit"
+                disabled={submitting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {tab.label} ({tab.count})
+                <ButtonLoader loading={submitting} loadingText="Saving...">
+                  {editingId ? 'Update' : 'Create'}
+                </ButtonLoader>
               </button>
-            ))}
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingId(null)
+                    setFormState({ name: '', description: '', parentId: '' })
+                  }}
+                  className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </form>
       </div>
 
-      {/* Categories List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-3 sm:p-4 lg:p-6">
-          {(() => {
-            let categoriesToRender = []
-            
-            switch (activeTab) {
-              case 'main':
-                categoriesToRender = mainCategories
-                break
-              case 'hierarchy':
-                categoriesToRender = hierarchy
-                break
-              default:
-                categoriesToRender = filteredCategories
-            }
-
-            return categoriesToRender.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <FiPlus className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
-                <p className="text-gray-500">
-                  {activeTab === 'all' 
-                    ? 'No categories to display.'
-                    : `No ${activeTab} categories found.`
-                  }
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {renderCategories(categoriesToRender)}
-              </div>
-            )
-          })()}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="p-4 border-b flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">All Categories</h2>
+          <span className="text-sm text-gray-500">{categoriesFlat.length} entries</span>
         </div>
+
+        {loading ? (
+          <div className="p-6 flex justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+          </div>
+        ) : error ? (
+          <div className="p-6 text-sm text-red-600">{error}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Name</th>
+                  <th className="px-4 py-3 font-medium">Parent</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categoriesFlat.map(category => (
+                  <tr key={category.id} className="border-t">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{category.name}</div>
+                      <p className="text-gray-500 text-xs line-clamp-2">{category.description}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {category.parentId
+                        ? hierarchy.find(parent => parent.id === category.parentId)?.name || '—'
+                        : 'Top level'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          category.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {category.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleCategoryStatus(category.id)}
+                          className="p-2 rounded-full border hover:bg-gray-50"
+                          title={category.isActive ? 'Deactivate' : 'Activate'}
+                        >
+                          {category.isActive ? (
+                            <FiToggleRight className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <FiToggleLeft className="w-4 h-4 text-gray-500" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingId(category.id)
+                            setFormState({
+                              name: category.name,
+                              description: category.description || '',
+                              parentId: category.parentId || '',
+                            })
+                          }}
+                          className="p-2 rounded-full border hover:bg-gray-50"
+                        >
+                          <FiEdit2 className="w-4 h-4 text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => deleteCategory(category.id)}
+                          className="p-2 rounded-full border hover:bg-gray-50"
+                        >
+                          <FiTrash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-2xl font-semibold text-gray-900 mt-1">{value.toLocaleString()}</p>
     </div>
   )
 }

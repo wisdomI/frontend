@@ -22,7 +22,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       setLoading(true)
       setError(null)
       const response = await messageAPI.getConversations()
-      setConversations(response.data.data || [])
+      setConversations(response.data || [])
     } catch (err) {
       setError('Failed to fetch conversations')
       console.error('Error fetching conversations:', err)
@@ -36,7 +36,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       setLoading(true)
       setError(null)
       const response = await messageAPI.getConversation(recipientId)
-      setMessages(response.data.data || [])
+      setMessages(response.data || [])
     } catch (err) {
       setError('Failed to fetch messages')
       console.error('Error fetching messages:', err)
@@ -48,7 +48,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const fetchUnreadCount = useCallback(async () => {
     try {
       const response = await messageAPI.unreadCount()
-      setUnreadCount(response.data.data?.count || 0)
+      setUnreadCount(response.data?.count || 0)
     } catch (err) {
       console.error('Error fetching unread count:', err)
     }
@@ -64,13 +64,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       })
       
       // Add the new message to the current messages
-      setMessages(prev => [...prev, response.data.data])
+      const sentMessage = response.data
+      if (!sentMessage) {
+        throw new Error('Message send succeeded but no payload was returned')
+      }
+
+      setMessages(prev => [...prev, sentMessage])
       
       // Refresh conversations to update last message
       await fetchConversations()
       await fetchUnreadCount()
       
-      return response.data.data
+      return sentMessage
     } catch (err) {
       setError('Failed to send message')
       console.error('Error sending message:', err)
@@ -135,7 +140,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       setLoading(true)
       setError(null)
       const response = await messageAPI.search({ q: query, page, limit })
-      return response.data.data
+      return response.data || []
     } catch (err) {
       setError('Failed to search messages')
       console.error('Error searching messages:', err)
@@ -148,7 +153,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const getOnlineStatus = useCallback(async (userId: string) => {
     try {
       const response = await messageAPI.getOnlineStatus(userId)
-      return response.data.data
+      return response.data
     } catch (err) {
       console.error('Error getting online status:', err)
       throw err
@@ -158,7 +163,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const conversationExists = useCallback(async (recipientId: string) => {
     try {
       const response = await messageAPI.conversationExists(recipientId)
-      return response.data.data?.exists || false
+      return response.data?.exists || false
     } catch (err) {
       console.error('Error checking conversation existence:', err)
       return false
@@ -168,7 +173,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const getLatestMessage = useCallback(async (recipientId: string) => {
     try {
       const response = await messageAPI.latestMessage(recipientId)
-      return response.data.data
+      return response.data
     } catch (err) {
       console.error('Error getting latest message:', err)
       return null
@@ -178,7 +183,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const getConversationStats = useCallback(async () => {
     try {
       const response = await messageAPI.getStats()
-      return response.data.data
+      return response.data
     } catch (err) {
       console.error('Error getting conversation stats:', err)
       throw err

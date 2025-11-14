@@ -8,6 +8,7 @@ import Providers from '@/components/providers/Providers'
 import NotificationContainer from '@/components/ui/NotificationContainer'
 import NotificationBreadcrumbWrapper from '@/components/ui/NotificationBreadcrumbWrapper'
 import Sidebar from '@/components/layouts/Sidebar'
+import OfflineBanner from '@/components/common/OfflineBanner'
 
 export default function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -20,6 +21,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   if (isVendorDashboardPage) {
     return (
       <Providers>
+        <OfflineBanner />
         {children}
       </Providers>
     )
@@ -29,6 +31,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   if (isClientPage) {
     return (
       <Providers>
+        <OfflineBanner />
         {children}
       </Providers>
     )
@@ -38,6 +41,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   if (isHomePage) {
     return (
       <Providers>
+        <OfflineBanner />
         <div className="flex flex-col min-h-screen overflow-x-hidden">
           <Header />
           <NotificationBreadcrumbWrapper />
@@ -64,6 +68,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   return (
     <Providers>
       <div className="flex flex-col min-h-screen overflow-x-hidden">
+        <OfflineBanner />
         <Header />
         <NotificationBreadcrumbWrapper />
         <div className="flex flex-1 px-8 bg-gray-50">

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Raleway, Asul } from 'next/font/google'
 import '../styles/globals.css'
+import '@/lib/suppressDevLogs'
 import MainLayoutWrapper from '@/components/layouts/MainLayoutWrapper'
 
 const raleway = Raleway({ subsets: ['latin'] })

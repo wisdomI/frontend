@@ -383,7 +383,12 @@ export default function ComprehensiveApiTest() {
     try {
       // Test Get Conversations
       const conversationsResponse = await messageAPI.getConversations()
-      addResult('GET /message/conversations', 'success', `Found ${conversationsResponse.data.data?.length || 0} conversations`, Date.now() - startTime)
+      addResult(
+        'GET /message/conversations',
+        'success',
+        `Found ${conversationsResponse.data?.length || 0} conversations`,
+        Date.now() - startTime
+      )
     } catch (error: any) {
       addResult('GET /message/conversations', 'error', error.response?.data?.message || 'Failed to get conversations')
     }
@@ -392,7 +397,12 @@ export default function ComprehensiveApiTest() {
     const startTime2 = Date.now()
     try {
       const unreadResponse = await messageAPI.unreadCount()
-      addResult('GET /message/unread', 'success', `Unread count: ${unreadResponse.data.data?.count || 0}`, Date.now() - startTime2)
+      addResult(
+        'GET /message/unread',
+        'success',
+        `Unread count: ${unreadResponse.data?.count || 0}`,
+        Date.now() - startTime2
+      )
     } catch (error: any) {
       addResult('GET /message/unread', 'error', error.response?.data?.message || 'Failed to get unread count')
     }

@@ -30,7 +30,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
     try {
       setLoading(true)
       const response = await messageAPI.getConversations()
-      setConversations(response.data.data || [])
+      setConversations(response.data || [])
     } catch (err) {
       setError('Failed to fetch conversations')
       console.error('Error fetching conversations:', err)
@@ -43,7 +43,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   const fetchUnreadCount = async () => {
     try {
       const response = await messageAPI.unreadCount()
-      setUnreadCount(response.data.data?.count || 0)
+      setUnreadCount(response.data?.count || 0)
     } catch (err) {
       console.error('Error fetching unread count:', err)
     }
@@ -53,7 +53,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   const fetchMessages = useCallback(async (recipientId: string) => {
     try {
       const response = await messageAPI.getConversation(recipientId)
-      setMessages(response.data.data || [])
+      setMessages(response.data || [])
       
       // Mark conversation as read
       await messageAPI.markConversationAsRead(recipientId)
@@ -86,7 +86,9 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
         messageType: 'text'
       })
       
-      setMessages([...messages, response.data.data])
+      if (response.data) {
+        setMessages([...messages, response.data])
+      }
       setNewMessage('')
       
       // Scroll to bottom
@@ -137,7 +139,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
     try {
       const response = await messageAPI.search({ q: query })
       // Handle search results - you might want to show them in a separate view
-      console.log('Search results:', response.data.data)
+      console.log('Search results:', response.data)
     } catch (err) {
       setError('Failed to search messages')
       console.error('Error searching messages:', err)

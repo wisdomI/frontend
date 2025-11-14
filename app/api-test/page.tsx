@@ -185,11 +185,12 @@ export default function ApiTestPage() {
     { category: 'notifications', name: 'Mark All Notifications as Read', method: 'PATCH', endpoint: '/notifications/read-all', test: () => notificationAPI.markAllAsRead() },
     { category: 'notifications', name: 'Get Notification Preferences', method: 'GET', endpoint: '/notifications/preferences', test: () => notificationAPI.getPreferences() },
     { category: 'notifications', name: 'Create Notification', method: 'POST', endpoint: '/notifications/', test: () => notificationAPI.create({
+      userId: '95532fca-267a-46a0-82d6-0edbca737285',
       type: 'system',
       title: 'Test Notification',
       message: 'Test message',
       priority: 'medium',
-      channels: ['in-app']
+      channels: ['in_app']
     }) },
     { category: 'notifications', name: 'Create Notification Preferences', method: 'POST', endpoint: '/notifications/preferences', test: () => notificationAPI.createPreferences({
       jobAlerts: true,
@@ -454,8 +455,10 @@ export default function ApiTestPage() {
     { category: 'payments', name: 'Get All Payments', method: 'GET', endpoint: '/payments/', test: () => paymentsAPI.getAll() },
     { category: 'payments', name: 'Delete Payment by ID', method: 'DELETE', endpoint: '/payments/:id', test: () => paymentsAPI.deleteById('test-id') },
     { category: 'payments', name: 'Create Payment Account', method: 'POST', endpoint: '/payments/', test: () => paymentsAPI.createAccount({
-      accountType: 'bank',
-      accountNumber: '1234567890'
+      accountName: 'Glory Alphonsus',
+      accountNumber: '0123456789',
+      bankName: 'Access Bank',
+      paymentMethod: 'bank'
     }) },
 
     // Travel (Placeholder)

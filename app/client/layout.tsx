@@ -6,6 +6,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import ClientHeader from '@/components/client/ClientHeader'
 import ClientSidebar from '@/components/client/ClientSidebar'
 import Footer from '@/components/ui/Footer'
+import OfflineBanner from '@/components/common/OfflineBanner'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -65,6 +66,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   if (pathname.startsWith('/client')) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
+        <OfflineBanner />
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div 

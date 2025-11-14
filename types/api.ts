@@ -253,8 +253,8 @@ export interface Meeting {
   location?: string
   attendees: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
   status: 'active' | 'inactive' | 'cancelled'
   createdAt: string
@@ -263,7 +263,7 @@ export interface Meeting {
 
 export interface CreateMeetingRequest {
   title: string
-  description: string
+  description?: string
   frequency: string
   meetingDate: string
   startTime: string
@@ -275,8 +275,8 @@ export interface CreateMeetingRequest {
   location?: string
   attendees: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
 }
 
@@ -294,8 +294,8 @@ export interface UpdateMeetingRequest {
   location?: string
   attendees?: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
 }
 
@@ -917,7 +917,7 @@ export interface ServicePerformance {
 export interface Notification {
   id: string
   userId: string
-  type: 'payment_update' | 'new_message' | 'bid_update' | 'meeting_reminder' | 'rating_received' | 'system'
+  type: 'payment_update' | 'new_message' | 'bid_update' | 'new_bid' | 'meeting_reminder' | 'rating_received' | 'system' | string
   title: string
   message: string
   data?: any
@@ -926,8 +926,22 @@ export interface Notification {
   isRead: boolean
   scheduledAt?: string
   expiresAt?: string
+  maxRetries?: number
   createdAt: string
   updatedAt: string
+}
+
+export interface CreateNotificationRequest {
+  userId: string
+  type: string
+  title: string
+  message: string
+  data?: any
+  priority?: 'low' | 'medium' | 'high'
+  channels?: string[]
+  scheduledAt?: string
+  expiresAt?: string
+  maxRetries?: number
 }
 
 export interface NotificationPreferences {
@@ -961,6 +975,12 @@ export interface UserSettings {
   showAvailability: boolean
   notificationPreferences: NotificationPreferences
   pinEnabled: boolean
+}
+
+export interface GeneralSettings {
+  timezone: string
+  language: string
+  currency: string
 }
 
 // Withdrawal/Bank Types

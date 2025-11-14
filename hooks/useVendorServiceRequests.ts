@@ -9,18 +9,47 @@ interface UseVendorServiceRequestsOptions {
   autoFetch?: boolean
 }
 
+type RequestsCacheRecord = {
+  data: VendorServiceRequest[]
+  timestamp: number
+}
+
+type StatsCacheRecord = {
+  data: ServiceRequestStats | null
+  timestamp: number
+}
+
+const VENDOR_SERVICE_REQUEST_CACHE = new Map<string, RequestsCacheRecord>()
+let VENDOR_SERVICE_REQUEST_STATS_CACHE: StatsCacheRecord | null = null
+const VENDOR_SERVICE_CACHE_TTL = 1000 * 60 * 2 // 2 minutes
+
+const isCacheValid = <T extends { timestamp: number }>(record?: T | null) =>
+  !!record && Date.now() - record.timestamp < VENDOR_SERVICE_CACHE_TTL
+
 export function useVendorServiceRequests(options: UseVendorServiceRequestsOptions = {}) {
   const { viewType = 'all', autoFetch = true } = options
-  const [requests, setRequests] = useState<VendorServiceRequest[]>([])
-  const [stats, setStats] = useState<ServiceRequestStats | null>(null)
-  const [loading, setLoading] = useState(false)
+  const cacheKey = viewType
+  const cachedRequestRecord = VENDOR_SERVICE_REQUEST_CACHE.get(cacheKey)
+  const cachedStatsRecord = VENDOR_SERVICE_REQUEST_STATS_CACHE
+  const hasFreshRequestCache = isCacheValid(cachedRequestRecord)
+  const hasFreshStatsCache = isCacheValid(cachedStatsRecord)
+  const [requests, setRequests] = useState<VendorServiceRequest[]>(cachedRequestRecord?.data ?? [])
+  const [stats, setStats] = useState<ServiceRequestStats | null>(cachedStatsRecord?.data ?? null)
+  const [loading, setLoading] = useState(autoFetch && !hasFreshRequestCache)
   const [error, setError] = useState<string | null>(null)
 
   const fetchRequests = useCallback(async () => {
     try {
+      const cached = VENDOR_SERVICE_REQUEST_CACHE.get(cacheKey)
+      if (isCacheValid(cached)) {
+        setRequests(cached!.data)
+        setLoading(false)
+        return cached!.data
+      }
+
       setLoading(true)
       setError(null)
-      
+
       let response
       switch (viewType) {
         case 'my':
@@ -38,22 +67,35 @@ export function useVendorServiceRequests(options: UseVendorServiceRequestsOption
         default:
           response = await vendorServiceRequestAPI.getAll()
       }
-      
-      setRequests(response.data.data || [])
+
+      const data = response.data.data || []
+      VENDOR_SERVICE_REQUEST_CACHE.set(cacheKey, { data, timestamp: Date.now() })
+      setRequests(data)
+      return data
     } catch (err) {
       setError('Failed to fetch vendor service requests')
       console.error('Error fetching vendor service requests:', err)
+      throw err
     } finally {
       setLoading(false)
     }
-  }, [viewType])
+  }, [cacheKey, viewType])
 
   const fetchStats = useCallback(async () => {
     try {
+      if (isCacheValid(VENDOR_SERVICE_REQUEST_STATS_CACHE)) {
+        setStats(VENDOR_SERVICE_REQUEST_STATS_CACHE!.data)
+        return VENDOR_SERVICE_REQUEST_STATS_CACHE!.data
+      }
+
       const response = await vendorServiceRequestAPI.getStats()
-      setStats(response.data.data)
+      const data = response.data.data ?? null
+      VENDOR_SERVICE_REQUEST_STATS_CACHE = { data, timestamp: Date.now() }
+      setStats(data)
+      return data
     } catch (err) {
       console.error('Error fetching vendor service request stats:', err)
+      throw err
     }
   }, [])
 
@@ -94,7 +136,14 @@ export function useVendorServiceRequests(options: UseVendorServiceRequestsOption
       setLoading(true)
       setError(null)
       await vendorServiceRequestAPI.delete(id)
-      setRequests(requests.filter(r => r.id !== id))
+      setRequests((prev) => {
+        const next = prev.filter(r => r.id !== id)
+        const existing = VENDOR_SERVICE_REQUEST_CACHE.get(cacheKey)
+        if (existing) {
+          VENDOR_SERVICE_REQUEST_CACHE.set(cacheKey, { data: next, timestamp: Date.now() })
+        }
+        return next
+      })
     } catch (err) {
       setError('Failed to delete vendor service request')
       console.error('Error deleting vendor service request:', err)
@@ -153,9 +202,9 @@ export function useVendorServiceRequests(options: UseVendorServiceRequestsOption
   useEffect(() => {
     if (autoFetch) {
       fetchRequests()
-      fetchStats()
+      fetchStats().catch(() => undefined)
     }
-  }, [autoFetch, viewType])
+  }, [autoFetch, fetchRequests, fetchStats])
 
   return {
     requests,

@@ -9,9 +9,13 @@ import { FiFilter } from 'react-icons/fi'
 import { useVendorServiceRequests } from '@/hooks/useVendorServiceRequests'
 import { useServiceRequests } from '@/hooks/useServiceRequests'
 import { useCategories } from '@/hooks/useCategories'
-import { vendorServiceRequestAPI } from '@/lib/api'
+import { vendorServiceRequestAPI, vendorResponseAPI, serviceRequestAPI, notificationAPI } from '@/lib/api'
+import { CreateNotificationRequest } from '@/types/api'
+import { toast } from 'react-hot-toast'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function ServiceRequestsPage() {
+  const { user } = useAuthContext()
   const [activeTab, setActiveTab] = useState<'active' | 'rejected' | 'accepted' | 'direct' | 'responses'>('active')
   const [showCounterOfferModal, setShowCounterOfferModal] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
@@ -27,12 +31,12 @@ export default function ServiceRequestsPage() {
   })
 
   // Fetch general (assigned) requests and direct requests
-  const { requests: assignedRequests, loading: assignedLoading, error: assignedError } = useServiceRequests({
+  const { requests: assignedRequests, loading: assignedLoading, error: assignedError, fetchRequests: fetchAssignedRequests } = useServiceRequests({
     viewType: 'assigned',
     autoFetch: true,
   })
 
-  const { requests: directRequests, loading: directLoading, error: directError } = useVendorServiceRequests({
+  const { requests: directRequests, loading: directLoading, error: directError, fetchRequests: fetchDirectRequests } = useVendorServiceRequests({
     viewType: 'received',
     autoFetch: true,
   })
@@ -117,6 +121,10 @@ export default function ServiceRequestsPage() {
     }
   }, [getCategoryNames])
 
+  // Store original requests for accessing client IDs
+  const assignedRequestsOriginal = useMemo(() => assignedRequests || [], [assignedRequests])
+  const directRequestsOriginal = useMemo(() => directRequests || [], [directRequests])
+
   const assignedRequestsData = useMemo(() => {
     return (assignedRequests || []).map(transformServiceRequest)
   }, [assignedRequests, transformServiceRequest])
@@ -124,6 +132,64 @@ export default function ServiceRequestsPage() {
   const directRequestsData = useMemo(() => {
     return (directRequests || []).map(transformServiceRequest)
   }, [directRequests, transformServiceRequest])
+
+  // Helper function to get client ID from request
+  const getClientId = useCallback((requestId: string | number, isDirectRequest: boolean): string | null => {
+    const originalRequests = isDirectRequest ? directRequestsOriginal : assignedRequestsOriginal
+    const request = originalRequests.find((r: any) => String(r.id) === String(requestId)) as any
+    const clientId = request?.client?.id || request?.userId || request?.requesterId || (request as any)?.clientId || null
+    
+    // Validate that clientId is a valid UUID format
+    if (clientId && typeof clientId === 'string' && clientId.trim().length > 0) {
+      return clientId.trim()
+    }
+    
+    return null
+  }, [assignedRequestsOriginal, directRequestsOriginal])
+
+  // Helper function to get request details for notifications
+  const getRequestDetails = useCallback((requestId: string | number, isDirectRequest: boolean): any => {
+    const originalRequests = isDirectRequest ? directRequestsOriginal : assignedRequestsOriginal
+    return originalRequests.find((r: any) => String(r.id) === String(requestId)) || null
+  }, [assignedRequestsOriginal, directRequestsOriginal])
+
+  // Helper function to create notification for client
+  const createClientNotification = useCallback(async (
+    clientId: string | null,
+    type: string,
+    title: string,
+    message: string
+  ) => {
+    if (!clientId) {
+      console.warn('Cannot create notification: client ID not found')
+      return
+    }
+
+    try {
+      // Build notification payload
+      // Backend rejects the data field (invalid JSON parsing). Skip it entirely.
+      const notificationPayload: Omit<CreateNotificationRequest, 'data'> = {
+        userId: clientId,
+        type,
+        title,
+        message,
+        priority: 'high',
+        channels: ['email', 'in_app'],
+      }
+
+      console.log('Creating notification with payload:', JSON.stringify(notificationPayload, null, 2))
+      const response = await notificationAPI.create(notificationPayload as CreateNotificationRequest)
+      console.log('✅ Notification created successfully:', response.data)
+    } catch (error: any) {
+      console.error('❌ Failed to create notification:', error)
+      if (error.response?.data) {
+        console.error('❌ Backend error response:', JSON.stringify(error.response.data, null, 2))
+        console.error('❌ Backend error status:', error.response?.status)
+        console.error('❌ Backend error message:', error.response?.data?.message)
+      }
+      // Don't throw - notification failure shouldn't break the main flow
+    }
+  }, [])
 
   // Apply filters and tab filtering
   const datasetForTab = activeTab === 'direct' ? directRequestsData : assignedRequestsData
@@ -188,22 +254,22 @@ export default function ServiceRequestsPage() {
     
     // Budget range filter
     if (filters.budgetRange) {
-      const budget = request.budget
+      const budget = typeof request.budget === 'string' ? request.budget : ''
       switch (filters.budgetRange) {
         case 'under-100k':
-          if (!budget.includes('20,000') && !budget.includes('49,000')) return false
+          if (!budget || (!budget.includes('20,000') && !budget.includes('49,000'))) return false
           break
         case '100k-500k':
-          if (!budget.includes('100,000') && !budget.includes('299,000')) return false
+          if (!budget || (!budget.includes('100,000') && !budget.includes('299,000'))) return false
           break
         case '500k-1m':
-          if (!budget.includes('500,000') && !budget.includes('999,000')) return false
+          if (!budget || (!budget.includes('500,000') && !budget.includes('999,000'))) return false
           break
         case '1m-2m':
-          if (!budget.includes('1,000,000') && !budget.includes('1,999,000')) return false
+          if (!budget || (!budget.includes('1,000,000') && !budget.includes('1,999,000'))) return false
           break
         case 'over-2m':
-          if (!budget.includes('2,000,000')) return false
+          if (!budget || !budget.includes('2,000,000')) return false
           break
       }
     }
@@ -216,45 +282,131 @@ export default function ServiceRequestsPage() {
     return true
   })
 
-  const handleReject = async (requestId: number) => {
+  const handleReject = async (requestId: string | number, isDirectRequest: boolean = false) => {
     try {
-      console.log(`🔍 Rejecting offer for request ${requestId}`)
-      console.log(`🔍 Request ID type:`, typeof requestId)
-      const response = await vendorServiceRequestAPI.respond(requestId.toString(), { response: 'declined' })
-      console.log(`✅ Offer rejected successfully for request ${requestId}:`, response)
+      const requestIdString = String(requestId ?? '')
+      if (!requestIdString) {
+        console.warn('handleReject: requestId is missing')
+        toast.error('Invalid request ID')
+        return
+      }
+
+      // Get request details for notification BEFORE making the API call
+      const requestDetails = getRequestDetails(requestId, isDirectRequest)
+      const clientId = getClientId(requestId, isDirectRequest)
+      const eventTitle = requestDetails?.eventTitle || 'your service request'
+
+      console.log('🔄 Rejecting request:', { requestId: requestIdString, isDirectRequest, clientId, eventTitle })
+
+      // Use different endpoints based on request type
+      let rejectResponse
+      if (isDirectRequest) {
+        // For direct vendor service requests
+        console.log('📤 Calling vendorServiceRequestAPI.respond with declined')
+        rejectResponse = await vendorServiceRequestAPI.respond(requestIdString, { response: 'declined' })
+        console.log('✅ Reject response (direct):', rejectResponse.data)
+      } else {
+        // For regular service requests (assigned to vendor)
+        console.log('📤 Calling serviceRequestAPI.vendorReject')
+        rejectResponse = await serviceRequestAPI.vendorReject(requestIdString)
+        console.log('✅ Reject response (regular):', rejectResponse.data)
+      }
+
+      // Refresh requests first to get updated status
+      await Promise.allSettled([
+        fetchAssignedRequests(),
+        fetchDirectRequests()
+      ])
+
+      // Create notification for client (non-blocking - don't wait for it)
+      createClientNotification(
+        clientId,
+        'booking_declined',
+        'Service Request Rejected',
+        `Your service request "${eventTitle}" has been rejected by the vendor.`
+      ).catch((notifError) => {
+        console.warn('Notification creation failed (non-critical):', notifError)
+      })
       
-      // Show success message
-      alert('Offer rejected successfully! The client will be notified.')
-      
-      // Refresh page to show updated data
-      window.location.reload()
-    } catch (error) {
+      // Switch to rejected tab
+      setActiveTab('rejected')
+      toast.success('Request rejected successfully')
+    } catch (error: any) {
       console.error('❌ Error rejecting request:', error)
-      alert('Failed to reject offer. Please try again.')
+      console.error('❌ Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      })
+      toast.error(error.response?.data?.message || 'Failed to reject request. Please try again.')
     }
   }
 
-  const handleAccept = async (requestId: number) => {
+  const handleAccept = async (requestId: string | number, isDirectRequest: boolean = false) => {
     try {
-      console.log(`🔍 Accepting offer for request ${requestId}`)
-      console.log(`🔍 Request ID type:`, typeof requestId)
-      const response = await vendorServiceRequestAPI.respond(requestId.toString(), { response: 'accepted' })
-      console.log(`✅ Offer accepted successfully for request ${requestId}:`, response)
+      const requestIdString = String(requestId ?? '')
+      if (!requestIdString) {
+        console.warn('handleAccept: requestId is missing')
+        toast.error('Invalid request ID')
+        return
+      }
+
+      // Get request details for notification BEFORE making the API call
+      const requestDetails = getRequestDetails(requestId, isDirectRequest)
+      const clientId = getClientId(requestId, isDirectRequest)
+      const eventTitle = requestDetails?.eventTitle || 'your service request'
+
+      console.log('🔄 Accepting request:', { requestId: requestIdString, isDirectRequest, clientId, eventTitle })
+
+      // Use different endpoints based on request type
+      let acceptResponse
+      if (isDirectRequest) {
+        // For direct vendor service requests
+        console.log('📤 Calling vendorServiceRequestAPI.respond with accepted')
+        acceptResponse = await vendorServiceRequestAPI.respond(requestIdString, { response: 'accepted' })
+        console.log('✅ Accept response (direct):', acceptResponse.data)
+      } else {
+        // For regular service requests (assigned to vendor)
+        console.log('📤 Calling serviceRequestAPI.vendorAccept')
+        acceptResponse = await serviceRequestAPI.vendorAccept(requestIdString)
+        console.log('✅ Accept response (regular):', acceptResponse.data)
+      }
+
+      // Refresh requests first to get updated status
+      await Promise.allSettled([
+        fetchAssignedRequests(),
+        fetchDirectRequests()
+      ])
+
+      // Create notification for client (non-blocking - don't wait for it)
+      createClientNotification(
+        clientId,
+        'booking_accepted',
+        'Service Request Accepted',
+        `Great news! Your service request "${eventTitle}" has been accepted by the vendor.`
+      ).catch((notifError) => {
+        console.warn('Notification creation failed (non-critical):', notifError)
+      })
       
-      // Show success message
-      alert('Offer accepted successfully! The client will be notified.')
-      
-      // Refresh page to show updated data
-      window.location.reload()
-    } catch (error) {
+      // Switch to accepted tab
+      setActiveTab('accepted')
+      toast.success('Request accepted successfully')
+    } catch (error: any) {
       console.error('❌ Error accepting request:', error)
-      alert('Failed to accept offer. Please try again.')
+      console.error('❌ Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      })
+      toast.error(error.response?.data?.message || 'Failed to accept request. Please try again.')
     }
   }
 
   const handleCounterOffer = (request: any) => {
     console.log(`🔍 Opening counter offer modal for request:`, request)
-    setSelectedRequest(request)
+    // Store whether this is a direct request or regular service request
+    const isDirectRequest = activeTab === 'direct'
+    setSelectedRequest({ ...request, isDirectRequest })
     setShowCounterOfferModal(true)
   }
 
@@ -263,9 +415,9 @@ export default function ServiceRequestsPage() {
     setSelectedRequest(null)
   }
 
-  const handleFiltersChange = (newFilters: typeof filters) => {
+  const handleFiltersChange = useCallback((newFilters: typeof filters) => {
     setFilters(newFilters)
-  }
+  }, [])
 
   const tabs = [
     { id: 'active', label: 'Client Requests', count: assignedRequestsData.filter((r: any) => ['open', 'in-progress', 'pending'].includes(r.status)).length },
@@ -340,29 +492,32 @@ export default function ServiceRequestsPage() {
               <p className="text-red-600">Failed to load service requests</p>
             </div>
           ) : filteredRequests.length > 0 ? (
-            filteredRequests.map((req: any, idx: any) => (
-              <ServiceRequestCard
-                key={req.id}
-                id={req.id}
-                status={req.status}
-                clientName={req.clientName}
-                clientAvatar={req.clientAvatar}
-                eventTitle={req.eventTitle}
-                rating={req.rating}
-                totalBookings={req.totalBookings}
-                sentTime={req.sentTime}
-                eventType={req.eventType}
-                eventDate={req.eventDate}
-                eventLocation={req.eventLocation}
-                guests={req.guests}
-                servicesNeeded={req.servicesNeeded}
-                budget={req.budget}
-                additionalInfo={req.additionalInfo}
-                onReject={() => handleReject(req.id)}
-                onAccept={() => handleAccept(req.id)}
-                onCounterOffer={() => handleCounterOffer(req)}
-              />
-            ))
+            filteredRequests.map((req: any, idx: any) => {
+              const isDirectRequest = activeTab === 'direct'
+              return (
+                <ServiceRequestCard
+                  key={req.id}
+                  id={req.id}
+                  status={req.status}
+                  clientName={req.clientName}
+                  clientAvatar={req.clientAvatar}
+                  eventTitle={req.eventTitle}
+                  rating={req.rating}
+                  totalBookings={req.totalBookings}
+                  sentTime={req.sentTime}
+                  eventType={req.eventType}
+                  eventDate={req.eventDate}
+                  eventLocation={req.eventLocation}
+                  guests={req.guests}
+                  servicesNeeded={req.servicesNeeded}
+                  budget={req.budget}
+                  additionalInfo={req.additionalInfo}
+                  onReject={() => handleReject(req.id, isDirectRequest)}
+                  onAccept={() => handleAccept(req.id, isDirectRequest)}
+                  onCounterOffer={() => handleCounterOffer(req)}
+                />
+              )
+            })
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <div className="text-6xl mb-4">📋</div>
@@ -410,9 +565,114 @@ export default function ServiceRequestsPage() {
         <CounterOfferModal
           request={selectedRequest}
           onClose={handleCloseCounterOffer}
-          onSubmit={(offerData: any) => {
-            console.log('Counter offer submitted:', offerData)
-            handleCloseCounterOffer()
+          onSubmit={async (offerData: any) => {
+            try {
+              const requestIdString = String(selectedRequest.id ?? '')
+              if (!requestIdString) {
+                console.warn('handleCounterOffer: requestId is missing')
+                toast.error('Invalid request ID')
+                return
+              }
+
+              const isDirectRequest = selectedRequest.isDirectRequest || false
+
+              // Parse delivery date from DD/MM/YYYY to ISO format
+              let deliveryDateISO: string | undefined
+              if (offerData.serviceModifications?.deliveryDate) {
+                const [day, month, year] = offerData.serviceModifications.deliveryDate.split('/')
+                if (day && month && year) {
+                  deliveryDateISO = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+                }
+              }
+
+              // Parse setup hours from "3 Hours" format
+              let setupHours: number | undefined
+              if (offerData.serviceModifications?.setupTime) {
+                const hoursMatch = offerData.serviceModifications.setupTime.match(/(\d+)/)
+                if (hoursMatch) {
+                  setupHours = parseInt(hoursMatch[1])
+                }
+              }
+
+              // Get request details for notification BEFORE making API calls
+              const requestDetails = getRequestDetails(requestIdString, isDirectRequest)
+              const clientId = getClientId(requestIdString, isDirectRequest)
+              const eventTitle = requestDetails?.eventTitle || 'your service request'
+
+              console.log('🔄 Submitting counter offer:', { requestId: requestIdString, isDirectRequest, clientId, eventTitle })
+
+              if (isDirectRequest) {
+                // For direct vendor service requests, use vendorServiceRequestAPI.respond
+                console.log('📤 Calling vendorServiceRequestAPI.respond with counter_offer')
+                await vendorServiceRequestAPI.respond(requestIdString, { response: 'counter_offer' })
+                
+                // Also create a vendor response with counter-offer details if needed
+                // Note: For direct requests, the vendor response might use vendorServiceRequestId
+                try {
+                  console.log('📤 Creating vendor response for counter-offer')
+                  await vendorResponseAPI.create({
+                    vendorServiceRequestId: requestIdString,
+                    responseType: 'counter_offer',
+                    responseMessage: offerData.counterOfferMessage || '',
+                    counterOfferPrice: offerData.totalAmount || 0,
+                    counterOfferDeliveryDate: deliveryDateISO,
+                    counterOfferDeliveryTime: offerData.serviceModifications?.deliveryTime,
+                    counterOfferSetupHours: setupHours,
+                    counterOfferMessage: offerData.counterOfferMessage || '',
+                  })
+                  console.log('✅ Vendor response created successfully')
+                } catch (responseError: any) {
+                  // If creating vendor response fails, log but don't fail the whole operation
+                  console.warn('⚠️ Could not create vendor response for counter-offer:', responseError)
+                }
+              } else {
+                // For regular service requests, create vendor response with service request ID
+                console.log('📤 Creating vendor response for regular service request')
+                await vendorResponseAPI.create({
+                  vendorServiceRequestId: requestIdString, // This might need to be serviceRequestId
+                  responseType: 'counter_offer',
+                  responseMessage: offerData.counterOfferMessage || '',
+                  counterOfferPrice: offerData.totalAmount || 0,
+                  counterOfferDeliveryDate: deliveryDateISO,
+                  counterOfferDeliveryTime: offerData.serviceModifications?.deliveryTime,
+                  counterOfferSetupHours: setupHours,
+                  counterOfferMessage: offerData.counterOfferMessage || '',
+                } as any) // Type assertion needed if the API structure differs
+                console.log('✅ Vendor response created successfully')
+              }
+
+              // Refresh requests first to get updated status
+              await Promise.allSettled([
+                fetchAssignedRequests(),
+                fetchDirectRequests()
+              ])
+
+              // Create notification for client (non-blocking - don't wait for it)
+              createClientNotification(
+                clientId,
+                'message_received',
+                'New Counter Offer Received',
+                `You have received a counter offer for your service request "${eventTitle}".`
+              ).catch((notifError) => {
+                console.warn('Notification creation failed (non-critical):', notifError)
+              })
+
+              handleCloseCounterOffer()
+              
+              // Switch to "My Responses" tab to show the counter offer
+              setActiveTab('responses')
+              toast.success('Counter offer submitted successfully!')
+            } catch (error: any) {
+              console.error('❌ Error submitting counter offer:', error)
+              console.error('Full error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                requestId: selectedRequest.id,
+                isDirectRequest: selectedRequest.isDirectRequest
+              })
+              toast.error(error.response?.data?.message || 'Failed to submit counter offer. Please check the console for details.')
+            }
           }}
         />
       )}

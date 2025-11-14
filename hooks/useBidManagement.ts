@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { bidAPI } from '@/lib/api'
 import { Bid, CreateBidRequest, UpdateBidRequest, BidStats } from '@/types/api'
+import { CreateBidSchema, UpdateBidSchema } from '@/lib/validation'
+import { reportNetworkFailure, logError } from '@/lib/logger'
 
 export const useBidManagement = () => {
   const [bids, setBids] = useState<Bid[]>([])
@@ -8,6 +10,12 @@ export const useBidManagement = () => {
   const [stats, setStats] = useState<BidStats | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const handleError = (err: any, fallback: string, context: string) => {
+    reportNetworkFailure({ operation: context, error: err })
+    logError(fallback, { error: err, context })
+    setError(err.response?.data?.message || fallback)
+  }
 
   const fetchBids = async (params?: any) => {
     try {
@@ -17,7 +25,7 @@ export const useBidManagement = () => {
       setBids(response.data.data || [])
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch bids')
+      handleError(err, 'Failed to fetch bids', 'bids.fetch')
       throw err
     } finally {
       setLoading(false)
@@ -32,7 +40,7 @@ export const useBidManagement = () => {
       setBids(response.data.data || [])
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch bids with details')
+      handleError(err, 'Failed to fetch bids with details', 'bids.fetchWithDetails')
       throw err
     } finally {
       setLoading(false)
@@ -47,7 +55,7 @@ export const useBidManagement = () => {
       setBid(response.data.data)
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch bid')
+      handleError(err, 'Failed to fetch bid', 'bids.fetchById')
       throw err
     } finally {
       setLoading(false)
@@ -62,7 +70,7 @@ export const useBidManagement = () => {
       setStats(response.data.data)
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch bid stats')
+      handleError(err, 'Failed to fetch bid stats', 'bids.fetchStats')
       throw err
     } finally {
       setLoading(false)
@@ -73,11 +81,12 @@ export const useBidManagement = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await bidAPI.create(data)
+      const payload = CreateBidSchema.parse(data)
+      const response = await bidAPI.create(payload)
       setBids(prev => [...prev, response.data.data])
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create bid')
+      handleError(err, 'Failed to create bid', 'bids.create')
       throw err
     } finally {
       setLoading(false)
@@ -88,7 +97,8 @@ export const useBidManagement = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await bidAPI.update(id, data)
+      const payload = UpdateBidSchema.parse(data)
+      const response = await bidAPI.update(id, payload)
       setBids(prev => 
         prev.map(bid => 
           bid.id === id ? response.data.data : bid
@@ -99,7 +109,7 @@ export const useBidManagement = () => {
       }
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update bid')
+      handleError(err, 'Failed to update bid', 'bids.update')
       throw err
     } finally {
       setLoading(false)
@@ -121,7 +131,7 @@ export const useBidManagement = () => {
       }
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to withdraw bid')
+      handleError(err, 'Failed to withdraw bid', 'bids.withdraw')
       throw err
     } finally {
       setLoading(false)
@@ -138,7 +148,7 @@ export const useBidManagement = () => {
         setBid(null)
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete bid')
+      handleError(err, 'Failed to delete bid', 'bids.delete')
       throw err
     } finally {
       setLoading(false)
@@ -160,7 +170,7 @@ export const useBidManagement = () => {
       }
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to accept bid')
+      handleError(err, 'Failed to accept bid', 'bids.accept')
       throw err
     } finally {
       setLoading(false)
@@ -182,7 +192,7 @@ export const useBidManagement = () => {
       }
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to reject bid')
+      handleError(err, 'Failed to reject bid', 'bids.reject')
       throw err
     } finally {
       setLoading(false)

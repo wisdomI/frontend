@@ -61,6 +61,22 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
   useEffect(() => {
     const fetchProfileData = async () => {
       if (user?.id && isAuthenticated) {
+        const normalizedAccountType = (user.accountType || '').toLowerCase()
+        const shouldFetchProfile = ['vendor', 'business', 'organization'].includes(normalizedAccountType)
+
+        if (!shouldFetchProfile) {
+          // Fall back to cached values for client accounts that don't have profile records yet
+          const savedImage = typeof window !== 'undefined' ? localStorage.getItem(`profile_picture_${user.id}`) : null
+          if (savedImage) {
+            setProfilePicture(savedImage)
+          }
+          const cachedName = typeof window !== 'undefined' ? localStorage.getItem(`cached_user_name_${user.id}`) : null
+          if (cachedName) {
+            setCachedUserName(cachedName)
+          }
+          return
+        }
+
         try {
           const response = await profileAPI.me()
           if (response.data.data?.displayPicture) {
@@ -171,6 +187,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
               alt="EventHub" 
               fill
               className="object-contain"
+              sizes="32px"
             />
           </div>
           {/* Desktop: Full logo */}
@@ -180,6 +197,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
               alt="EventHub" 
               fill
               className="object-contain"
+              sizes="128px"
             />
           </div>
         </Link>
@@ -240,6 +258,7 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
                 alt="Profile" 
                 fill
                 className="object-cover"
+                sizes="32px"
               />
             ) : (cachedUserName) ? (
               <span className="text-gray-600 font-medium text-sm">

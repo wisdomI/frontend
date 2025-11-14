@@ -6,6 +6,8 @@ import CreatePINModal from '@/components/ui/modals/CreatePINModal'
 import ChangePINModal from '@/components/ui/modals/ChangePINModal'
 import ResetPINModal from '@/components/ui/modals/ResetPINModal'
 import PINSuccessModal from '@/components/ui/modals/PINSuccessModal'
+import { useSettings } from '@/hooks/useSettings'
+import { toast } from 'react-hot-toast'
 
 export default function PINSetupTab() {
   const [isCreatePINModalOpen, setIsCreatePINModalOpen] = useState(false)
@@ -13,6 +15,7 @@ export default function PINSetupTab() {
   const [isResetPINModalOpen, setIsResetPINModalOpen] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [successModalType, setSuccessModalType] = useState<'create' | 'change' | 'reset'>('create')
+  const { createPin, changePin, verifyPin, resendPinVerification } = useSettings()
 
   const handleCreatePIN = () => {
     setIsCreatePINModalOpen(true)
@@ -92,18 +95,31 @@ export default function PINSetupTab() {
       <CreatePINModal
         isOpen={isCreatePINModalOpen}
         onClose={() => setIsCreatePINModalOpen(false)}
+        onSubmit={async ({ pin, confirmPin }) => {
+          await createPin({ pin, confirmPin })
+          toast.success('PIN created successfully')
+        }}
         onSuccess={handlePINCreated}
       />
       
       <ChangePINModal
         isOpen={isChangePINModalOpen}
         onClose={() => setIsChangePINModalOpen(false)}
+        onSubmit={async ({ oldPin, newPin, confirmNewPin }) => {
+          await changePin({ oldPin, newPin, confirmNewPin })
+          toast.success('PIN changed successfully')
+        }}
         onSuccess={handlePINChanged}
       />
       
       <ResetPINModal
         isOpen={isResetPINModalOpen}
         onClose={() => setIsResetPINModalOpen(false)}
+        onSubmit={async ({ pin }) => {
+          await verifyPin({ pin })
+          toast.success('PIN verified successfully')
+        }}
+        onResend={() => resendPinVerification('reset')}
         onSuccess={handlePINReset}
       />
       

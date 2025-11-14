@@ -82,9 +82,11 @@ import {
   ClientGrowth,
   ServicePerformance,
   Notification,
+  CreateNotificationRequest,
   NotificationPreferences,
   NotificationStats,
   UserSettings,
+  GeneralSettings,
   Bank,
   BankAccount,
   Withdrawal,
@@ -107,6 +109,7 @@ const api = axios.create({
 const ACCESS_TOKEN_KEY = 'accessToken'
 const REFRESH_TOKEN_KEY = 'refreshToken'
 let isRefreshing = false
+let refreshPromise: Promise<string | null> | null = null
 let pendingRequests: Array<(token: string | null) => void> = []
 
 const setAuthHeader = async (config: any) => {
@@ -122,12 +125,7 @@ const setAuthHeader = async (config: any) => {
     '/password/reset-password',
     // Public service browsing endpoints (GET only)
     '/service/',
-    '/service?',
-    // Ratings (public read access)
-    '/ratings/stats/',
-    '/ratings/reviewee/',
-    // Categories (public read access for browsing)
-    '/categories/'
+    '/service?'
   ]
   
   // Check if this is a GET request to public service endpoints
@@ -138,8 +136,7 @@ const setAuthHeader = async (config: any) => {
     (config.url?.includes('/service/') || 
      config.url?.includes('/service?') || 
      config.url?.includes('/ratings/stats/') ||
-     config.url?.includes('/ratings/reviewee/') ||
-     config.url?.includes('/categories/'))
+     config.url?.includes('/ratings/reviewee/'))
   
   // Check if this is a POST/PUT/DELETE to /service/ - these need auth
   const isServiceMutation = (config.method?.toLowerCase() === 'post' || 
@@ -183,30 +180,23 @@ const setAuthHeader = async (config: any) => {
         console.log('⚠️ Token is EXPIRED, attempting refresh before request...')
         
         // Try to refresh before making the request
-        if (!isRefreshing) {
-          isRefreshing = true
-          const newToken = await refreshAccessToken()
-          isRefreshing = false
-          
-          if (newToken) {
-            config.headers.Authorization = `Bearer ${newToken}`
-            return config
-          } else {
-            localStorage.removeItem(ACCESS_TOKEN_KEY)
-            localStorage.removeItem(REFRESH_TOKEN_KEY)
-          }
+        const newToken = await refreshAccessToken()
+        
+        if (newToken) {
+          config.headers.Authorization = `Bearer ${newToken}`
+          return config
+        } else {
+          localStorage.removeItem(ACCESS_TOKEN_KEY)
+          localStorage.removeItem(REFRESH_TOKEN_KEY)
         }
       } else if (expiresIn < 60) {
         // Token expires in less than 60 seconds, refresh proactively
         console.log(`⏰ Token expires in ${expiresIn}s, refreshing proactively...`)
         
-        if (!isRefreshing) {
-          // Don't wait for refresh, just trigger it
-          refreshAccessToken().then(newToken => {
-            if (newToken) {
-            }
-          })
-        }
+        // Don't wait for refresh, just trigger it (guarded internally)
+        refreshAccessToken().then(() => {
+          // Refresh result is handled inside the helper; no-op here
+        })
       }
     } catch (e) {
       console.log('⚠️ Could not decode token for expiry check')
@@ -242,6 +232,11 @@ api.interceptors.request.use(
 
 // Attempt token refresh
 async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) {
+    console.log('🔄 Token Refresh: Existing refresh in progress, reusing promise')
+    return refreshPromise
+  }
+
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null
   if (!refreshToken) {
     console.log('🔄 Token Refresh: No refresh token found')
@@ -249,157 +244,165 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 
   console.log('🔄 Token Refresh: Attempting to refresh access token...')
-  
-  try {
-    const res = await api.post('/auth/refresh-token', { refreshToken }, {
-      headers: { Authorization: `Bearer ${refreshToken}` },
-    })
+
+  refreshPromise = (async () => {
+    isRefreshing = true
+    try {
+      const res = await api.post('/auth/refresh-token', { refreshToken }, {
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      })
     
-    // Log the full response structure properly
-    console.log('🔄 Token Refresh: Full response object:', res)
-    console.log('🔄 Token Refresh: Response data:', res.data)
-    console.log('🔄 Token Refresh: Response data (stringified):', JSON.stringify(res.data, null, 2))
-    console.log('🔄 Token Refresh: Response type:', typeof res.data)
-    console.log('🔄 Token Refresh: Response keys:', Object.keys(res.data || {}))
+      // Log the full response structure properly
+      console.log('🔄 Token Refresh: Full response object:', res)
+      console.log('🔄 Token Refresh: Response data:', res.data)
+      console.log('🔄 Token Refresh: Response data (stringified):', JSON.stringify(res.data, null, 2))
+      console.log('🔄 Token Refresh: Response type:', typeof res.data)
+      console.log('🔄 Token Refresh: Response keys:', Object.keys(res.data || {}))
     
-    // Try multiple possible response structures
-    const responseData = res?.data
+      // Try multiple possible response structures
+      const responseData = res?.data
     
-    // Log nested structure if it exists - check ALL possible nested paths
-    if (responseData?.data) {
-      console.log('🔄 Token Refresh: Found nested data object')
-      console.log('🔄 Token Refresh: Nested data type:', typeof responseData.data)
-      console.log('🔄 Token Refresh: Nested data keys:', Object.keys(responseData.data || {}))
-      console.log('🔄 Token Refresh: Nested data (stringified):', JSON.stringify(responseData.data, null, 2))
-      
-      // Check if nested data is an object with more nesting
-      if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
-        console.log('🔄 Token Refresh: Checking deeply nested paths...')
-        console.log('🔄 Token Refresh: data.data?.accessToken:', responseData.data.data?.accessToken)
-        console.log('🔄 Token Refresh: data.data?.token:', responseData.data.data?.token)
-      }
-    }
-    
-    // Try to extract token from multiple possible locations
-    // Check direct properties first
-    console.log('🔄 Token Refresh: Checking token locations...')
-    console.log('  - responseData?.accessToken:', responseData?.accessToken ? 'FOUND' : 'not found')
-    console.log('  - responseData?.token:', responseData?.token ? 'FOUND' : 'not found')
-    console.log('  - responseData?.access_token:', responseData?.access_token ? 'FOUND' : 'not found')
-    
-    // Check nested properties
-    if (responseData?.data) {
-      console.log('  - responseData?.data?.accessToken:', responseData?.data?.accessToken ? 'FOUND' : 'not found')
-      console.log('  - responseData?.data?.token:', responseData?.data?.token ? 'FOUND' : 'not found')
-      console.log('  - responseData?.data?.access_token:', responseData?.data?.access_token ? 'FOUND' : 'not found')
-      
-      // Check if data itself is the token string
-      if (typeof responseData.data === 'string') {
-        console.log('  - responseData.data (as string):', 'FOUND (data is token string)')
-      }
-      
-      // Check deeply nested
-      if (responseData.data?.data) {
-        console.log('  - responseData?.data?.data?.accessToken:', responseData?.data?.data?.accessToken ? 'FOUND' : 'not found')
-        console.log('  - responseData?.data?.data?.token:', responseData?.data?.data?.token ? 'FOUND' : 'not found')
-      }
-    }
-    
-    // Helper function to find JWT token in any object (recursive search)
-    const findJWTInObject = (obj: any, depth = 0): string | undefined => {
-      if (depth > 3) return undefined // Prevent infinite recursion
-      if (!obj || typeof obj !== 'object') return undefined
-      
-      // Check if this object itself is a string that looks like a JWT
-      if (typeof obj === 'string' && obj.startsWith('eyJ')) {
-        return obj
-      }
-      
-      // Check all string properties for JWT-like tokens
-      for (const key in obj) {
-        const value = obj[key]
-        if (typeof value === 'string' && value.startsWith('eyJ') && value.split('.').length === 3) {
-          return value
-        }
-        // Recursively search nested objects
-        if (typeof value === 'object' && value !== null) {
-          const found = findJWTInObject(value, depth + 1)
-          if (found) return found
+      // Log nested structure if it exists - check ALL possible nested paths
+      if (responseData?.data) {
+        console.log('🔄 Token Refresh: Found nested data object')
+        console.log('🔄 Token Refresh: Nested data type:', typeof responseData.data)
+        console.log('🔄 Token Refresh: Nested data keys:', Object.keys(responseData.data || {}))
+        console.log('🔄 Token Refresh: Nested data (stringified):', JSON.stringify(responseData.data, null, 2))
+        
+        // Check if nested data is an object with more nesting
+        if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
+          console.log('🔄 Token Refresh: Checking deeply nested paths...')
+          console.log('🔄 Token Refresh: data.data?.accessToken:', responseData.data.data?.accessToken)
+          console.log('🔄 Token Refresh: data.data?.token:', responseData.data.data?.token)
         }
       }
-      return undefined
-    }
-    
-    const newAccessToken: string | undefined = 
-      responseData?.accessToken ||                    // Direct accessToken
-      responseData?.data?.accessToken ||              // Nested in data.accessToken
-      responseData?.data?.data?.accessToken ||        // Deeply nested
-      responseData?.data?.token ||                    // Nested in data.token
-      responseData?.data?.data?.token ||              // Deeply nested token
-      responseData?.token ||                          // Direct token
-      responseData?.data?.access_token ||             // Snake case nested
-      responseData?.data?.data?.access_token ||       // Deeply nested snake case
-      responseData?.access_token ||                   // Snake case direct
-      responseData?.authToken ||                      // Alternative field name
-      responseData?.data?.authToken ||                // Nested authToken
-      responseData?.jwt ||                            // JWT field
-      responseData?.data?.jwt ||                      // Nested JWT
-      responseData?.jwtToken ||                       // JWT token field
-      responseData?.data?.jwtToken ||                 // Nested JWT token
-      (responseData?.data && typeof responseData.data === 'string' ? responseData.data : undefined) || // If data is the token itself
-      (responseData?.data?.data && typeof responseData.data.data === 'string' ? responseData.data.data : undefined) || // If data.data is the token
-      findJWTInObject(responseData) // Fallback: search entire response for JWT-like strings
-    
-    console.log('🔄 Token Refresh: Extracted token:', {
-      hasToken: !!newAccessToken,
-      tokenLength: newAccessToken?.length,
-      tokenPreview: newAccessToken ? `${newAccessToken.substring(0, 20)}...` : 'none',
-      responseStructure: {
-        hasData: !!responseData?.data,
-        dataType: typeof responseData?.data,
-        dataKeys: responseData?.data && typeof responseData.data === 'object' ? Object.keys(responseData.data) : 'not an object',
-        topLevelKeys: Object.keys(responseData || {})
-      }
-    })
-    
-    if (newAccessToken && typeof window !== 'undefined') {
-      localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken)
-      console.log('✅ Token Refresh: Successfully stored new access token')
       
-      // Also update the refresh token if provided
-      const newRefreshToken = responseData?.refreshToken || 
-                             responseData?.data?.refreshToken ||
-                             responseData?.data?.refresh_token ||
-                             responseData?.refresh_token
-      if (newRefreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
-        console.log('✅ Token Refresh: Also updated refresh token')
+      // Try to extract token from multiple possible locations
+      // Check direct properties first
+      console.log('🔄 Token Refresh: Checking token locations...')
+      console.log('  - responseData?.accessToken:', responseData?.accessToken ? 'FOUND' : 'not found')
+      console.log('  - responseData?.token:', responseData?.token ? 'FOUND' : 'not found')
+      console.log('  - responseData?.access_token:', responseData?.access_token ? 'FOUND' : 'not found')
+      
+      // Check nested properties
+      if (responseData?.data) {
+        console.log('  - responseData?.data?.accessToken:', responseData?.data?.accessToken ? 'FOUND' : 'not found')
+        console.log('  - responseData?.data?.token:', responseData?.data?.token ? 'FOUND' : 'not found')
+        console.log('  - responseData?.data?.access_token:', responseData?.data?.access_token ? 'FOUND' : 'not found')
+        
+        // Check if data itself is the token string
+        if (typeof responseData.data === 'string') {
+          console.log('  - responseData.data (as string):', 'FOUND (data is token string)')
+        }
+        
+        // Check deeply nested
+        if (responseData.data?.data) {
+          console.log('  - responseData?.data?.data?.accessToken:', responseData?.data?.data?.accessToken ? 'FOUND' : 'not found')
+          console.log('  - responseData?.data?.data?.token:', responseData?.data?.data?.token ? 'FOUND' : 'not found')
+        }
       }
-    } else {
-      console.error('❌ Token Refresh: No access token in response:', res.data)
-      console.error('❌ Token Refresh: Full response structure:', JSON.stringify(res.data, null, 2))
-    }
-    return newAccessToken || null
-  } catch (e: any) {
-    console.error('❌ Token Refresh: Failed with error:', e)
-    console.error('❌ Token Refresh: Error details:', {
-      message: e.message,
-      status: e.response?.status,
-      data: e.response?.data,
-      code: e.code
-    })
-    
-    // If refresh token is invalid or expired, clear tokens
-    if (e.response?.status === 401 || e.response?.status === 403) {
-      console.log('🔄 Token Refresh: Refresh token is invalid, clearing all tokens')
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(ACCESS_TOKEN_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
+      
+      // Helper function to find JWT token in any object (recursive search)
+      const findJWTInObject = (obj: any, depth = 0): string | undefined => {
+        if (depth > 3) return undefined // Prevent infinite recursion
+        if (!obj || typeof obj !== 'object') return undefined
+        
+        // Check if this object itself is a string that looks like a JWT
+        if (typeof obj === 'string' && obj.startsWith('eyJ')) {
+          return obj
+        }
+        
+        // Check all string properties for JWT-like tokens
+        for (const key in obj) {
+          const value = obj[key]
+          if (typeof value === 'string' && value.startsWith('eyJ') && value.split('.').length === 3) {
+            return value
+          }
+          // Recursively search nested objects
+          if (typeof value === 'object' && value !== null) {
+            const found = findJWTInObject(value, depth + 1)
+            if (found) return found
+          }
+        }
+        return undefined
       }
+      
+      const newAccessToken: string | undefined = 
+        responseData?.accessToken ||                    // Direct accessToken
+        responseData?.data?.accessToken ||              // Nested in data.accessToken
+        responseData?.data?.data?.accessToken ||        // Deeply nested
+        responseData?.data?.token ||                    // Nested in data.token
+        responseData?.data?.data?.token ||              // Deeply nested token
+        responseData?.token ||                          // Direct token
+        responseData?.data?.access_token ||             // Snake case nested
+        responseData?.data?.data?.access_token ||       // Deeply nested snake case
+        responseData?.access_token ||                   // Snake case direct
+        responseData?.authToken ||                      // Alternative field name
+        responseData?.data?.authToken ||                // Nested authToken
+        responseData?.jwt ||                            // JWT field
+        responseData?.data?.jwt ||                      // Nested JWT
+        responseData?.jwtToken ||                       // JWT token field
+        responseData?.data?.jwtToken ||                 // Nested JWT token
+        (responseData?.data && typeof responseData.data === 'string' ? responseData.data : undefined) || // If data is the token itself
+        (responseData?.data?.data && typeof responseData.data.data === 'string' ? responseData.data.data : undefined) || // If data.data is the token
+        findJWTInObject(responseData) // Fallback: search entire response for JWT-like strings
+      
+      console.log('🔄 Token Refresh: Extracted token:', {
+        hasToken: !!newAccessToken,
+        tokenLength: newAccessToken?.length,
+        tokenPreview: newAccessToken ? `${newAccessToken.substring(0, 20)}...` : 'none',
+        responseStructure: {
+          hasData: !!responseData?.data,
+          dataType: typeof responseData?.data,
+          dataKeys: responseData?.data && typeof responseData.data === 'object' ? Object.keys(responseData.data) : 'not an object',
+          topLevelKeys: Object.keys(responseData || {})
+        }
+      })
+      
+      if (newAccessToken && typeof window !== 'undefined') {
+        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken)
+        console.log('✅ Token Refresh: Successfully stored new access token')
+        
+        // Also update the refresh token if provided
+        const newRefreshToken = responseData?.refreshToken || 
+                               responseData?.data?.refreshToken ||
+                               responseData?.data?.refresh_token ||
+                               responseData?.refresh_token
+        if (newRefreshToken) {
+          localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
+          console.log('✅ Token Refresh: Also updated refresh token')
+        }
+      } else {
+        console.error('❌ Token Refresh: No access token in response:', res.data)
+        console.error('❌ Token Refresh: Full response structure:', JSON.stringify(res.data, null, 2))
+      }
+      return newAccessToken || null
+    } catch (e: any) {
+      console.error('❌ Token Refresh: Failed with error:', e)
+      console.error('❌ Token Refresh: Error details:', {
+        message: e.message,
+        status: e.response?.status,
+        data: e.response?.data,
+        code: e.code
+      })
+      
+      // If refresh token is invalid or expired, clear tokens
+      if (e.response?.status === 401 || e.response?.status === 403) {
+        console.log('🔄 Token Refresh: Refresh token is invalid, clearing all tokens')
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(ACCESS_TOKEN_KEY)
+          localStorage.removeItem(REFRESH_TOKEN_KEY)
+        }
+      }
+      
+      return null
+    } finally {
+      isRefreshing = false
+      refreshPromise = null
     }
-    
-    return null
-  }
+  })()
+
+  return refreshPromise
 }
 
 // Response interceptor for 401 -> refresh -> retry
@@ -423,7 +426,7 @@ api.interceptors.response.use(
           if (isExpired) {
             originalRequest._retry = true
             
-            if (isRefreshing) {
+            if (isRefreshing || refreshPromise) {
               return new Promise((resolve, reject) => {
                 pendingRequests.push((token) => {
                   if (token) {
@@ -436,9 +439,7 @@ api.interceptors.response.use(
               })
             }
 
-            isRefreshing = true
             const newToken = await refreshAccessToken()
-            isRefreshing = false
 
             pendingRequests.forEach((cb) => cb(newToken))
             pendingRequests = []
@@ -486,7 +487,7 @@ api.interceptors.response.use(
       
       console.log('🔒 401 Unauthorized: Attempting token refresh for', originalRequest.url)
       
-      if (isRefreshing) {
+      if (isRefreshing || refreshPromise) {
         console.log('🔄 Token refresh already in progress, queueing request...')
         return new Promise((resolve, reject) => {
           pendingRequests.push((token) => {
@@ -505,9 +506,7 @@ api.interceptors.response.use(
       }
 
       originalRequest._retry = true
-      isRefreshing = true
       const newToken = await refreshAccessToken()
-      isRefreshing = false
 
       pendingRequests.forEach((cb) => cb(newToken))
       pendingRequests = []
@@ -743,8 +742,8 @@ export const vendorServiceRequestAPI = {
 export const vendorResponseAPI = {
   getAll: (params?: SearchParams) => api.get<ApiResponse<VendorResponse[]>>('/service-requests/vendor-responses/', { params }),
   getById: (id: string) => api.get<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}`),
-  create: (data: any) => api.post<ApiResponse<VendorResponse>>('/service-requests/vendor-responses/', data),
-  update: (id: string, data: any) => api.patch<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}`, data),
+  create: (data: CreateVendorResponseRequest) => api.post<ApiResponse<VendorResponse>>('/service-requests/vendor-responses/', data),
+  update: (id: string, data: Partial<CreateVendorResponseRequest>) => api.patch<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}`, data),
   delete: (id: string) => api.delete<ApiResponse>(`/service-requests/vendor-responses/${id}`),
   withdraw: (id: string) => api.patch<ApiResponse<VendorResponse>>(`/service-requests/vendor-responses/${id}/withdraw`),
   getHistory: () => api.get<ApiResponse<VendorResponse[]>>('/service-requests/vendor-responses/history'),
@@ -828,8 +827,15 @@ export const teamsAPI = {
 
 // Bidding System API
 export const bidAPI = {
-  // Create bid - POST /bids/details (as per API spec)
-  create: (data: CreateBidRequest) => api.post<ApiResponse<Bid>>('/bids/details', data),
+  // Create bid - backend accepts POST /bids/
+  create: (data: CreateBidRequest | FormData) => {
+    if (typeof FormData !== 'undefined' && data instanceof FormData) {
+      return api.post<ApiResponse<Bid>>('/bids/', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return api.post<ApiResponse<Bid>>('/bids/', data)
+  },
   
   // Get bids - GET /bids
   getAll: (params?: SearchParams) => api.get<ApiResponse<Bid[]>>('/bids/', { params }),
@@ -853,10 +859,12 @@ export const bidAPI = {
   delete: (id: string) => api.delete<ApiResponse>(`/bids/${id}/withdraw`),
   
   // Accept bid - PATCH /bids/:id/accept
-  accept: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/${id}/accept`),
+  accept: (id: string, data?: Partial<UpdateBidRequest & CreateBidRequest>) =>
+    api.patch<ApiResponse<Bid>>(`/bids/${id}/accept`, data),
   
   // Reject bid - PATCH /bids/:id/reject
-  reject: (id: string) => api.patch<ApiResponse<Bid>>(`/bids/${id}/reject`),
+  reject: (id: string, data?: Partial<UpdateBidRequest & CreateBidRequest>) =>
+    api.patch<ApiResponse<Bid>>(`/bids/${id}/reject`, data),
 }
 
 
@@ -874,23 +882,85 @@ export const ratingAPI = {
 }
 
 // Messaging System API
+const messagingDisabledWarning = (operation: string) => {
+  if (typeof console !== 'undefined') {
+    console.warn(`Messaging API call skipped (${operation}) — messaging endpoints are temporarily on hold.`)
+  }
+}
+
+const messagingStubResponse = <T>(data: T) =>
+  Promise.resolve({
+    data: {
+      data,
+      message: 'Messaging endpoints temporarily unavailable',
+    },
+  } as ApiResponse<T>)
+
 export const messageAPI = {
-  send: (payload: SendMessageRequest) => api.post<ApiResponse<Message>>('/message/', payload),
-  getConversation: (recipientId: string, page?: number, limit?: number) => api.get<ApiResponse<Message[]>>('/message/conversation', { params: { recipientId, page, limit } }),
-  markAsRead: (messageId: string) => api.patch<ApiResponse>(`/message/read`, { messageId }),
-  unreadCount: () => api.get<ApiResponse<{ count: number }>>('/message/unread'),
-  getConversations: (page?: number, limit?: number) => api.get<ApiResponse<Conversation[]>>('/message/conversations', { params: { page, limit } }),
-  getStats: () => api.get<ApiResponse<MessageStats>>('/message/conversation/stats'),
-  conversationExists: (recipientId: string) => api.get<ApiResponse<{ exists: boolean }>>('/message/conversation/exists', { params: { recipientId } }),
-  latestMessage: (recipientId: string) => api.get<ApiResponse<Message>>('/message/conversation/latest', { params: { recipientId } }),
-  markBulkAsRead: (messageIds: string[]) => api.patch<ApiResponse>('/message/read/bulk', { messageIds }),
-  markConversationAsRead: (recipientId: string) => api.patch<ApiResponse>('/message/conversation/read', { recipientId }),
-  getOnlineStatus: (userId: string) => api.get<ApiResponse<{ isOnline: boolean; lastSeen?: string }>>('/message/online-status', { params: { userId } }),
-  search: (params: { q: string; page?: number; limit?: number }) => api.get<ApiResponse<Message[]>>('/message/search', { params }),
-  edit: (messageId: string, message: string) => api.patch<ApiResponse<Message>>('/message/edit', { messageId, message }),
-  delete: (messageId: string) => api.delete<ApiResponse>('/message/delete', { data: { messageId } }),
-  getById: (messageId: string) => api.get<ApiResponse<Message>>(`/message/${messageId}`),
-  health: () => api.get<ApiResponse<{ status: string }>>('/message/health'),
+  send: (_payload: SendMessageRequest) => {
+    messagingDisabledWarning('send')
+    return messagingStubResponse<Message | null>(null)
+  },
+  getConversation: (_recipientId: string, _page?: number, _limit?: number) => {
+    messagingDisabledWarning('getConversation')
+    return messagingStubResponse<Message[]>([])
+  },
+  markAsRead: (_messageId: string) => {
+    messagingDisabledWarning('markAsRead')
+    return messagingStubResponse<null>(null)
+  },
+  unreadCount: () => {
+    messagingDisabledWarning('unreadCount')
+    return messagingStubResponse<{ count: number }>({ count: 0 })
+  },
+  getConversations: (_page?: number, _limit?: number) => {
+    messagingDisabledWarning('getConversations')
+    return messagingStubResponse<Conversation[]>([])
+  },
+  getStats: () => {
+    messagingDisabledWarning('getStats')
+    return messagingStubResponse<MessageStats | null>(null)
+  },
+  conversationExists: (_recipientId: string) => {
+    messagingDisabledWarning('conversationExists')
+    return messagingStubResponse<{ exists: boolean }>({ exists: false })
+  },
+  latestMessage: (_recipientId: string) => {
+    messagingDisabledWarning('latestMessage')
+    return messagingStubResponse<Message | null>(null)
+  },
+  markBulkAsRead: (_messageIds: string[]) => {
+    messagingDisabledWarning('markBulkAsRead')
+    return messagingStubResponse<null>(null)
+  },
+  markConversationAsRead: (_recipientId: string) => {
+    messagingDisabledWarning('markConversationAsRead')
+    return messagingStubResponse<null>(null)
+  },
+  getOnlineStatus: (_userId: string) => {
+    messagingDisabledWarning('getOnlineStatus')
+    return messagingStubResponse<{ isOnline: boolean; lastSeen?: string }>({ isOnline: false })
+  },
+  search: (_params: { q: string; page?: number; limit?: number }) => {
+    messagingDisabledWarning('search')
+    return messagingStubResponse<Message[]>([])
+  },
+  edit: (_messageId: string, _message: string) => {
+    messagingDisabledWarning('edit')
+    return messagingStubResponse<Message | null>(null)
+  },
+  delete: (_messageId: string) => {
+    messagingDisabledWarning('delete')
+    return messagingStubResponse<null>(null)
+  },
+  getById: (_messageId: string) => {
+    messagingDisabledWarning('getById')
+    return messagingStubResponse<Message | null>(null)
+  },
+  health: () => {
+    messagingDisabledWarning('health')
+    return messagingStubResponse<{ status: string }>({ status: 'disabled' })
+  },
 }
 
 // Progress Tracking API
@@ -959,7 +1029,16 @@ export const vendorEarningsAPI = {
 
 // Vendor Analytics & Performance API
 export const vendorAnalyticsAPI = {
-  // Performance Metrics
+  // GET /analytics/dashboard/ - Get vendor dashboard
+  getDashboard: () => api.get<ApiResponse<PerformanceDashboard>>('/analytics/dashboard/'),
+  
+  // GET /analytics/client-growth/ - Get vendor client growth
+  getClientGrowth: () => api.get<ApiResponse<ClientGrowth>>('/analytics/client-growth/'),
+  
+  // GET /analytics/ - Get vendor analytics
+  getAnalytics: () => api.get<ApiResponse<any>>('/analytics/'),
+  
+  // Performance Metrics (legacy endpoints)
   getPerformanceMetrics: (params?: { period?: string; from?: string; to?: string }) => 
     api.get<ApiResponse<any>>('/vendor/analytics/performance', { params }),
   getEngagementMetrics: () => api.get<ApiResponse<any>>('/vendor/analytics/engagement'),
@@ -1050,25 +1129,48 @@ export const availabilityAPI = {
 
 // Notification API
 export const notificationAPI = {
-  create: (data: Partial<Notification>) => api.post<ApiResponse<Notification>>('/notifications/', data),
+  // POST /notifications/ - Create notification
+  create: (data: CreateNotificationRequest) => api.post<ApiResponse<Notification>>('/notifications/', data),
+  
+  // GET /notifications/ - Get user notifications
   getAll: () => api.get<ApiResponse<Notification[]>>('/notifications/'),
+  
+  // GET /notifications/:id - Get specific notification
   getById: (id: string) => api.get<ApiResponse<Notification>>(`/notifications/${id}`),
+  
+  // PATCH /notifications/:id/read - Mark notification as read
   markAsRead: (id: string) => api.patch<ApiResponse<Notification>>(`/notifications/${id}/read`),
+  
+  // PATCH /notifications/read-all - Mark all notifications as read
   markAllAsRead: () => api.patch<ApiResponse<any>>('/notifications/read-all'),
+  
+  // GET /notifications/stats/overview - Get notification statistics
   getStats: () => api.get<ApiResponse<NotificationStats>>('/notifications/stats/overview'),
+  
+  // POST /notifications/preferences - Create notification preferences
   createPreferences: (data: NotificationPreferences) => api.post<ApiResponse<NotificationPreferences>>('/notifications/preferences', data),
+  
+  // GET /notifications/preferences - Get notification preferences
   getPreferences: () => api.get<ApiResponse<NotificationPreferences>>('/notifications/preferences'),
+  
+  // PATCH /notifications/preferences - Update notification preferences
   updatePreferences: (data: Partial<NotificationPreferences>) => api.patch<ApiResponse<NotificationPreferences>>('/notifications/preferences', data),
 }
 
 // Settings API
 export const settingsAPI = {
-  getAll: () => api.get<ApiResponse<UserSettings>>('/settings/'),
+  getAll: () => api.get<ApiResponse<UserSettings & { generalSettings?: GeneralSettings }>>('/settings/'),
   createPin: (data: { pin: string; confirmPin: string }) => api.post<ApiResponse<any>>('/settings/pin/create', data),
   changePin: (data: { oldPin: string; newPin: string; confirmNewPin: string }) => api.patch<ApiResponse<any>>('/settings/pin/change', data),
   verifyPin: (data: { pin: string }) => api.post<ApiResponse<any>>('/settings/pin/verify', data),
-  updateNotificationSettings: (data: Partial<NotificationPreferences>) => api.patch<ApiResponse<NotificationPreferences>>('/settings/notification', data),
-  updateProfileSettings: (data: Partial<UserSettings>) => api.patch<ApiResponse<UserSettings>>('/settings/profile', data),
+  resendPinVerification: (data: { pinType: 'create' | 'change' | 'reset' }) =>
+    api.post<ApiResponse<any>>('/settings/pin/resend-verification', data),
+  updateNotificationSettings: (data: Partial<NotificationPreferences>) =>
+    api.patch<ApiResponse<NotificationPreferences>>('/settings/notification', data),
+  updateProfileSettings: (data: Partial<UserSettings>) =>
+    api.patch<ApiResponse<UserSettings>>('/settings/profile', data),
+  updateGeneralSettings: (data: Partial<GeneralSettings>) =>
+    api.patch<ApiResponse<GeneralSettings>>('/settings/general', data),
 }
 
 // Withdrawal/Bank Management API
@@ -1105,9 +1207,27 @@ export const enhancedEarningsAPI = {
 
 // Payments API
 export const paymentsAPI = {
+  // GET /payments/ - Get all accounts
   getAll: () => api.get<ApiResponse<any[]>>('/payments/'),
+  
+  // GET /payments/stats - Get accounts stats
+  getStats: () => api.get<ApiResponse<any>>('/payments/stats'),
+  
+  // GET /payments/my-payments - Get my payments (non vendor and admin)
+  getMyPayments: () => api.get<ApiResponse<any[]>>('/payments/my-payments'),
+  
+  // GET /payments/:id - Get by id
+  getById: (id: string) => api.get<ApiResponse<any>>(`/payments/${id}`),
+  
+  // PATCH /payments/:id - Update by id
+  update: (id: string, data: any) => api.patch<ApiResponse<any>>(`/payments/${id}`, data),
+  
+  // DELETE /payments/:id - Delete by id
   deleteById: (id: string) => api.delete<ApiResponse<any>>(`/payments/${id}`),
-  createAccount: (data: any) => api.post<ApiResponse<any>>('/payments/', data),
+  
+  // POST /payments/ - Create account type (non vendor and admin)
+  createAccount: (data: { accountName: string; accountNumber: string; bankName: string; paymentMethod: string }) => 
+    api.post<ApiResponse<any>>('/payments/', data),
 }
 
 // Travel API (placeholder - endpoints not fully documented yet)

@@ -1,7 +1,52 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { serviceAPI } from '@/lib/api'
-import { ServiceOffering, CreateServiceOfferingRequest, UpdateServiceOfferingRequest } from '@/types/api'
+import {
+  ServiceOffering,
+  CreateServiceOfferingRequest,
+  UpdateServiceOfferingRequest,
+} from '@/types/api'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { ServiceOfferingPayloadSchema } from '@/lib/validation'
+import { reportNetworkFailure, logError } from '@/lib/logger'
+
+type ExtendedUpdateServiceRequest = UpdateServiceOfferingRequest & {
+  serviceOfferings?: CreateServiceOfferingRequest['serviceOfferings']
+  isActive?: boolean
+}
+
+const appendServiceOfferingsToFormData = (
+  formData: FormData,
+  offerings?: CreateServiceOfferingRequest['serviceOfferings']
+) => {
+  if (!offerings || offerings.length === 0) return
+
+  offerings.forEach((offering, index) => {
+    if (offering.categoryIds) {
+      offering.categoryIds.forEach((categoryId, catIndex) => {
+        formData.append(`serviceOfferings[${index}][categoryIds][${catIndex}]`, categoryId)
+      })
+    }
+    if (offering.description) {
+      formData.append(`serviceOfferings[${index}][description]`, offering.description)
+    }
+    if (offering.serviceName) {
+      formData.append(`serviceOfferings[${index}][serviceName]`, offering.serviceName)
+    }
+    if (offering.pricingTitle) {
+      formData.append(`serviceOfferings[${index}][pricingTitle]`, offering.pricingTitle)
+    }
+    if (typeof offering.price === 'number') {
+      formData.append(`serviceOfferings[${index}][price]`, offering.price.toString())
+    }
+  })
+}
+
+const appendMediaToFormData = (formData: FormData, media?: File[]) => {
+  if (!media || media.length === 0) return
+  media.forEach(file => {
+    formData.append('mediaUrl', file)
+  })
+}
 
 export const useServiceOfferings = () => {
   const { user } = useAuthContext()
@@ -10,7 +55,7 @@ export const useServiceOfferings = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchMyServices = async () => {
+  const fetchMyServices = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -23,9 +68,9 @@ export const useServiceOfferings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchAllServices = async (params?: any) => {
+  const fetchAllServices = useCallback(async (params?: any) => {
     try {
       setLoading(true)
       setError(null)
@@ -38,9 +83,9 @@ export const useServiceOfferings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchUserServices = async () => {
+  const fetchUserServices = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -53,9 +98,9 @@ export const useServiceOfferings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchServiceById = async (id: string) => {
+  const fetchServiceById = useCallback(async (id: string) => {
     try {
       setLoading(true)
       setError(null)
@@ -68,126 +113,112 @@ export const useServiceOfferings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const createService = async (data: CreateServiceOfferingRequest) => {
+  const createService = useCallback(async (data: CreateServiceOfferingRequest) => {
     try {
       setLoading(true)
       setError(null)
+      const parsed = ServiceOfferingPayloadSchema.parse(data)
       const formData = new FormData()
-      
-      // Handle service offerings array
-      data.serviceOfferings.forEach((offering, index) => {
-        if (offering.categoryIds) {
-          offering.categoryIds.forEach((categoryId, catIndex) => {
-            formData.append(`serviceOfferings[${index}][categoryIds][${catIndex}]`, categoryId)
-          })
-        }
-        if (offering.description) {
-          formData.append(`serviceOfferings[${index}][description]`, offering.description)
-        }
-        if (offering.serviceName) {
-          formData.append(`serviceOfferings[${index}][serviceName]`, offering.serviceName)
-        }
-        if (offering.pricingTitle) {
-          formData.append(`serviceOfferings[${index}][pricingTitle]`, offering.pricingTitle)
-        }
-        if (offering.price) {
-          formData.append(`serviceOfferings[${index}][price]`, offering.price.toString())
-        }
-      })
-
-      // Handle media files
-      if (data.mediaUrl) {
-        data.mediaUrl.forEach((file) => {
-          formData.append('mediaUrl', file)
-        })
-      }
+      appendServiceOfferingsToFormData(formData, parsed.serviceOfferings)
+      appendMediaToFormData(formData, parsed.mediaUrl as File[] | undefined)
 
       const response = await serviceAPI.create(formData)
-      setServices(prev => [...prev, response.data.data])
+      const created = response.data.data
+      setServices(prev => (Array.isArray(created) ? [...prev, ...created] : [...prev, created]))
       return response.data
     } catch (err: any) {
+      reportNetworkFailure({ operation: 'service.create', error: err })
+      logError('Failed to create service offering', { error: err })
       setError(err.response?.data?.message || 'Failed to create service')
       throw err
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  type ExtendedUpdateServiceRequest = UpdateServiceOfferingRequest & {
-    serviceOfferings?: CreateServiceOfferingRequest['serviceOfferings']
-  }
+  const updateService = useCallback(
+    async (id: string, data: ExtendedUpdateServiceRequest) => {
+      try {
+        setLoading(true)
+        setError(null)
+        const formData = new FormData()
+        const fallbackOffering =
+          data.serviceOfferings ||
+          (data.serviceName && typeof data.price === 'number'
+            ? [
+                {
+                  serviceName: data.serviceName,
+                  description: data.description || '',
+                  categoryIds: data.categoryIds || [],
+                  pricingTitle: data.pricingTitle || '',
+                  price: data.price,
+                },
+              ]
+            : undefined)
 
-  const updateService = async (id: string, data: ExtendedUpdateServiceRequest) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const formData = new FormData()
-      
-      // Handle service offerings array
-      if (data.serviceOfferings) {
-        data.serviceOfferings.forEach((offering, index) => {
-          if (offering.categoryIds) {
-            offering.categoryIds.forEach((categoryId, catIndex) => {
-              formData.append(`serviceOfferings[${index}][categoryIds][${catIndex}]`, categoryId)
-            })
-          }
-          if (offering.description) {
-            formData.append(`serviceOfferings[${index}][description]`, offering.description)
-          }
-          if (offering.serviceName) {
-            formData.append(`serviceOfferings[${index}][serviceName]`, offering.serviceName)
-          }
-          if (offering.pricingTitle) {
-            formData.append(`serviceOfferings[${index}][pricingTitle]`, offering.pricingTitle)
-          }
-          if (offering.price) {
-            formData.append(`serviceOfferings[${index}][price]`, offering.price.toString())
-          }
+        if (!fallbackOffering) {
+          throw new Error('At least one service offering must be provided')
+        }
+
+        const validated = ServiceOfferingPayloadSchema.parse({
+          serviceOfferings: fallbackOffering,
+          mediaUrl: data.mediaUrl,
         })
-      }
 
-      // Handle media files
-      if (data.mediaUrl) {
-        data.mediaUrl.forEach((file) => {
-          formData.append('mediaUrl', file)
-        })
-      }
+        appendServiceOfferingsToFormData(formData, validated.serviceOfferings)
+        appendMediaToFormData(formData, validated.mediaUrl as File[] | undefined)
 
-      const response = await serviceAPI.update(id, formData)
-      setServices(prev => 
-        prev.map(service => 
-          service.id === id ? response.data.data : service
+        if (typeof data.isActive === 'boolean') {
+          formData.append('isActive', data.isActive.toString())
+        }
+
+        const response = await serviceAPI.update(id, formData)
+        setServices(prev =>
+          prev.map(service => (service.id === id ? response.data.data : service))
         )
-      )
-      if (service?.id === id) {
-        setService(response.data.data)
+        if (service?.id === id) {
+          setService(response.data.data)
+        }
+        return response.data
+      } catch (err: any) {
+        reportNetworkFailure({ operation: 'service.update', error: err })
+        logError('Failed to update service offering', { error: err, id })
+        setError(err.response?.data?.message || 'Failed to update service')
+        throw err
+      } finally {
+        setLoading(false)
       }
-      return response.data
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update service')
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    [service]
+  )
 
-  const removeMediaFromService = async (id: string, mediaUrl: string) => {
+  const removeMediaFromService = useCallback(async (id: string, mediaUrl: string) => {
     try {
       setLoading(true)
       setError(null)
       await serviceAPI.removeMedia(id, mediaUrl)
-      await fetchMyServices() // Refresh the list
+      setServices(prev =>
+        prev.map(service =>
+          service.id === id
+            ? {
+                ...service,
+                mediaUrl: service.mediaUrl?.filter(url => url !== mediaUrl) || [],
+              }
+            : service
+        )
+      )
     } catch (err: any) {
+      reportNetworkFailure({ operation: 'service.removeMedia', error: err })
       setError(err.response?.data?.message || 'Failed to remove media from service')
       throw err
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const deleteService = async (id: string) => {
+  const deleteService = useCallback(async (id: string) => {
     try {
       setLoading(true)
       setError(null)
@@ -202,15 +233,16 @@ export const useServiceOfferings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [service])
 
   useEffect(() => {
-    if (user?.accountType === 'vendor') {
+    if (!user) return
+    if (user.accountType === 'vendor') {
       fetchMyServices()
     } else {
       fetchAllServices()
     }
-  }, [user])
+  }, [user, fetchAllServices, fetchMyServices])
 
   return {
     services,
@@ -225,5 +257,7 @@ export const useServiceOfferings = () => {
     updateService,
     removeMediaFromService,
     deleteService,
+    setServices,
+    setError,
   }
 }

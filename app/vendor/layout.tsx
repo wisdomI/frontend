@@ -6,6 +6,7 @@ import DashboardHeader from '@/components/vendors/DashboardHeader'
 import Sidebar from '@/components/vendors/VendorSidebar'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useProfileCompletion } from '@/hooks/useProfileCompletion'
+import OfflineBanner from '@/components/common/OfflineBanner'
 
 export default function VendorLayout({
   children,
@@ -71,6 +72,7 @@ export default function VendorLayout({
     }
     
     // Check if profile setup is required
+    // Check if profile setup is required
     console.log('Vendor layout - Profile status:', profileStatus)
     console.log('Vendor layout - Is completed:', profileStatus.isCompleted)
     console.log('Vendor layout - Current pathname:', pathname)
@@ -128,6 +130,7 @@ export default function VendorLayout({
         
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <OfflineBanner />
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>

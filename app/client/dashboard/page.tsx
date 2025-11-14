@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { FiEye, FiEdit2, FiTrash2, FiChevronRight, FiChevronLeft, FiX } from 'react-icons/fi'
 import EditServiceRequestModal from '@/components/ui/modals/EditServiceRequestModal'
@@ -10,7 +10,9 @@ import { useVendorServiceRequests } from '@/hooks/useVendorServiceRequests'
 import { useCategories } from '@/hooks/useCategories'
 import { useApi } from '@/hooks/useApi'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { serviceRequestAPI } from '@/lib/api'
+import { serviceRequestAPI, notificationAPI } from '@/lib/api'
+import { useNotifications } from '@/hooks/useNotifications'
+import { toast } from 'react-hot-toast'
 
 export default function ClientDashboardPage() {
   const { user } = useAuthContext()
@@ -64,6 +66,41 @@ export default function ClientDashboardPage() {
       error: vendorServiceRequestsError
     })
   }, [vendorServiceRequestsData, vendorServiceRequestsLoading, vendorServiceRequestsError])
+
+  // Poll for new bid notifications using the hook
+  const { notifications } = useNotifications()
+  const lastNotificationCheckRef = useRef<number>(Date.now())
+  
+  useEffect(() => {
+    if (!user?.id || notifications.length === 0) return
+
+    // Check for new bid notifications created since last check
+    const newBidNotifications = notifications.filter((notif) => {
+      const createdAt = new Date(notif.createdAt).getTime()
+      return (
+        notif.type === 'new_bid' &&
+        createdAt > lastNotificationCheckRef.current &&
+        !notif.isRead
+      )
+    })
+
+    // Show toast for each new bid notification
+    newBidNotifications.forEach((notif) => {
+      const serviceRequestTitle = (notif.data as any)?.serviceRequestTitle || notif.title || 'your service request'
+      toast.success(
+        `🎉 New bid received on "${serviceRequestTitle}"!`,
+        {
+          duration: 5000,
+          icon: '💰',
+        }
+      )
+    })
+
+    // Update last check time
+    if (notifications.length > 0) {
+      lastNotificationCheckRef.current = Date.now()
+    }
+  }, [notifications, user?.id])
   
   // Function to map category IDs to category names
   const getCategoryNames = (categoryIds: string[] | string): string[] => {
@@ -132,27 +169,33 @@ export default function ClientDashboardPage() {
   }
 
   const handleEditSave = async (updatedRequest: any) => {
+    if (!selectedRequest) return
+
+    const payload = {
+      eventTitle: updatedRequest.title || selectedRequest.title || selectedRequest.eventTitle,
+      eventType: updatedRequest.eventType || selectedRequest.eventType,
+      eventStartDate: selectedRequest.eventDate || selectedRequest.eventStartDate,
+      eventEndDate: selectedRequest.eventDate || selectedRequest.eventEndDate,
+      eventLocation: selectedRequest.eventLocation,
+      eventCity: selectedRequest.eventLocation,
+      servicesNeeded: updatedRequest.servicesNeeded || selectedRequest.servicesNeeded || [],
+      numberOfGuests: updatedRequest.numberOfGuests || selectedRequest.numberOfGuests,
+      budgetRange: updatedRequest.budget || selectedRequest.budget,
+      additionalInformation: updatedRequest.additionalInfo || selectedRequest.additionalInfo || '',
+      needsEventPlanner: true,
+      needsAISuggestions: false,
+      images: [],
+    }
+
     try {
-      // Call API to update service request
-      const response = await fetch(`/api/v1/service-requests/${updatedRequest.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(updatedRequest)
-      })
-      
-      if (response.ok) {
-        // Refetch data to get updated service requests
-        refetchServiceRequests()
-        setEditModalOpen(false)
-        setSelectedRequest(null)
-      } else {
-        console.error('Failed to update service request')
-      }
+      await serviceRequestAPI.update(selectedRequest.id, payload)
+      await refetchServiceRequests()
+      setEditModalOpen(false)
+      setSelectedRequest(null)
+      toast.success('Service request updated')
     } catch (error) {
       console.error('Error updating service request:', error)
+      toast.error('Failed to update service request')
     }
   }
 

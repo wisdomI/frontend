@@ -11,6 +11,14 @@ interface ProfileCompletionStatus {
 }
 
 const PROFILE_COMPLETION_KEY = 'vendor-profile-completion'
+const PROFILE_COMPLETION_CACHE_KEY = 'vendor-profile-completion-cache'
+const PROFILE_COMPLETION_CACHE_TTL = 1000 * 60 * 5 // 5 minutes
+
+interface CachedProfileStatus {
+  userId: string
+  timestamp: number
+  status: ProfileCompletionStatus
+}
 
 export const useProfileCompletion = () => {
   const { user } = useAuthContext()
@@ -22,12 +30,47 @@ export const useProfileCompletion = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const persistStatusToCache = (status: ProfileCompletionStatus) => {
+    if (typeof window === 'undefined' || !user?.id) return
+    const payload: CachedProfileStatus = {
+      userId: user.id,
+      timestamp: Date.now(),
+      status,
+    }
+    try {
+      sessionStorage.setItem(PROFILE_COMPLETION_CACHE_KEY, JSON.stringify(payload))
+    } catch {
+      // Ignore storage errors (e.g., quota exceeded)
+    }
+  }
+
   // Load profile completion status from API
   useEffect(() => {
     const loadProfileStatus = async () => {
       if (!user?.id) {
         return
       }
+
+       let cachedStatus: CachedProfileStatus | null = null
+       if (typeof window !== 'undefined') {
+         const stored = sessionStorage.getItem(PROFILE_COMPLETION_CACHE_KEY)
+         if (stored) {
+           try {
+             const parsed = JSON.parse(stored) as CachedProfileStatus
+             if (parsed.userId === user.id) {
+               cachedStatus = parsed
+               setProfileStatus(parsed.status)
+               if (Date.now() - parsed.timestamp < PROFILE_COMPLETION_CACHE_TTL) {
+                 setLoading(false)
+                 setError(null)
+                 return
+               }
+             }
+           } catch (parseError) {
+             sessionStorage.removeItem(PROFILE_COMPLETION_CACHE_KEY)
+           }
+         }
+       }
 
       try {
         setLoading(true)
@@ -65,6 +108,7 @@ export const useProfileCompletion = () => {
           }
           
           setProfileStatus(apiStatus)
+          persistStatusToCache(apiStatus)
         }
       } catch (err: any) {
         // Silently handle errors - backend will be fixed to allow vendor access
@@ -72,19 +116,23 @@ export const useProfileCompletion = () => {
           // 403: Profile endpoint doesn't allow vendor access yet
           setError(null)
           // Use default status until backend is fixed
-          setProfileStatus({
+          const fallbackStatus = {
             isCompleted: false,
             completedSteps: [],
             completionPercentage: 0
-          })
+          }
+          setProfileStatus(fallbackStatus)
+          persistStatusToCache(fallbackStatus)
         } else if (err?.response?.status === 404) {
           // 404: Profile doesn't exist yet (new user)
           setError(null)
-          setProfileStatus({
+          const fallbackStatus = {
             isCompleted: false,
             completedSteps: [],
             completionPercentage: 0
-          })
+          }
+          setProfileStatus(fallbackStatus)
+          persistStatusToCache(fallbackStatus)
         } else {
           setError('Failed to load profile status')
         }
@@ -110,6 +158,11 @@ export const useProfileCompletion = () => {
       completedSteps: steps,
       completionPercentage: percentage
     })
+    persistStatusToCache({
+      isCompleted,
+      completedSteps: steps,
+      completionPercentage: percentage
+    })
   }
 
   const markProfileComplete = () => {
@@ -121,11 +174,13 @@ export const useProfileCompletion = () => {
   }
 
   const resetProfileCompletion = () => {
-    setProfileStatus({
+    const status = {
       isCompleted: false,
       completedSteps: [],
       completionPercentage: 0
-    })
+    }
+    setProfileStatus(status)
+    persistStatusToCache(status)
   }
 
   return {
