@@ -55,18 +55,52 @@ export default function SignUpFlow({ onClose }: { onClose: () => void }) {
       
       // Call the registration API
       const response = await authAPI.register(registrationPayload)
+      
+      // Enhanced logging for debugging OTP issues
       console.log('Registration response:', response)
+      console.log('Registration response data:', response?.data)
+      console.log('Registration response message:', response?.data?.message)
+      console.log('Full response structure:', JSON.stringify(response?.data, null, 2))
       
       // Store registration data for verification
       setRegistrationData(registrationPayload)
       setContact(formData.email)
       setType('email')
       
-      // FIXED: Provide clear instruction to check email
-      addNotification({
-        type: 'success',
-        message: 'Registration successful! A verification code has been sent to your email. Please check your inbox (and spam folder).'
-      })
+      // Check response for OTP-related status
+      const responseMessage = (response?.data?.message || '').toLowerCase()
+      
+      // Check for explicit OTP sending failure indicators
+      const hasOtpError = responseMessage.includes('otp') && 
+                          (responseMessage.includes('failed') || 
+                           responseMessage.includes('error') || 
+                           responseMessage.includes('not sent') ||
+                           responseMessage.includes('unable to send'))
+      
+      // If there's an explicit OTP error, try to resend automatically
+      if (hasOtpError) {
+        console.warn('OTP sending failed during registration. Attempting to resend...')
+        try {
+          await authAPI.resendVerificationCode({ email: registrationPayload.email })
+          addNotification({
+            type: 'success',
+            message: 'Registration successful! Verification code has been resent to your email. Please check your inbox (and spam folder).'
+          })
+        } catch (resendError: any) {
+          console.error('Failed to resend verification code:', resendError)
+          const resendErrorMessage = resendError.response?.data?.message || resendError.message || 'Unknown error'
+          addNotification({
+            type: 'warning',
+            message: `Registration successful, but verification code could not be sent. Error: ${resendErrorMessage}. Please use the "Resend Code" button below.`
+          })
+        }
+      } else {
+        // Normal success case - assume OTP was sent by backend
+        addNotification({
+          type: 'success',
+          message: 'Registration successful! A verification code has been sent to your email. Please check your inbox (and spam folder).'
+        })
+      }
       
       setStep('choice')
     } catch (error: any) {
