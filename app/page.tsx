@@ -11,7 +11,7 @@ export default function HomePage() {
     <>
       <HeroBanner/>
       <div className="pt-3 sm:pt-4 lg:pt-5 pb-4">
-        <div className="space-y-4 sm:space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           <WhyChooseEventHub/>
           <RecentlyViewed/>
           <PopularServices/>

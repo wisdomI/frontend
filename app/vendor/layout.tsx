@@ -7,6 +7,7 @@ import Sidebar from '@/components/vendors/VendorSidebar'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useProfileCompletion } from '@/hooks/useProfileCompletion'
 import OfflineBanner from '@/components/common/OfflineBanner'
+import SecurityReminderBanner from '@/components/ui/SecurityReminderBanner'
 
 export default function VendorLayout({
   children,
@@ -132,6 +133,7 @@ export default function VendorLayout({
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <OfflineBanner />
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+          <SecurityReminderBanner />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>

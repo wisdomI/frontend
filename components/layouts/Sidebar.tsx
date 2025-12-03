@@ -598,7 +598,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                 onClick={toggleSidebar}
                 className="hidden md:inline-flex mr-3 bg-[#0B2E6F] text-white p-2 rounded-lg shadow-sm hover:shadow-md transition"
               >
-                <Bars3Icon className="h-5 w-5" />
+                <Bars3Icon className="h-7 w-7" />
               </button>
               
               {/* Center - Category Title */}

@@ -7,6 +7,7 @@ import ClientHeader from '@/components/client/ClientHeader'
 import ClientSidebar from '@/components/client/ClientSidebar'
 import Footer from '@/components/ui/Footer'
 import OfflineBanner from '@/components/common/OfflineBanner'
+import SecurityReminderBanner from '@/components/ui/SecurityReminderBanner'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -79,6 +80,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <div className="w-full">
           <ClientHeader onMenuClick={() => setSidebarOpen(true)} />
         </div>
+        
+        <SecurityReminderBanner />
         
         {/* Main content area with sidebar */}
         <div className="flex flex-1 relative">

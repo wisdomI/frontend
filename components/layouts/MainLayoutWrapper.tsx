@@ -9,6 +9,7 @@ import NotificationContainer from '@/components/ui/NotificationContainer'
 import NotificationBreadcrumbWrapper from '@/components/ui/NotificationBreadcrumbWrapper'
 import Sidebar from '@/components/layouts/Sidebar'
 import OfflineBanner from '@/components/common/OfflineBanner'
+import SecurityReminderBanner from '@/components/ui/SecurityReminderBanner'
 
 export default function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -22,6 +23,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
     return (
       <Providers>
         <OfflineBanner />
+        <SecurityReminderBanner />
         {children}
       </Providers>
     )
@@ -32,6 +34,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
     return (
       <Providers>
         <OfflineBanner />
+        <SecurityReminderBanner />
         {children}
       </Providers>
     )
@@ -45,6 +48,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
         <div className="flex flex-col min-h-screen overflow-x-hidden">
           <Header />
           <NotificationBreadcrumbWrapper />
+          <SecurityReminderBanner />
           
           {/* Main content area with sidebar - unified container and gutters */}
           <div className="flex flex-1 bg-gray-50 mt-4 sm:mt-6">
@@ -71,6 +75,7 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
         <OfflineBanner />
         <Header />
         <NotificationBreadcrumbWrapper />
+        <SecurityReminderBanner />
         <div className="flex flex-1 px-8 bg-gray-50">
           {!isAuthPage && <Sidebar />}
           <main className={`flex-1 px-6 ${isAuthPage ? 'ml-0' : ''}`}>
