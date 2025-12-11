@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import primaryLogo from '../../public/images/primary-logo 3.png'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/contexts/AppContext'
 import SignUpFlow from './modals/SignUpFlow'
@@ -171,19 +172,20 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2">
         {/* Desktop Header */}
         <div className="hidden lg:flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/images/primary-logo 3.png" 
+                src={primaryLogo} 
                 alt="EventHub" 
                 width={120}
                 height={24}
                 className="h-6 w-30"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority
               />
             </Link>
           </div>

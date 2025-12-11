@@ -18,6 +18,7 @@ export default function Footer() {
     { name: 'Mediakit', href: '/mediakit' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Careers', href: '/careers' },
+    { name: 'Admin Portal', href: '/admin/auth/login' },
   ];
 
   const legalLinks = [

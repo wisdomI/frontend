@@ -5,7 +5,7 @@ import '@/lib/suppressDevLogs'
 import MainLayoutWrapper from '@/components/layouts/MainLayoutWrapper'
 
 const raleway = Raleway({ subsets: ['latin'] })
-const asul = Asul({ subsets: ['latin'], weight: '400' })
+const asul = Asul({ subsets: ['latin'], weight: ['400', '700'] })
 
 export default function RootLayout({
   children,
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={asul.className} style={{'--font-raleway': raleway.style.fontFamily, '--font-asul': asul.style.fontFamily} as React.CSSProperties}>
+      <body className={raleway.className} style={{'--font-raleway': raleway.style.fontFamily, '--font-asul': asul.style.fontFamily} as React.CSSProperties}>
         <MainLayoutWrapper>
           {children}
         </MainLayoutWrapper>

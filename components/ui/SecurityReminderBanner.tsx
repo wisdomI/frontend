@@ -1,14 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { FiX } from 'react-icons/fi'
 
 export default function SecurityReminderBanner() {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    // Check if the banner has been closed in this session
+    const hasBeenClosed = sessionStorage.getItem('securityBannerClosed')
+    if (!hasBeenClosed) {
+      setIsVisible(true)
+    }
+  }, [])
 
   const handleClose = () => {
     setIsVisible(false)
+    sessionStorage.setItem('securityBannerClosed', 'true')
   }
 
   if (!isVisible) {
@@ -16,7 +25,7 @@ export default function SecurityReminderBanner() {
   }
 
   return (
-    <div className="bg-blue-100 rounded-lg mx-4 mt-4 mb-4 px-4 py-3 shadow-sm relative">
+    <div className="bg-blue-100 rounded-lg mx-4 mt-4 mb-4 px-4 py-3 shadow-sm relative animate-fade-in">
       <div className="container mx-auto">
         <div className="flex items-center justify-center space-x-3 pr-6">
           {/* Shield Icon */}

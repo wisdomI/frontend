@@ -14,6 +14,9 @@ export function middleware(request: NextRequest) {
   // Client-only routes
   const clientRoutes = ['/client']
 
+  // Admin-only routes
+  const adminRoutes: string[] = []
+
   // Check if the current path is protected
   const isProtectedRoute = protectedRoutes.some(route => 
     pathname.startsWith(route)
@@ -60,6 +63,12 @@ export function middleware(request: NextRequest) {
       if (clientRoutes.some(route => pathname.startsWith(route)) && userRole !== 'client') {
         console.log('Middleware: Redirecting non-client from client route to vendor dashboard')
         return NextResponse.redirect(new URL('/vendor', request.url))
+      }
+
+      // Check admin routes
+      if (adminRoutes.some(route => pathname.startsWith(route)) && userRole !== 'admin') {
+        console.log('Middleware: Redirecting non-admin from admin route')
+        return NextResponse.redirect(new URL('/client/dashboard', request.url))
       }
     }
   }

@@ -553,7 +553,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
       <button
         onClick={toggleSidebar}
         className={`md:hidden fixed top-20 z-[100] bg-[#0B2E6F] text-white p-2 rounded-lg shadow-lg transition-all duration-300 ${
-          isMobileOpen ? 'left-[280px]' : 'left-4'
+          isMobileOpen ? 'left-80' : 'left-4'
         }`}
       >
         {isMobileOpen ? (
@@ -580,7 +580,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
         fixed md:static top-0 left-0 z-[95] md:z-auto
         h-screen md:h-full md:max-h-full md:overflow-y-auto
         md:ml-4 lg:ml-6
-        w-64 ${isDesktopCollapsed ? 'md:w-12 lg:w-12' : 'md:w-64 lg:w-64'}
+        w-80 ${isDesktopCollapsed ? 'md:w-12 lg:w-12' : 'md:w-65 lg:w-65'}
       `}>
         {isFilterModalOpen ? (
           <FilterModal 

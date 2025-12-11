@@ -28,7 +28,6 @@ import personOutline from '@iconify/icons-material-symbols/person-outline'
 import reviewsOutline from '@iconify/icons-material-symbols/reviews-outline'
 import settingsOutline from '@iconify/icons-material-symbols/settings-outline'
 import { IoHelpCircleOutline } from 'react-icons/io5'
-import logo from "../../public/images/primary-logo 3.png"
 import iconLogo from "../../public/images/icon-1.png"
 
 interface SidebarProps {

@@ -7,6 +7,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { profileAPI } from '@/lib/api'
 import { FiUser, FiLogOut, FiBell, FiMessageCircle } from 'react-icons/fi'
 import LogoutConfirmationModal from '@/components/ui/modals/LogoutConfirmationModal'
+import primaryLogo from '../../public/images/primary-logo 3.png'
 
 interface ClientHeaderProps {
   onMenuClick?: () => void
@@ -193,11 +194,12 @@ export default function ClientHeader({ onMenuClick }: ClientHeaderProps) {
           {/* Desktop: Full logo */}
           <div className="relative h-8 w-32 hidden lg:block">
             <Image 
-              src="/images/primary-logo 3.png" 
+              src={primaryLogo}
               alt="EventHub" 
               fill
               className="object-contain"
               sizes="128px"
+              priority
             />
           </div>
         </Link>

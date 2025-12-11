@@ -16,14 +16,30 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
   const isAuthPage = pathname?.startsWith('/auth')
   const isVendorDashboardPage = pathname?.startsWith('/vendor')
   const isClientPage = pathname?.startsWith('/client')
+  const isAdminPage = pathname?.startsWith('/admin')
+  const isSuperAdminPage = pathname?.startsWith('/super-admin')
+  const isVerificationAdminPage = pathname?.startsWith('/verification-admin')
+  const isEscrowAdminPage = pathname?.startsWith('/escrow-admin')
+  const isDisputeAdminPage = pathname?.startsWith('/dispute-admin')
+  const isMarketplaceAdminPage = pathname?.startsWith('/marketplace-admin')
+  const isCommunicationAdminPage = pathname?.startsWith('/communication-admin')
   const isHomePage = pathname === '/'
+
+  // For admin pages, render only the admin app (admin has its own layout)
+  if (isAdminPage || isSuperAdminPage || isVerificationAdminPage || isEscrowAdminPage || isDisputeAdminPage || isMarketplaceAdminPage || isCommunicationAdminPage) {
+    return (
+      <Providers>
+        <OfflineBanner />
+        {children}
+      </Providers>
+    )
+  }
 
   // For vendor dashboard pages, render only the children (they have their own layout)
   if (isVendorDashboardPage) {
     return (
       <Providers>
         <OfflineBanner />
-        <SecurityReminderBanner />
         {children}
       </Providers>
     )
@@ -34,7 +50,6 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
     return (
       <Providers>
         <OfflineBanner />
-        <SecurityReminderBanner />
         {children}
       </Providers>
     )
@@ -75,7 +90,6 @@ export default function MainLayoutWrapper({ children }: { children: React.ReactN
         <OfflineBanner />
         <Header />
         <NotificationBreadcrumbWrapper />
-        <SecurityReminderBanner />
         <div className="flex flex-1 px-8 bg-gray-50">
           {!isAuthPage && <Sidebar />}
           <main className={`flex-1 px-6 ${isAuthPage ? 'ml-0' : ''}`}>
