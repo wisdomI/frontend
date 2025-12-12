@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { bidAPI } from '@/lib/api'
-import { Bid, BidStats } from '@/types/api'
+import { Bid, BidStats, CreateBidRequest, UpdateBidRequest } from '@/types/api'
 
 interface UseBiddingOptions {
   viewType?: 'all' | 'my' | 'received'
@@ -48,11 +48,11 @@ export function useBidding(options: UseBiddingOptions = {}) {
     }
   }, [])
 
-  const createBid = async (formData: FormData) => {
+  const createBid = async (data: CreateBidRequest) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await bidAPI.create(formData)
+      const response = await bidAPI.create(data)
       await fetchBids() // Refresh the list
       return response.data.data
     } catch (err) {
@@ -64,7 +64,7 @@ export function useBidding(options: UseBiddingOptions = {}) {
     }
   }
 
-  const updateBid = async (id: string, data: Partial<Bid>) => {
+  const updateBid = async (id: string, data: UpdateBidRequest) => {
     try {
       setLoading(true)
       setError(null)

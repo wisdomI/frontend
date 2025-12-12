@@ -5,6 +5,7 @@ import { meetingAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { Meeting } from '@/types/api'
 import { FiPlus, FiEdit, FiTrash2, FiCalendar, FiClock, FiMapPin, FiVideo, FiPhone, FiUsers, FiLink } from 'react-icons/fi'
+import { ButtonLoader } from '@/components/ui/Loader'
 
 interface MeetingManagerProps {
   viewType?: 'all' | 'my' | 'attendances' | 'upcoming'
@@ -708,7 +709,9 @@ function CreateEditMeetingModal({ meeting, onClose, onSuccess, onCheckConflicts 
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Saving...' : (meeting ? 'Update' : 'Schedule')}
+                <ButtonLoader loading={loading} loadingText="Saving...">
+                  {meeting ? 'Update' : 'Schedule'}
+                </ButtonLoader>
               </button>
             </div>
           </form>

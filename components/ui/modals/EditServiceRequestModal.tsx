@@ -23,7 +23,7 @@ interface EditServiceRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
   serviceRequest: ServiceRequest | null;
-  onSave: (updatedRequest: ServiceRequest) => void;
+  onSave: (updatedRequest: ServiceRequest) => Promise<void> | void;
 }
 
 const EditServiceRequestModal: React.FC<EditServiceRequestModalProps> = ({ 
@@ -183,10 +183,6 @@ const EditServiceRequestModal: React.FC<EditServiceRequestModalProps> = ({
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Create updated service request
     const updatedRequest: ServiceRequest = {
       ...serviceRequest,
       title: formData.eventTitle,
@@ -197,9 +193,14 @@ const EditServiceRequestModal: React.FC<EditServiceRequestModalProps> = ({
       additionalInfo: formData.additionalInformation,
     };
     
-    onSave(updatedRequest);
-    setIsSubmitting(false);
-    onClose();
+    try {
+      await onSave(updatedRequest);
+      setIsSubmitting(false);
+      onClose();
+    } catch (error) {
+      console.error('Failed to save service request update:', error);
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen || !serviceRequest) return null;

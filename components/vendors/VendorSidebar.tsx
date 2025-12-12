@@ -3,18 +3,20 @@
 import { Icon } from '@iconify/react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { MessageOutlined } from '@ant-design/icons'
-import { 
-  FiGrid, 
-  FiClipboard, 
-  FiShoppingBag, 
-  FiCalendar, 
-  FiBarChart, 
+import {
+  FiGrid,
+  FiClipboard,
+  FiShoppingBag,
+  FiCalendar,
+  FiBarChart,
   FiUsers,
   FiSettings,
   FiHelpCircle,
-  FiList
+  FiList,
+  FiTag,
 } from 'react-icons/fi'
 import dashboardOutline from '@iconify/icons-material-symbols/dashboard-outline'
 import eventNoteOutline from '@iconify/icons-material-symbols/event-note-outline'
@@ -26,7 +28,6 @@ import personOutline from '@iconify/icons-material-symbols/person-outline'
 import reviewsOutline from '@iconify/icons-material-symbols/reviews-outline'
 import settingsOutline from '@iconify/icons-material-symbols/settings-outline'
 import { IoHelpCircleOutline } from 'react-icons/io5'
-import logo from "../../public/images/primary-logo 3.png"
 import iconLogo from "../../public/images/icon-1.png"
 
 interface SidebarProps {
@@ -35,8 +36,36 @@ interface SidebarProps {
   onToggle?: () => void
 }
 
+const VENDOR_ROUTES_TO_PREFETCH = [
+  '/vendor',
+  '/vendor/marketplace',
+  '/vendor/service-requests',
+  '/vendor/messages',
+  '/vendor/manage-bookings',
+  '/vendor/invoice-management',
+  '/vendor/schedule-meetings',
+  '/vendor/my-earnings',
+  '/vendor/performance-analytics',
+  '/vendor/teams-roles',
+  '/vendor/services',
+  '/vendor/categories',
+]
+
 const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
   const pathname = usePathname()
+  const router = useRouter()
+  
+  useEffect(() => {
+    VENDOR_ROUTES_TO_PREFETCH.forEach((path) => {
+      if (path !== pathname) {
+        try {
+          router.prefetch(path)
+        } catch (error) {
+          // ignore prefetch errors silently
+        }
+      }
+    })
+  }, [pathname, router])
   
   const menuItems = [
     {
@@ -56,6 +85,18 @@ const Sidebar = ({ onClose, isCollapsed = false, onToggle }: SidebarProps) => {
       icon: <FiClipboard className="w-6 h-6" />,
       path: '/vendor/service-requests',
       isActive: pathname === '/vendor/service-requests',
+    },
+    {
+      label: 'Services',
+      icon: <FiList className="w-6 h-6" />,
+      path: '/vendor/services',
+      isActive: pathname === '/vendor/services',
+    },
+    {
+      label: 'Categories',
+      icon: <FiTag className="w-6 h-6" />,
+      path: '/vendor/categories',
+      isActive: pathname === '/vendor/categories',
     },
     {
       label: 'Messages',

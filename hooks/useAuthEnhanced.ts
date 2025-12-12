@@ -157,14 +157,61 @@ export const useAuthEnhanced = () => {
     }
   }
 
-  const getMe = async () => {
+  const switchRole = async (role: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await authAPI.switchRole(role)
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to switch role')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const addVendorRole = async (vendorData: { 
+    businessName: string; 
+    businessAddress: string; 
+    businessEmail: string; 
+    businessPhone: string 
+  }) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await authAPI.addVendorRole(vendorData)
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to add vendor role')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getRoles = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await authAPI.getRoles()
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to get roles')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getCurrentUser = async () => {
     try {
       setLoading(true)
       setError(null)
       const response = await authAPI.me()
       return response.data
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch user info')
+      setError(err.response?.data?.message || 'Failed to get current user')
       throw err
     } finally {
       setLoading(false)
@@ -199,6 +246,42 @@ export const useAuthEnhanced = () => {
     }
   }
 
+  const getAllUsers = async (params?: any) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await authAPI.getAll(params)
+      return response.data
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to get users')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getUserById = async (id: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await authAPI.getById(id)
+      return response.data
+    } catch (err: any) {
+      // If it's a 403 error, it means the user doesn't have permission to view this user's data
+      // This is expected for some users, so we'll gracefully handle it
+      if (err.response?.status === 403) {
+        console.log('🔍 User API requires special permissions - skipping user fetch')
+        setError(null) // Don't show error for expected permission requirements
+        return null
+      } else {
+        setError(err.response?.data?.message || 'Failed to get user')
+        throw err
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     loading,
     error,
@@ -212,8 +295,13 @@ export const useAuthEnhanced = () => {
     refreshToken,
     revokeRefreshToken,
     logout,
-    getMe,
+    switchRole,
+    addVendorRole,
+    getRoles,
+    getCurrentUser,
     updateUser,
     deleteUser,
+    getAllUsers,
+    getUserById,
   }
 }

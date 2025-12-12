@@ -1,79 +1,71 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 import { BsHeart } from 'react-icons/bs'
 import { HiShare } from 'react-icons/hi2'
 import { HiOutlineLocationMarker } from 'react-icons/hi'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
-import vendorImage from '../../public/images/vendor-img1.jpg'
-import vendorImage2 from '../../public/images/vendor-img2.jpg'
+import { useServiceOfferings } from '@/hooks/useLandingPageData'
+import { ServiceOffering } from '@/types/api'
+import { useFilterContext } from '@/contexts/FilterContext'
 
-const services = [
-  {
-    id: "bridal-makeup",
-    title: "Bridal Make Up Artists",
-    vendorName: "Glamour Studios",
-    rating: 5,
-    reviews: 128,
-    location: "Lagos, Nigeria",
-    verified: true,
-    status: "Popular"
-  },
-  {
-    id: "wedding-decoration",
-    title: "Wedding Hall Decoration",
-    vendorName: "Elegant Events",
-    rating: 4,
-    reviews: 89,
-    location: "Abuja, Nigeria",
-    verified: true,
-    status: "Trending"
-  },
-  {
-    id: "event-cakes",
-    title: "Event Cakes",
-    vendorName: "Sweet Delights",
-    rating: 5,
-    reviews: 156,
-    location: "Port Harcourt, Nigeria",
-    verified: true,
-    status: "Top Rated"
-  },
-  {
-    id: "photography",
-    title: "Professional Photography",
-    vendorName: "Capture Moments",
-    rating: 4,
-    reviews: 203,
-    location: "Kano, Nigeria",
-    verified: true,
-    status: "Popular"
-  },
-  {
-    id: "catering",
-    title: "Event Catering",
-    vendorName: "Gourmet Catering",
-    rating: 5,
-    reviews: 167,
-    location: "Ibadan, Nigeria",
-    verified: true,
-    status: "Best Valued"
-  },
-  {
-    id: "sound-lighting",
-    title: "Sound & Lighting",
-    vendorName: "Audio Visual Pro",
-    rating: 4,
-    reviews: 94,
-    location: "Enugu, Nigeria",
-    verified: true,
-    status: "Popular"
-  }
-]
+// Using string paths for Next.js Image component
+const vendorImage = '/images/vendor-img1.jpg'
+const vendorImage2 = '/images/vendor-img2.jpg'
+
+// This array is no longer needed - using API data instead
 
 export default function ServicesPage() {
+  const router = useRouter();
+  const { selectedCategory, selectedSubCategory } = useFilterContext();
+  
+  // Fetch services from API
+  const { services, loading, error } = useServiceOfferings({ limit: 20 });
+
+  // Transform API data to match component expectations
+  const transformedServices = useMemo(() => {
+    return services.map((service: ServiceOffering) => ({
+      id: service.id,
+      title: service.serviceName,
+      vendorName: 'Vendor Name', // This would need to be fetched from user data
+      rating: 4, // Default rating since it's not in the API
+      reviews: (service as any)?.reviewCount || (Math.abs(service.id?.charCodeAt(0) || 0) % 200) + 10, // Use API data or stable hash-based number
+      location: 'Location TBD', // This would need to be fetched from user profile
+      verified: true, // Assume verified for demo
+      status: service.isActive ? 'Active' : 'Inactive',
+      categoryIds: service.categoryIds || [], // Keep original category IDs
+      description: service.description,
+      price: service.price,
+      pricingTitle: service.pricingTitle,
+      mediaUrl: service.mediaUrl,
+      createdAt: service.createdAt,
+      userId: service.userId, // Add userId for routing
+      vendorId: service.userId // Use userId as vendorId for routing
+    }));
+  }, [services]);
+
+  // Filter services based on selected category and subcategory
+  const filteredServices = useMemo(() => {
+    if (!selectedCategory && !selectedSubCategory) {
+      return transformedServices;
+    }
+
+    return transformedServices.filter((service) => {
+      if (selectedSubCategory) {
+        // Check if any of the service's category IDs match the selected subcategory
+        return service.categoryIds.some((id: string) => id === selectedSubCategory);
+      }
+      if (selectedCategory) {
+        // Check if any of the service's category IDs match the selected category
+        return service.categoryIds.some((id: string) => id === selectedCategory);
+      }
+      return true;
+    });
+  }, [selectedCategory, selectedSubCategory, transformedServices]);
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <span key={index}>
@@ -91,13 +83,34 @@ export default function ServicesPage() {
       <h1 className="text-3xl font-bold mb-8 font-asul">All Services</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service) => (
-          <div key={service.id} className="bg-white shadow-md rounded-2xl hover:shadow-lg transition-shadow w-full max-w-sm mx-auto">
+        {filteredServices.map((service) => {
+          // Handle card click to navigate to service details page
+          const handleCardClick = () => {
+            const serviceId = service.id
+            if (serviceId) {
+              router.push(`/services/${serviceId}`)
+            }
+          }
+
+          return (
+            <div 
+              key={service.id} 
+              className="bg-white shadow-md rounded-2xl hover:shadow-lg transition-shadow w-full max-w-sm mx-auto cursor-pointer"
+              onClick={handleCardClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleCardClick()
+                }
+              }}
+            >
             {/* Image Section */}
             <div className="relative w-full">
               <div className="relative h-48 w-full">
                 <Image
-                  src={vendorImage}
+                  src={service.mediaUrl && service.mediaUrl.length > 0 ? service.mediaUrl[0] : vendorImage}
                   alt={service.title}
                   fill
                   className="object-cover rounded-t-2xl"
@@ -147,13 +160,22 @@ export default function ServicesPage() {
               <div className="flex justify-between items-center">
                 <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
                 <div className="flex items-center gap-2">
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                   </button>
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <BsHeart className="w-4 h-4" />
                   </button>
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <HiShare className="w-4 h-4" />
                   </button>
                 </div>
@@ -175,8 +197,9 @@ export default function ServicesPage() {
               </div>
 
             </div>
-          </div>
-        ))}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

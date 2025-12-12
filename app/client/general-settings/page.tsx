@@ -1,328 +1,471 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ClientPageHeader from '@/components/client/ClientPageHeader'
-import { FiChevronDown, FiX } from 'react-icons/fi'
-import { useApi } from '@/hooks/useApi'
+import { useSettings } from '@/hooks/useSettings'
+import { toast } from 'react-hot-toast'
 
-type TabKey = 'notification' | 'integrations'
+type TabKey = 'notification' | 'profile' | 'general'
+
+const timezoneOptions = ['Africa/Lagos', 'Africa/Johannesburg', 'Europe/London', 'UTC']
+const languageOptions = ['en', 'fr', 'es']
+const currencyOptions = ['NGN', 'USD', 'GBP', 'EUR']
 
 export default function GeneralSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('notification')
+  const {
+    notificationPreferences,
+    settings,
+    generalSettings,
+    updateNotificationSettings,
+    updateProfileSettings,
+    updateGeneralSettings,
+    loading,
+  } = useSettings()
 
-  // API hooks
-  const { data: settingsData, loading: settingsLoading, error: settingsError } = useApi(() => Promise.resolve({ 
-    data: {
-      notifications: {
-        vendorTask: true,
-        offerDecision: false,
-        newChat: false,
-        escrowConfirmed: true,
-        refundProcessed: false,
-        outstandingPayment: false,
-        channelInApp: true,
-        channelEmail: false,
-        channelSms: false,
-        platformFeatures: true,
-        platformNewsletter: false,
-      },
-      integrations: {
-        meetings: true,
-        siteVisits: true,
-        planning: true,
-        payments: true,
-        followUps: false,
-      },
-      syncFrequency: 'Every 15 minutes',
-      reminderTime: '1 Hour before'
-    }, 
-    message: 'success', 
-    success: true 
-  }))
-  const { data: saveResponse, loading: saveLoading, error: saveError, execute: saveSettings } = useApi(() => Promise.resolve({ data: {}, message: 'success', success: true }))
-
-  // Notification toggles
-  const [noti, setNoti] = useState({
-    vendorTask: true,
-    offerDecision: false,
-    newChat: false,
-    escrowConfirmed: true,
-    refundProcessed: false,
-    outstandingPayment: false,
-    channelInApp: true,
-    channelEmail: false,
-    channelSms: false,
-    platformFeatures: true,
-    platformNewsletter: false,
+  const [notificationState, setNotificationState] = useState(notificationPreferences)
+  const [profileState, setProfileState] = useState({
+    profileVisibility: settings?.profileVisibility ?? 'public',
+    showContactInfo: settings?.showContactInfo ?? true,
+    showPortfolio: settings?.showPortfolio ?? true,
+    showReviews: settings?.showReviews ?? true,
+    showAvailability: settings?.showAvailability ?? true,
   })
-
-  const toggle = (key: keyof typeof noti) => setNoti(prev => ({ ...prev, [key]: !prev[key] }))
-
-  // Integrations state
-  const [syncItems, setSyncItems] = useState({
-    meetings: true,
-    siteVisits: true,
-    planning: true,
-    payments: true,
-    followUps: false,
-  })
-  const toggleSync = (k: keyof typeof syncItems) => setSyncItems(p => ({ ...p, [k]: !p[k] }))
-
-  const [frequency, setFrequency] = useState('Every 15 minutes')
-  const [reminder, setReminder] = useState('1 Hour before')
-  const [openSelect, setOpenSelect] = useState<'freq' | 'rem' | null>(null)
-  const selectsRef = useRef<HTMLDivElement | null>(null)
-  const [showSuccess, setShowSuccess] = useState(false)
-
-  // Load settings from API
-  useEffect(() => {
-    if (settingsData) {
-      setNoti(prev => settingsData.notifications || prev)
-      setSyncItems(prev => settingsData.integrations || prev)
-      setFrequency(prev => settingsData.syncFrequency || prev)
-      setReminder(prev => settingsData.reminderTime || prev)
-    }
-  }, [settingsData])
-
-  const frequencyOptions = ['Every 15 minutes','Every 30 minutes','Every 60 minutes','Every 2 hours','Everyday']
-  const reminderOptions = ['15 minutes before','30 minutes before','1 Hour before','1 Day before']
+  const [generalState, setGeneralState] = useState(generalSettings)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (selectsRef.current && !selectsRef.current.contains(e.target as Node)) setOpenSelect(null)
-    }
-    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenSelect(null) }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onEsc)
-    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onEsc) }
-  }, [])
+    setNotificationState(notificationPreferences)
+  }, [notificationPreferences])
 
-  const saveIntegrations = async () => {
+  useEffect(() => {
+    if (settings) {
+      setProfileState({
+        profileVisibility: settings.profileVisibility,
+        showContactInfo: settings.showContactInfo,
+        showPortfolio: settings.showPortfolio,
+        showReviews: settings.showReviews,
+        showAvailability: settings.showAvailability,
+      })
+    }
+  }, [settings])
+
+  useEffect(() => {
+    setGeneralState(generalSettings)
+  }, [generalSettings])
+
+  const handleSaveNotifications = async () => {
     try {
-      const settingsPayload = {
-        notifications: noti,
-        integrations: syncItems,
-        syncFrequency: frequency,
-        reminderTime: reminder
-      }
-      
-      await saveSettings(settingsPayload)
-      setShowSuccess(true)
-    } catch (error) {
-      console.error('Error saving settings:', error)
+      setSaving(true)
+      await updateNotificationSettings(notificationState)
+      toast.success('Notification preferences updated')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to update notifications')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true)
+      await updateProfileSettings(profileState)
+      toast.success('Profile settings updated')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to update profile settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveGeneral = async () => {
+    try {
+      setSaving(true)
+      await updateGeneralSettings(generalState)
+      toast.success('General settings updated')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to update general settings')
+    } finally {
+      setSaving(false)
     }
   }
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
       <ClientPageHeader
-        breadcrumbs={[{ label: 'My Account' }, { label: 'General Settings', isActive: true }]}
-        title="General Settings"
+        breadcrumbs={[{ label: 'My Account' }, { label: 'Settings', isActive: true }]}
+        title="Settings"
       />
 
-      {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible">
         <div className="px-3 sm:px-4 lg:px-6 pt-3">
           <div className="inline-flex bg-[#0B2E6F] rounded-lg p-1">
             <button
               onClick={() => setActiveTab('notification')}
-              className={`px-4 py-2 text-sm font-semibold rounded-md ${activeTab==='notification' ? 'bg-white text-[#0B2E6F]' : 'text-white'}`}
+              className={`px-4 py-2 text-sm font-semibold rounded-md ${
+                activeTab === 'notification' ? 'bg-white text-[#0B2E6F]' : 'text-white'
+              }`}
             >
               Notification
             </button>
             <button
-              onClick={() => setActiveTab('integrations')}
-              className={`px-4 py-2 text-sm font-semibold rounded-md ${activeTab==='integrations' ? 'bg-white text-[#0B2E6F]' : 'text-white'}`}
+              onClick={() => setActiveTab('profile')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md ${
+                activeTab === 'profile' ? 'bg-white text-[#0B2E6F]' : 'text-white'
+              }`}
             >
-              Integrations
+              Profile
+            </button>
+            <button
+              onClick={() => setActiveTab('general')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md ${
+                activeTab === 'general' ? 'bg-white text-[#0B2E6F]' : 'text-white'
+              }`}
+            >
+              General
             </button>
           </div>
         </div>
 
         {activeTab === 'notification' && (
-          <div className="p-3 sm:p-4 lg:p-6">
-            <p className="text-sm text-gray-700 mb-4">Please select the types of notifications you would like to receive</p>
-            <div className="grid grid-cols-1 gap-4">
-              <section className="bg-gray-50 rounded-xl p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Project & Event Updates</h3>
-                <div className="space-y-3">
-                  <ToggleRow label="Vendor Planner added or updated a Task" checked={noti.vendorTask} onChange={() => toggle('vendorTask')} />
-                  <ToggleRow label="Vendor Accept/Decline Offer" checked={noti.offerDecision} onChange={() => toggle('offerDecision')} />
-                  <ToggleRow label="New Chat Message (Vendor/Planner)" checked={noti.newChat} onChange={() => toggle('newChat')} />
-                </div>
-              </section>
+          <div className="p-3 sm:p-4 lg:p-6 space-y-4">
+            <SettingsSection title="Project & Event Updates">
+              <ToggleRow
+                label="Job Alerts"
+                checked={notificationState.jobAlerts}
+                onChange={() =>
+                  setNotificationState(prev => ({ ...prev, jobAlerts: !prev.jobAlerts }))
+                }
+              />
+              <ToggleRow
+                label="New Job Matches"
+                checked={notificationState.newJobMatches}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    newJobMatches: !prev.newJobMatches,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Clients Posted a Job"
+                checked={notificationState.clientsPostedJob}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    clientsPostedJob: !prev.clientsPostedJob,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="New Chat Messages"
+                checked={notificationState.newChatMessage}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    newChatMessage: !prev.newChatMessage,
+                  }))
+                }
+              />
+            </SettingsSection>
 
-              <section className="bg-gray-50 rounded-xl p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Payments & Finance</h3>
-                <div className="space-y-3">
-                  <ToggleRow label="Escrow Deposit Confirmed" checked={noti.escrowConfirmed} onChange={() => toggle('escrowConfirmed')} />
-                  <ToggleRow label="Refund Processed" checked={noti.refundProcessed} onChange={() => toggle('refundProcessed')} />
-                  <ToggleRow label="Outstanding Payment Reminder" checked={noti.outstandingPayment} onChange={() => toggle('outstandingPayment')} />
-                </div>
-              </section>
+            <SettingsSection title="Payments & Finance">
+              <ToggleRow
+                label="Escrow Deposit Confirmed"
+                checked={notificationState.escrowDepositConfirmed}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    escrowDepositConfirmed: !prev.escrowDepositConfirmed,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Payment Released"
+                checked={notificationState.paymentReleased}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    paymentReleased: !prev.paymentReleased,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Refund / Cancellation Notices"
+                checked={notificationState.refundCancellationNotice}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    refundCancellationNotice: !prev.refundCancellationNotice,
+                  }))
+                }
+              />
+            </SettingsSection>
 
-              <section className="bg-gray-50 rounded-xl p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Communication Channels</h3>
-                <div className="space-y-3">
-                  <ToggleRow label="In‑app" checked={noti.channelInApp} onChange={() => toggle('channelInApp')} />
-                  <ToggleRow label="Email" checked={noti.channelEmail} onChange={() => toggle('channelEmail')} />
-                  <ToggleRow label="SMS" checked={noti.channelSms} onChange={() => toggle('channelSms')} />
-                </div>
-              </section>
+            <SettingsSection title="Communication Channels">
+              <ToggleRow
+                label="In-app"
+                checked={notificationState.inAppNotifications}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    inAppNotifications: !prev.inAppNotifications,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Email"
+                checked={notificationState.emailNotifications}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    emailNotifications: !prev.emailNotifications,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="SMS"
+                checked={notificationState.smsNotifications}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    smsNotifications: !prev.smsNotifications,
+                  }))
+                }
+              />
+            </SettingsSection>
 
-              <section className="bg-gray-50 rounded-xl p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Platform Update</h3>
-                <div className="space-y-3">
-                  <ToggleRow label="New Features/Discounts" checked={noti.platformFeatures} onChange={() => toggle('platformFeatures')} />
-                  <ToggleRow label="Newsletter/Blogs" checked={noti.platformNewsletter} onChange={() => toggle('platformNewsletter')} />
-                </div>
-              </section>
+            <SettingsSection title="Platform Updates">
+              <ToggleRow
+                label="Promotions & Discounts"
+                checked={notificationState.platformPromotions}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    platformPromotions: !prev.platformPromotions,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Verification Updates"
+                checked={notificationState.verificationUpdates}
+                onChange={() =>
+                  setNotificationState(prev => ({
+                    ...prev,
+                    verificationUpdates: !prev.verificationUpdates,
+                  }))
+                }
+              />
+            </SettingsSection>
+
+            <div className="pt-4">
+              <button
+                onClick={handleSaveNotifications}
+                disabled={saving || loading}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         )}
 
-        {activeTab === 'integrations' && (
-          <div className="p-3 sm:p-4 lg:p-6" ref={selectsRef}>
-            <section className="bg-gray-50 rounded-xl p-4 sm:p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-1">Calendar Sync</h3>
-              <p className="text-sm text-gray-600">Stay organized by syncing your event planning activities with your personal calendar.</p>
-              <div className="mt-4">
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-3V2h-2v2H10V2H8v2H5a2 2 0 00-2 2v13a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 15H5V9h14v10z"/></svg>
-                  Connect Google Calendar
-                </button>
-              </div>
+        {activeTab === 'profile' && (
+          <div className="p-3 sm:p-4 lg:p-6 space-y-4">
+            <SettingsSection title="Profile Visibility">
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Who can view your profile?
+              </label>
+              <select
+                value={profileState.profileVisibility}
+                onChange={e =>
+                  setProfileState(prev => ({
+                    ...prev,
+                    profileVisibility: e.target.value as typeof prev.profileVisibility,
+                  }))
+                }
+                className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+              >
+                <option value="public">Public</option>
+                <option value="contacts-only">Contacts only</option>
+                <option value="private">Private</option>
+              </select>
+            </SettingsSection>
 
-              <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SettingsSection title="Profile Details">
+              <ToggleRow
+                label="Show contact information"
+                checked={profileState.showContactInfo}
+                onChange={() =>
+                  setProfileState(prev => ({
+                    ...prev,
+                    showContactInfo: !prev.showContactInfo,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Show portfolio"
+                checked={profileState.showPortfolio}
+                onChange={() =>
+                  setProfileState(prev => ({
+                    ...prev,
+                    showPortfolio: !prev.showPortfolio,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Show reviews"
+                checked={profileState.showReviews}
+                onChange={() =>
+                  setProfileState(prev => ({
+                    ...prev,
+                    showReviews: !prev.showReviews,
+                  }))
+                }
+              />
+              <ToggleRow
+                label="Show availability"
+                checked={profileState.showAvailability}
+                onChange={() =>
+                  setProfileState(prev => ({
+                    ...prev,
+                    showAvailability: !prev.showAvailability,
+                  }))
+                }
+              />
+            </SettingsSection>
+
+            <div className="pt-4">
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving || loading}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'general' && (
+          <div className="p-3 sm:p-4 lg:p-6 space-y-4">
+            <SettingsSection title="General Preferences">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">What to sync:</h4>
-                  <div className="space-y-2">
-                    <CheckRow label="Vendor meetings & consultations" checked={syncItems.meetings} onChange={() => toggleSync('meetings')} />
-                    <CheckRow label="Site visits & venue tours" checked={syncItems.siteVisits} onChange={() => toggleSync('siteVisits')} />
-                    <CheckRow label="Planning deadlines & milestones" checked={syncItems.planning} onChange={() => toggleSync('planning')} />
-                    <CheckRow label="Payment due dates" checked={syncItems.payments} onChange={() => toggleSync('payments')} />
-                    <CheckRow label="Follow-up reminders" checked={syncItems.followUps} onChange={() => toggleSync('followUps')} />
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Timezone
+                  </label>
+                  <select
+                    value={generalState.timezone}
+                    onChange={e =>
+                      setGeneralState(prev => ({ ...prev, timezone: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                  >
+                    {timezoneOptions.map(tz => (
+                      <option key={tz} value={tz}>
+                        {tz}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <label className="block text-sm text-gray-700 mb-1">Sync Frequency</label>
-                      <button
-                        onClick={() => setOpenSelect(openSelect === 'freq' ? null : 'freq')}
-                        className="w-full text-left bg-white border border-gray-300 rounded-lg px-3 py-2 pr-9 text-sm"
-                        aria-expanded={openSelect==='freq'}
-                      >
-                        {frequency}
-                        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      </button>
-                      {openSelect==='freq' && (
-                        <div className="absolute left-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                          <ul className="py-1 text-sm">
-                            {frequencyOptions.map(opt => (
-                              <li key={opt}>
-                                <button
-                                  onClick={() => { setFrequency(opt); setOpenSelect(null) }}
-                                  className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${frequency===opt? 'bg-blue-50 font-semibold text-blue-900' : 'text-gray-800'}`}
-                                >
-                                  {opt}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Language
+                  </label>
+                  <select
+                    value={generalState.language}
+                    onChange={e =>
+                      setGeneralState(prev => ({ ...prev, language: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                  >
+                    {languageOptions.map(lang => (
+                      <option key={lang} value={lang}>
+                        {lang.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    <div className="relative">
-                      <label className="block text-sm text-gray-700 mb-1">Default reminder time:</label>
-                      <button
-                        onClick={() => setOpenSelect(openSelect === 'rem' ? null : 'rem')}
-                        className="w-full text-left bg-white border border-gray-300 rounded-lg px-3 py-2 pr-9 text-sm"
-                        aria-expanded={openSelect==='rem'}
-                      >
-                        {reminder}
-                        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      </button>
-                      {openSelect==='rem' && (
-                        <div className="absolute left-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-30">
-                          <ul className="py-1 text-sm">
-                            {reminderOptions.map(opt => (
-                              <li key={opt}>
-                                <button
-                                  onClick={() => { setReminder(opt); setOpenSelect(null) }}
-                                  className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${reminder===opt? 'bg-blue-50 font-semibold text-blue-900' : 'text-gray-800'}`}
-                                >
-                                  {opt}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Currency
+                  </label>
+                  <select
+                    value={generalState.currency}
+                    onChange={e =>
+                      setGeneralState(prev => ({ ...prev, currency: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                  >
+                    {currencyOptions.map(currency => (
+                      <option key={currency} value={currency}>
+                        {currency}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
+            </SettingsSection>
 
-              <div className="mt-6">
-                <button 
-                  onClick={saveIntegrations} 
-                  disabled={saveLoading}
-                  className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saveLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </section>
+            <div className="pt-4">
+              <button
+                onClick={handleSaveGeneral}
+                disabled={saving || loading}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Success Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowSuccess(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 sm:p-8">
-            <button className="absolute top-3 right-3 text-gray-500" onClick={() => setShowSuccess(false)}><FiX /></button>
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900">Calendar Synced Successfully</h3>
-              <p className="text-sm text-gray-600">Your preferences have been saved successfully!</p>
-              <div className="pt-2">
-                <button className="px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold" onClick={() => setShowSuccess(false)}>Done</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
-function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+function SettingsSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="bg-gray-50 rounded-xl p-4 sm:p-5 space-y-3">
+      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      <div className="space-y-3">{children}</div>
+    </section>
+  )
+}
+
+function ToggleRow({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string
+  checked: boolean
+  onChange: () => void
+}) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-gray-800">{label}</span>
       <button
         onClick={onChange}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-gray-300'}`}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          checked ? 'bg-blue-600' : 'bg-gray-300'
+        }`}
         aria-pressed={checked}
       >
-        <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${checked ? 'translate-x-5' : 'translate-x-1'}`} />
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+            checked ? 'translate-x-5' : 'translate-x-1'
+          }`}
+        />
       </button>
     </div>
-  )
-}
-
-function CheckRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
-  return (
-    <label className="flex items-start gap-3 text-sm text-gray-800">
-      <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded" checked={checked} onChange={onChange} />
-      <span>{label}</span>
-    </label>
   )
 }

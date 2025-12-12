@@ -28,98 +28,101 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Skip initialization if we're on the login page to prevent 403 errors
-        if (typeof window !== 'undefined' && window.location.pathname === '/auth/login') {
-          console.log('AuthContext: Skipping initialization on login page')
-          setLoading(false)
-          return
-        }
-
-        // Check both localStorage and cookies for token
+        // OPTIMIZED: Only access localStorage during initialization (inside useEffect)
         const token = localStorage.getItem('accessToken') || 
                      (typeof document !== 'undefined' ? 
                        document.cookie.split(';').find(c => c.trim().startsWith('authToken='))?.split('=')[1] : null)
         
         if (!token) {
-          console.log('AuthContext: No token found, user not authenticated')
           setLoading(false)
           return
         }
 
-        console.log('AuthContext: Token found, attempting to initialize user...')
-
-        // Try the standard /auth/me endpoint first
-        const apiUrl = 'https://backend-a3nd.onrender.com/api/v1'
-        const resp = await fetch(`${apiUrl}/auth/me`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        console.log('AuthContext: /auth/me response status:', resp.status)
-
-        if (resp.status === 403) {
-          // Vendor token: build minimal user from JWT payload
-          console.log('AuthContext: 403 response - creating vendor user from token')
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]))
-            console.log('AuthContext: Token payload:', payload)
-            
-            // Check if token is expired
-            const now = Math.floor(Date.now() / 1000)
-            if (payload.exp && payload.exp < now) {
-              console.log('AuthContext: Token is expired, clearing tokens')
-              localStorage.removeItem('accessToken')
-              localStorage.removeItem('refreshToken')
-              setLoading(false)
-              return
-            }
-            
-            // Note: There's no vendor-specific profile endpoint, so we'll create a minimal user from JWT
-            console.log('AuthContext: No vendor profile endpoint available, creating minimal user from JWT...')
-            console.log('AuthContext: Backend vendor profile endpoints not implemented yet')
-            
-            // Create minimal user from JWT payload
-            const vendorUser = {
-              id: payload.id,
-              accountType: payload.accountType || 'vendor' as const,
-              email: payload.email || '',
-              firstName: payload.firstName || '',
-              lastName: payload.lastName || '',
-              businessName: payload.businessName || '',
-              isEmailVerified: true,
-              createdAt: new Date(payload.iat * 1000).toISOString(),
-              updatedAt: new Date(payload.iat * 1000).toISOString(),
-            }
-            console.log('AuthContext: Created minimal vendor user from JWT:', vendorUser)
-            
-            // Ensure token is stored in localStorage for API calls
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('accessToken', token)
-            }
-            
-            setUser(vendorUser)
-          } catch (tokenError) {
-            console.error('AuthContext: Failed to decode token:', tokenError)
-            // If token cannot be decoded, treat as unauthenticated
+        // For initial load, try to use token directly without blocking
+        // This allows the page to render while auth loads in background
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          
+          // Check if token is expired
+          const now = Math.floor(Date.now() / 1000)
+          if (payload.exp && payload.exp < now) {
             localStorage.removeItem('accessToken')
             localStorage.removeItem('refreshToken')
-            if (typeof document !== 'undefined') {
-              document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-              document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-              document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-            }
-          } finally {
             setLoading(false)
+            return
           }
-          return
-        }
+          
+          // Create minimal user from JWT payload for immediate rendering
+          // Check multiple possible fields for accountType (some backends use different field names)
+          // Also check localStorage for accountType preference (set during login)
+          const storedAccountType = typeof window !== 'undefined' ? localStorage.getItem('userAccountType') : null
+          const accountType = payload.accountType || payload.role || payload.userType || payload.type || storedAccountType || 'client'
+          
+          console.log('🔍 AuthContext: JWT payload accountType:', {
+            accountType: payload.accountType,
+            role: payload.role,
+            userType: payload.userType,
+            type: payload.type,
+            storedAccountType,
+            finalAccountType: accountType,
+            allPayload: payload
+          })
+          
+          const userFromToken = {
+            id: payload.id,
+            accountType: accountType as 'client' | 'vendor' | 'admin' | 'individual' | 'business',
+            email: payload.email || '',
+            firstName: payload.firstName || '',
+            lastName: payload.lastName || '',
+            businessName: payload.businessName || '',
+            isEmailVerified: true,
+            createdAt: new Date(payload.iat * 1000).toISOString(),
+            updatedAt: new Date(payload.iat * 1000).toISOString(),
+          }
+          
+          console.log('🔍 AuthContext: Created user from token:', userFromToken)
+          
+          // Set user immediately to unblock rendering
+          setUser(userFromToken)
+          setLoading(false)
+          
+          // Fetch full user data in background without blocking
+          try {
+            const apiUrl = 'https://backend-a3nd.onrender.com/api/v1'
+            const resp = await fetch(`${apiUrl}/auth/me`, {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            })
 
-        if (!resp.ok) {
-          console.log('AuthContext: Non-403 failure, invalidating tokens')
-          // Non-403 failures invalidate tokens
+            if (resp.status === 403) {
+              // Already set user from JWT above, just ensure token is stored
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('accessToken', token)
+              }
+              return
+            }
+
+            if (resp.ok) {
+              const data = await resp.json()
+              const userData = data.data || data
+              
+              // Update with full user data
+              setUser(userData)
+              
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('accessToken', token)
+              }
+            }
+          } catch (backgroundError) {
+            console.log('Background auth fetch failed, using JWT data:', backgroundError)
+            // Already have user from JWT, so this is OK
+          }
+        } catch (tokenError) {
+          console.error('AuthContext: Failed to decode token:', tokenError)
+          // Clear invalid tokens but don't block
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           if (typeof document !== 'undefined') {
@@ -128,30 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
           }
           setLoading(false)
-          return
         }
-
-        const data = await resp.json()
-        const userData = data.data || data
-        console.log('AuthContext: Retrieved user data:', userData)
-        
-        // Ensure token is stored in localStorage for API calls
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('accessToken', token)
-        }
-        
-        setUser(userData)
-        setLoading(false)
       } catch (error) {
         console.error('AuthContext: Initialization error:', error)
-        // Network or unexpected error: clear any stale tokens
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        if (typeof document !== 'undefined') {
-          document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-          document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-          document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        }
         setLoading(false)
       }
     }
@@ -179,24 +161,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (fetchResponse.status === 403) {
         // For vendor accounts, create user data from token since backend doesn't support vendor /me endpoint
-        console.log('AuthContext: 403 response - creating vendor user from token')
         try {
           const payload = JSON.parse(atob(token.split('.')[1]))
-          console.log('AuthContext: Token payload:', payload)
+          
+          // Check multiple possible fields for accountType
+          const accountType = payload.accountType || payload.role || payload.userType || payload.type || 'client'
+          
+          console.log('🔍 AuthContext refreshUser: JWT payload accountType:', {
+            accountType: payload.accountType,
+            role: payload.role,
+            userType: payload.userType,
+            type: payload.type,
+            finalAccountType: accountType
+          })
           
           // Create minimal user data from token
           const userData = {
             id: payload.id,
-            accountType: 'vendor' as const,
+            accountType: accountType as 'client' | 'vendor' | 'admin' | 'individual' | 'business',
             email: payload.email || '',
+            firstName: payload.firstName || '',
+            lastName: payload.lastName || '',
+            businessName: payload.businessName || '',
             isEmailVerified: true,
             createdAt: new Date(payload.iat * 1000).toISOString(),
             updatedAt: new Date(payload.iat * 1000).toISOString()
           }
           
-          console.log('AuthContext: Created vendor user data:', userData)
+          console.log('🔍 AuthContext refreshUser: Created user data:', userData)
           setUser(userData)
-          console.log('AuthContext: Vendor user set successfully')
           return
         } catch (tokenError) {
           console.error('AuthContext: Failed to decode token:', tokenError)
@@ -217,7 +210,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const setUserData = (userData: User) => {
-    console.log('AuthContext: Setting user data directly:', userData)
     setUser(userData)
   }
 
@@ -232,6 +224,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Clear localStorage
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userAccountType')
       
       // Clear cookies
       if (typeof document !== 'undefined') {

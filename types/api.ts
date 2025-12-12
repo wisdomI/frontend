@@ -33,7 +33,7 @@ export interface User {
   businessEmail?: string
   email: string
   phoneNumber?: string
-  accountType: 'individual' | 'business' | 'vendor' | 'admin'
+  accountType: 'client' | 'individual' | 'business' | 'vendor' | 'admin'
   isEmailVerified: boolean
   displayName?: string
   createdAt: string
@@ -180,6 +180,31 @@ export interface ServiceOffering {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  // Populated fields from backend
+  User?: {
+    id: string
+    firstName?: string
+    lastName?: string
+    businessName?: string
+    businessAddress?: string
+    businessEmail?: string
+    email: string
+    phoneNumber?: string
+    accountType: string
+    isVerified?: boolean
+  }
+  Profile?: {
+    id: string
+    userId: string
+    displayPicture?: string
+    bio?: string
+    city?: string
+    country?: string
+    skills?: string[]
+    gender?: string
+  }
+  averageRating?: number
+  totalReviews?: number
 }
 
 export interface CreateServiceRequest {
@@ -228,8 +253,8 @@ export interface Meeting {
   location?: string
   attendees: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
   status: 'active' | 'inactive' | 'cancelled'
   createdAt: string
@@ -238,7 +263,7 @@ export interface Meeting {
 
 export interface CreateMeetingRequest {
   title: string
-  description: string
+  description?: string
   frequency: string
   meetingDate: string
   startTime: string
@@ -250,8 +275,8 @@ export interface CreateMeetingRequest {
   location?: string
   attendees: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
 }
 
@@ -269,8 +294,8 @@ export interface UpdateMeetingRequest {
   location?: string
   attendees?: Array<{
     email: string
-    firstName: string
-    lastName: string
+    firstName?: string
+    lastName?: string
   }>
 }
 
@@ -354,7 +379,16 @@ export interface CreateBidRequest {
   endDate: string
   proposedDetails: string
   additionalServices: string[]
-  images: File[]
+  images?: File[]
+}
+
+export interface UpdateBidRequest {
+  bidAmount?: number
+  startDate?: string
+  endDate?: string
+  proposedDetails?: string
+  additionalServices?: string[]
+  images?: File[]
 }
 
 // Vendor Response Types
@@ -506,6 +540,8 @@ export interface SearchParams {
   page?: number
   limit?: number
   cursor?: string
+  sortBy?: 'createdAt' | 'price' | 'rating' | 'popularity' | 'name'
+  sortOrder?: 'asc' | 'desc'
 }
 
 export interface ServiceRequestSearchParams extends SearchParams {
@@ -806,4 +842,251 @@ export interface TeamStats {
   totalMembers: number
   activeMembers: number
   pendingInvitations: number
+}
+
+// Financial Analytics Types
+export interface ProfitAnalysis {
+  totalRevenue: number
+  totalExpenses: number
+  netProfit: number
+  profitMargin: number
+  monthlyTrends: Array<{
+    month: string
+    revenue: number
+    expenses: number
+    profit: number
+  }>
+  categoryBreakdown: Array<{
+    category: string
+    revenue: number
+    expenses: number
+    profit: number
+  }>
+}
+
+// Performance Analytics Types
+export interface PerformanceDashboard {
+  totalClients: number
+  activeClients: number
+  newClientsThisMonth: number
+  clientGrowthRate: number
+  totalEarnings: number
+  monthlyEarnings: number
+  topServices: Array<{
+    serviceName: string
+    bookings: number
+    revenue: number
+  }>
+  recentActivity: Array<{
+    type: string
+    description: string
+    timestamp: string
+  }>
+}
+
+export interface ClientGrowth {
+  totalClients: number
+  newClients: number
+  returningClients: number
+  clientRetentionRate: number
+  growthByMonth: Array<{
+    month: string
+    newClients: number
+    totalClients: number
+  }>
+}
+
+export interface ServicePerformance {
+  totalServices: number
+  activeServices: number
+  topPerformingServices: Array<{
+    serviceName: string
+    bookings: number
+    revenue: number
+    rating: number
+  }>
+  serviceCategories: Array<{
+    category: string
+    services: number
+    bookings: number
+    revenue: number
+  }>
+}
+
+// Notification Types
+export interface Notification {
+  id: string
+  userId: string
+  type: 'payment_update' | 'new_message' | 'bid_update' | 'new_bid' | 'meeting_reminder' | 'rating_received' | 'system' | string
+  title: string
+  message: string
+  data?: any
+  priority: 'low' | 'medium' | 'high'
+  channels: string[]
+  isRead: boolean
+  scheduledAt?: string
+  expiresAt?: string
+  maxRetries?: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateNotificationRequest {
+  userId: string
+  type: string
+  title: string
+  message: string
+  data?: any
+  priority?: 'low' | 'medium' | 'high'
+  channels?: string[]
+  scheduledAt?: string
+  expiresAt?: string
+  maxRetries?: number
+}
+
+export interface NotificationPreferences {
+  jobAlerts: boolean
+  newJobMatches: boolean
+  clientsPostedJob: boolean
+  newChatMessage: boolean
+  escrowDepositConfirmed: boolean
+  paymentReleased: boolean
+  refundCancellationNotice: boolean
+  inAppNotifications: boolean
+  emailNotifications: boolean
+  smsNotifications: boolean
+  platformPromotions: boolean
+  verificationUpdates: boolean
+}
+
+export interface NotificationStats {
+  totalNotifications: number
+  unreadNotifications: number
+  notificationsByType: Record<string, number>
+  notificationsByPriority: Record<string, number>
+}
+
+// Settings Types
+export interface UserSettings {
+  profileVisibility: 'public' | 'private' | 'contacts-only'
+  showContactInfo: boolean
+  showPortfolio: boolean
+  showReviews: boolean
+  showAvailability: boolean
+  notificationPreferences: NotificationPreferences
+  pinEnabled: boolean
+}
+
+export interface GeneralSettings {
+  timezone: string
+  language: string
+  currency: string
+}
+
+// Withdrawal/Bank Types
+export interface Bank {
+  id: string
+  name: string
+  code: string
+  country: string
+}
+
+export interface BankAccount {
+  id: string
+  userId: string
+  accountName: string
+  accountNumber: string
+  bankCode: string
+  bankName: string
+  isVerified: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Withdrawal {
+  id: string
+  userId: string
+  bankAccountId: string
+  amount: number
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+  reference: string
+  processedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WithdrawalStats {
+  totalWithdrawals: number
+  pendingWithdrawals: number
+  completedWithdrawals: number
+  failedWithdrawals: number
+  totalAmount: number
+  pendingAmount: number
+}
+
+// Availability Types
+export interface Availability {
+  id: string
+  userId: string
+  dayOfWeek: string
+  startTime: string
+  endTime: string
+  isAvailable: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AvailabilityStats {
+  totalSlots: number
+  availableSlots: number
+  bookedSlots: number
+  availabilityRate: number
+}
+
+// Receipt Types (matching EventHub design)
+export interface ReceiptItem {
+  description: string
+  quantity: number | string
+  amount: number
+}
+
+export interface Receipt {
+  id: string
+  receiptNumber: string
+  companyName: string
+  companyLogo?: string
+  companyTagline?: string
+  companyEmail: string
+  clientName: string
+  clientEmail: string
+  issuedDate: string
+  paidDate: string
+  items: ReceiptItem[]
+  subtotal: number
+  discount: number
+  discountPercentage?: number
+  total: number
+  status: 'paid' | 'pending' | 'cancelled'
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateReceiptRequest {
+  clientName: string
+  clientEmail: string
+  items: ReceiptItem[]
+  subtotal: number
+  discount?: number
+  discountPercentage?: number
+  notes?: string
+}
+
+export interface ReceiptStats {
+  totalReceipts: number
+  paidReceipts: number
+  pendingReceipts: number
+  cancelledReceipts: number
+  totalRevenue: number
+  pendingRevenue: number
 }

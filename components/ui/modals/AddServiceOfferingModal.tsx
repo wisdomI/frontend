@@ -45,20 +45,45 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
   const fetchCategories = async () => {
     setLoadingCategories(true)
     try {
-      const response = await categoryAPI.getAll()
+      console.log('🔍 Fetching category hierarchy from backend API...')
+      const response = await categoryAPI.getHierarchy()
       const categoriesData = response.data.data || []
-      setCategories(categoriesData)
+      console.log('✅ Category hierarchy fetched successfully:', categoriesData.length, 'parent categories')
+      console.log('📊 Category structure:', categoriesData)
       
-      // Extract unique niches from categories
+      // Backend uses parentId/subcategories structure, not "niches"
+      // Extract parent categories (main categories)
+      const mainCategories = categoriesData.filter((cat: any) => !cat.parentId || cat.parentId === null)
+      setCategories(mainCategories)
+      console.log('✅ Found', mainCategories.length, 'main categories')
+      
+      // Extract all subcategories as "niches" for the dropdown
       const allNiches: string[] = []
       categoriesData.forEach((cat: any) => {
-        if (cat.niches && Array.isArray(cat.niches)) {
-          allNiches.push(...cat.niches)
+        // If category has subcategories array, use those
+        if (cat.subcategories && Array.isArray(cat.subcategories)) {
+          cat.subcategories.forEach((sub: any) => {
+            if (sub.name) allNiches.push(sub.name)
+          })
         }
       })
+      
+      // Also check for any categories that have a parentId (they are subcategories)
+      categoriesData.forEach((cat: any) => {
+        if (cat.parentId && cat.name) {
+          allNiches.push(cat.name)
+        }
+      })
+      
       const uniqueNiches = Array.from(new Set(allNiches))
       setNiches(uniqueNiches)
+      console.log('✅ Extracted', uniqueNiches.length, 'subcategories (niches) from hierarchy')
     } catch (error: any) {
+      console.error('❌ Failed to fetch categories from backend:', error)
+      console.error('❌ Error status:', error.response?.status)
+      console.error('❌ Error message:', error.response?.data?.message || error.message)
+      console.log('📦 Using fallback categories instead')
+      
       // Use fallback categories if API call fails (backend will be fixed to allow vendor access)
       const fallbackCategories = [
         { 
@@ -103,6 +128,7 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
         }
       ]
       setCategories(fallbackCategories)
+      console.log('✅ Fallback categories loaded:', fallbackCategories.length, 'categories')
       
       const allNiches: string[] = []
       fallbackCategories.forEach(cat => {
@@ -111,8 +137,10 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
         }
       })
       setNiches(Array.from(new Set(allNiches)))
+      console.log('✅ Fallback niches loaded:', allNiches.length, 'niches')
     } finally {
       setLoadingCategories(false)
+      console.log('🏁 Category fetching complete')
     }
   }
 
@@ -273,13 +301,42 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
         formDataToSend.append('mediaUrl', file)
       })
 
-      console.log('Sending to POST /service/ (correct endpoint) with array format:', {
+      console.log('Sending to POST /service/ with data:', {
         serviceName: formData.serviceTitle,
         categoryIds: formData.serviceCategory,
         description: formData.serviceDescription,
         pricingTitle: formData.pricingPackages[0]?.title,
         price: formData.pricingPackages[0]?.price,
         filesCount: formData.files.length
+      })
+      
+      // DEBUG: Compare frontend request vs Postman
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        console.log('🔐 Token User ID:', payload.id)
+        console.log('🔐 Token (first 50 chars):', token.substring(0, 50) + '...')
+        console.log('🔐 Token (last 50 chars):', '...' + token.substring(token.length - 50))
+      } else {
+        console.error('❌ NO TOKEN in localStorage!')
+      }
+      
+      // Log the exact request being sent
+      console.log('📤 Request Details:', {
+        url: 'POST /service/',
+        baseURL: 'https://backend-a3nd.onrender.com/api/v1',
+        hasAuthHeader: !!token,
+        contentType: 'multipart/form-data'
+      })
+      
+      // Log FormData contents (for debugging)
+      console.log('📋 FormData keys:')
+      Array.from(formDataToSend.entries()).forEach(([key, value]) => {
+        if (value instanceof File) {
+          console.log(`  ${key}: [File: ${value.name}, ${value.size} bytes]`)
+        } else {
+          console.log(`  ${key}: ${value}`)
+        }
       })
 
       const response = await serviceAPI.create(formDataToSend)
@@ -298,28 +355,35 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
       })
       
       // Pass the created service data to the parent component
-      // Extract the actual service data from the response structure
+      // Backend returns: { success: true, data: [{ id, userId, categoryIds, serviceName, price, pricingTitle, description, mediaUrl, createdAt, updatedAt }] }
       let serviceData = null
       
       if (Array.isArray(response.data.data) && response.data.data.length > 0) {
-        // If data is an array, take the first item
+        // Backend returns array, take the first item
         serviceData = response.data.data[0]
+        console.log('✅ Service data extracted from array:', serviceData)
       } else if (response.data.data && typeof response.data.data === 'object') {
-        // If data is a single object
+        // Backend returns single object
         serviceData = response.data.data
+        console.log('✅ Service data extracted from object:', serviceData)
       } else {
-        // Fallback: create a service object from the form data
+        // Fallback: This should not happen with current backend
+        console.warn('⚠️ Unexpected response structure, using fallback')
         serviceData = {
-          id: `temp-${Date.now()}`, // Temporary ID
+          id: `temp-${Date.now()}`,
+          userId: '', // Will be set by backend
           serviceName: formData.serviceTitle,
           description: formData.serviceDescription,
-          files: formData.files.map(file => URL.createObjectURL(file)), // Convert files to URLs
+          categoryIds: [formData.serviceCategory],
+          mediaUrl: formData.files.map(file => URL.createObjectURL(file)),
           price: formData.pricingPackages[0]?.price,
-          pricingTitle: formData.pricingPackages[0]?.title
+          pricingTitle: formData.pricingPackages[0]?.title,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       }
       
-      console.log('Extracted service data:', serviceData)
+      console.log('📤 Passing service data to parent component:', serviceData)
       onSave?.(serviceData)
       
       // Call onSuccess to refresh the list (optional since we have local state management)
@@ -327,15 +391,15 @@ const AddServiceOfferingModal = ({ onSave, onSuccess }: AddServiceOfferingModalP
       // Note: This may trigger a 403 error for service list fetching, but it's handled gracefully
       onSuccess?.()
       
-      setIsOpen(false)
-      setFormData({
-        serviceTitle: '',
-        serviceCategory: '',
-        serviceNiche: '',
-        serviceDescription: '',
-        files: [],
-        pricingPackages: [{ id: '1', title: '', price: '' }]
-      })
+    setIsOpen(false)
+    setFormData({
+      serviceTitle: '',
+      serviceCategory: '',
+      serviceNiche: '',
+      serviceDescription: '',
+      files: [],
+      pricingPackages: [{ id: '1', title: '', price: '' }]
+    })
       setErrors({})
     } catch (error: any) {
       console.error('Error saving service offering:', error)

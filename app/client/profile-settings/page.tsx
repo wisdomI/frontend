@@ -56,18 +56,21 @@ export default function ProfileSettingsPage() {
             setProfileImage(response.data.data.displayPicture)
           }
         } catch (error: any) {
-          console.error('Error fetching profile picture:', error)
-          
-          // Handle different error scenarios
           if (error.response?.status === 404) {
-            console.log('Profile endpoints not available yet - using localStorage fallback')
+            console.log('ℹ️ Client Profile Settings: Profile endpoint not implemented yet (404) - using default avatar')
             // Check localStorage for temporary profile picture
             const savedImage = localStorage.getItem(`profile_picture_${user.id}`)
             if (savedImage) {
               setProfileImage(savedImage)
+            } else {
+              setProfileImage(null)
             }
           } else if (error.response?.status === 403) {
-            console.log('Authentication issue - profile endpoints may not be accessible')
+            console.log('ℹ️ Client Profile Settings: Profile access restricted (403) - using default avatar')
+            setProfileImage(null)
+          } else {
+            console.error('Error fetching profile picture:', error)
+            setProfileImage(null)
           }
         }
       }
@@ -271,7 +274,7 @@ export default function ProfileSettingsPage() {
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                   </div>
                 ) : profileImage ? (
-                  <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                  <Image src={profileImage} alt="Profile" fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                 ) : (user?.firstName || user?.businessName || user?.displayName) ? (
                   <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-600">
                     {(user?.firstName || user?.businessName || user?.displayName || 'U').charAt(0).toUpperCase()}

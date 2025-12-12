@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react'
 import LoginForm from '@/components/auth/LoginForm'
 
 export default function LoginPage() {
-  const [selectedAccountType, setSelectedAccountType] = useState<'individual' | 'vendor'>('vendor')
+  const [selectedAccountType, setSelectedAccountType] = useState<'client' | 'vendor'>('client')
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-md p-6 sm:p-8 relative">
@@ -13,9 +13,9 @@ export default function LoginPage() {
         <div className="flex items-center justify-center">
           <div className="w-full max-w-md bg-gray-100 rounded-full p-1 flex">
             <button
-              onClick={() => setSelectedAccountType('individual')}
+              onClick={() => setSelectedAccountType('client')}
               className={`flex-1 rounded-full py-2 text-sm font-medium transition ${
-                selectedAccountType === 'individual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                selectedAccountType === 'client' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
               }`}
             >
               Individual/Org

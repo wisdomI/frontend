@@ -36,9 +36,15 @@ export function useVendorEarnings(options: UseVendorEarningsOptions = {}) {
       setError(null)
       const response = await vendorEarningsAPI.getWithdrawals(params)
       setWithdrawals(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch withdrawals')
-      console.error('Error fetching withdrawals:', err)
+    } catch (err: any) {
+      // Handle 404 errors gracefully - endpoint might not be implemented yet
+      if (err.response?.status === 404) {
+        console.warn('Withdrawals endpoint not implemented yet, using empty array')
+        setWithdrawals([])
+      } else {
+        setError('Failed to fetch withdrawals')
+        console.error('Error fetching withdrawals:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -57,8 +63,14 @@ export function useVendorEarnings(options: UseVendorEarningsOptions = {}) {
     try {
       const response = await vendorEarningsAPI.getBankDetails()
       setBankDetails(response.data.data)
-    } catch (err) {
-      console.error('Error fetching bank details:', err)
+    } catch (err: any) {
+      // Handle 404 errors gracefully - endpoint might not be implemented yet
+      if (err.response?.status === 404) {
+        console.warn('Bank details endpoint not implemented yet, using null')
+        setBankDetails(null)
+      } else {
+        console.error('Error fetching bank details:', err)
+      }
     }
   }, [])
 
@@ -69,9 +81,14 @@ export function useVendorEarnings(options: UseVendorEarningsOptions = {}) {
       const response = await vendorEarningsAPI.requestWithdrawal(data)
       await fetchWithdrawals() // Refresh withdrawals list
       return response.data.data
-    } catch (err) {
-      setError('Failed to request withdrawal')
-      console.error('Error requesting withdrawal:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setError('Withdrawal feature not implemented yet')
+        console.warn('Withdrawal endpoint not implemented yet')
+      } else {
+        setError('Failed to request withdrawal')
+        console.error('Error requesting withdrawal:', err)
+      }
       throw err
     } finally {
       setLoading(false)
@@ -85,9 +102,14 @@ export function useVendorEarnings(options: UseVendorEarningsOptions = {}) {
       const response = await vendorEarningsAPI.updateBankDetails(data)
       setBankDetails(response.data.data)
       return response.data.data
-    } catch (err) {
-      setError('Failed to update bank details')
-      console.error('Error updating bank details:', err)
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setError('Bank details feature not implemented yet')
+        console.warn('Bank details endpoint not implemented yet')
+      } else {
+        setError('Failed to update bank details')
+        console.error('Error updating bank details:', err)
+      }
       throw err
     } finally {
       setLoading(false)

@@ -34,8 +34,6 @@ export default function ViewAllOffers({
   onRejectOffer,
   onCompareAll
 }: ViewAllOffersProps) {
-  console.log('ViewAllOffers rendered with:', { serviceTitle, offersCount: offers.length, offers })
-  
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <FiStar
@@ -49,18 +47,6 @@ export default function ViewAllOffers({
 
   return (
     <div className="space-y-6">
-      {/* Debug Info */}
-      <div className="p-4 bg-blue-100 border border-blue-400 rounded-lg">
-        <p className="text-sm text-blue-800">
-          ViewAllOffers Debug: serviceTitle = &quot;{serviceTitle}&quot;, offers.length = {offers.length}
-        </p>
-        {offers.length > 0 && (
-          <p className="text-sm text-blue-800 mt-1">
-            First offer: {offers[0].vendorName} - {offers[0].offerAmount}
-          </p>
-        )}
-      </div>
-      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

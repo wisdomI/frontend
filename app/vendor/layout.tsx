@@ -6,6 +6,8 @@ import DashboardHeader from '@/components/vendors/DashboardHeader'
 import Sidebar from '@/components/vendors/VendorSidebar'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useProfileCompletion } from '@/hooks/useProfileCompletion'
+import OfflineBanner from '@/components/common/OfflineBanner'
+import SecurityReminderBanner from '@/components/ui/SecurityReminderBanner'
 
 export default function VendorLayout({
   children,
@@ -21,34 +23,69 @@ export default function VendorLayout({
 
   // Check authentication and profile setup
   useEffect(() => {
-    if (!loading) {
-      if (!isAuthenticated) {
-        // Redirect to login if not authenticated
-        router.push('/auth/login?redirect=' + encodeURIComponent(pathname))
-        return
-      }
-
-      // Check if user has vendor account type
-      if (user?.accountType !== 'vendor') {
-        alert('Only vendors can access the vendor dashboard. Please switch to vendor mode or create a vendor account.');
-        router.push('/');
-        return;
-      }
-      
-      // Check if profile setup is required
-      console.log('Vendor layout - Profile status:', profileStatus)
-      console.log('Vendor layout - Is completed:', profileStatus.isCompleted)
-      console.log('Vendor layout - Current pathname:', pathname)
-      
-      // TEMPORARY: Skip profile completion check for testing
-      // if (!profileStatus.isCompleted && pathname !== '/vendor/profile-setup') {
-      //   console.log('Vendor layout - Redirecting to profile setup')
-      //   // Redirect to profile setup if not completed
-      //   router.push('/vendor/profile-setup')
-      //   return
-      // }
+    if (loading) {
+      return
     }
-  }, [isAuthenticated, loading, profileStatus, pathname, router, user?.accountType])
+
+    if (!isAuthenticated) {
+      // Redirect to login if not authenticated
+      router.push('/auth/login?redirect=' + encodeURIComponent(pathname))
+      return
+    }
+
+    // Check accountType from both context and localStorage (for race condition on first login)
+    const storedAccountType = typeof window !== 'undefined' ? localStorage.getItem('userAccountType') : null
+    const effectiveAccountType = user?.accountType || storedAccountType
+    const normalizedAccountType = effectiveAccountType?.toLowerCase() || null
+    const vendorAccountTypes = new Set(['vendor', 'event_vendor', 'vendor_account', 'vendor-user', 'vendor_user'])
+    const isVendorAccount = normalizedAccountType ? vendorAccountTypes.has(normalizedAccountType) : false
+
+    // Debug logging
+    console.log('🔍 Vendor Layout - User accountType check:', {
+      contextAccountType: user?.accountType,
+      storedAccountType,
+      effectiveAccountType,
+      normalizedAccountType,
+      isVendorAccount,
+      user: user,
+      isAuthenticated,
+      pathname
+    })
+
+    // Check if user has vendor account type
+    // Use effectiveAccountType which falls back to localStorage if context isn't updated yet
+    if (normalizedAccountType && !isVendorAccount) {
+      console.warn('⚠️ Vendor Layout: User accountType is not vendor:', normalizedAccountType)
+
+      const clientAccountTypes = new Set(['client', 'individual', 'business'])
+      const redirectPath = clientAccountTypes.has(normalizedAccountType) ? '/client/dashboard' : '/'
+
+      if (pathname !== redirectPath) {
+        router.replace(redirectPath)
+      }
+      return
+    }
+    
+    // If accountType is not set in either place, log warning but allow access
+    // (This handles edge cases during initial load)
+    if (!normalizedAccountType) {
+      console.warn('⚠️ Vendor Layout: User accountType is not set anywhere, but allowing access for now')
+    }
+    
+    // Check if profile setup is required
+    // Check if profile setup is required
+    console.log('Vendor layout - Profile status:', profileStatus)
+    console.log('Vendor layout - Is completed:', profileStatus.isCompleted)
+    console.log('Vendor layout - Current pathname:', pathname)
+    
+    // TEMPORARY: Skip profile completion check for testing
+    // if (!profileStatus.isCompleted && pathname !== '/vendor/profile-setup') {
+    //   console.log('Vendor layout - Redirecting to profile setup')
+    //   // Redirect to profile setup if not completed
+    //   router.push('/vendor/profile-setup')
+    //   return
+    // }
+  }, [isAuthenticated, loading, profileStatus, pathname, router, user])
 
   // Show loading state while checking authentication
   if (loading) {
@@ -94,7 +131,9 @@ export default function VendorLayout({
         
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <OfflineBanner />
           <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+          <SecurityReminderBanner />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>

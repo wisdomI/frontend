@@ -7,11 +7,19 @@ interface CreatePINModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  onSubmit: (payload: { pin: string; confirmPin: string }) => Promise<void>
 }
 
-export default function CreatePINModal({ isOpen, onClose, onSuccess }: CreatePINModalProps) {
+export default function CreatePINModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  onSubmit,
+}: CreatePINModalProps) {
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (!isOpen) return null
 
@@ -21,9 +29,18 @@ export default function CreatePINModal({ isOpen, onClose, onSuccess }: CreatePIN
     }
   }
 
-  const handleContinue = () => {
-    if (pin.length === 4 && confirmPin.length === 4 && pin === confirmPin) {
+  const handleContinue = async () => {
+    if (!isFormValid || submitting) return
+
+    try {
+      setSubmitting(true)
+      setError(null)
+      await onSubmit({ pin, confirmPin })
       onSuccess()
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to create PIN')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -99,10 +116,12 @@ export default function CreatePINModal({ isOpen, onClose, onSuccess }: CreatePIN
             </div>
           </div>
 
+          {error && <p className="text-sm text-red-600 text-center -mt-4">{error}</p>}
+
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            disabled={!isFormValid}
+            disabled={!isFormValid || submitting}
             className={`w-full py-3 font-semibold rounded-lg transition-colors ${
               isFormValid
                 ? 'text-white'
@@ -110,7 +129,7 @@ export default function CreatePINModal({ isOpen, onClose, onSuccess }: CreatePIN
             }`}
             style={{ backgroundColor: isFormValid ? '#032D71' : undefined }}
           >
-            Continue
+            {submitting ? 'Saving...' : 'Continue'}
           </button>
         </div>
       </div>

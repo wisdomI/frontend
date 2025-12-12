@@ -30,10 +30,18 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
     try {
       setLoading(true)
       const response = await messageAPI.getConversations()
-      setConversations(response.data.data || [])
+      // Handle both nested (stub) and flat (real API) response structures
+      // The stub returns { data: { data: [], message: '...' } } but ApiResponse<T> is { data: T, message: string }
+      const responseData = (response as any).data
+      const conversationsData = responseData?.data !== undefined ? responseData.data : responseData
+      // Ensure it's always an array
+      const conversationsArray = Array.isArray(conversationsData) ? conversationsData : []
+      setConversations(conversationsArray)
     } catch (err) {
       setError('Failed to fetch conversations')
       console.error('Error fetching conversations:', err)
+      // Ensure conversations is always an array even on error
+      setConversations([])
     } finally {
       setLoading(false)
     }
@@ -43,7 +51,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   const fetchUnreadCount = async () => {
     try {
       const response = await messageAPI.unreadCount()
-      setUnreadCount(response.data.data?.count || 0)
+      setUnreadCount(response.data?.count || 0)
     } catch (err) {
       console.error('Error fetching unread count:', err)
     }
@@ -53,7 +61,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   const fetchMessages = useCallback(async (recipientId: string) => {
     try {
       const response = await messageAPI.getConversation(recipientId)
-      setMessages(response.data.data || [])
+      setMessages(response.data || [])
       
       // Mark conversation as read
       await messageAPI.markConversationAsRead(recipientId)
@@ -73,6 +81,10 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
 
     try {
       // Get the recipient ID from participants (assuming current user is not the recipient)
+      if (!selectedConversation.participants || !Array.isArray(selectedConversation.participants)) {
+        setError('Invalid conversation data')
+        return
+      }
       const currentUserId = user?.id
       const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
       if (!recipient) {
@@ -86,7 +98,9 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
         messageType: 'text'
       })
       
-      setMessages([...messages, response.data.data])
+      if (response.data) {
+        setMessages([...messages, response.data])
+      }
       setNewMessage('')
       
       // Scroll to bottom
@@ -137,7 +151,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
     try {
       const response = await messageAPI.search({ q: query })
       // Handle search results - you might want to show them in a separate view
-      console.log('Search results:', response.data.data)
+      console.log('Search results:', response.data)
     } catch (err) {
       setError('Failed to search messages')
       console.error('Error searching messages:', err)
@@ -150,9 +164,9 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
   }, [])
 
   useEffect(() => {
-    if (selectedRecipientId) {
+    if (selectedRecipientId && Array.isArray(conversations)) {
       const conversation = conversations.find(c => 
-        c.participants.some(p => p.id === selectedRecipientId)
+        c.participants && Array.isArray(c.participants) && c.participants.some(p => p.id === selectedRecipientId)
       )
       if (conversation) {
         setSelectedConversation(conversation)
@@ -206,7 +220,7 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
-          {conversations.length === 0 ? (
+          {!Array.isArray(conversations) || conversations.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               <p>No conversations yet</p>
             </div>
@@ -214,18 +228,36 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
             <div className="divide-y divide-gray-200">
               {conversations
                 .filter(conv => {
+                  // Ensure participants exists and is an array
+                  if (!conv.participants || !Array.isArray(conv.participants)) {
+                    return false
+                  }
                   const currentUserId = user?.id
                   const recipient = conv.participants.find(p => p.id !== currentUserId)
-                  return recipient && (
+                  if (!recipient) {
+                    return false
+                  }
+                  // If no search query, show all conversations
+                  if (!searchQuery.trim()) {
+                    return true
+                  }
+                  return (
                     recipient.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     recipient.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     recipient.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    recipient.email.toLowerCase().includes(searchQuery.toLowerCase())
+                    recipient.email?.toLowerCase().includes(searchQuery.toLowerCase())
                   )
                 })
                 .map((conversation) => {
+                  // Ensure participants exists and is an array
+                  if (!conversation.participants || !Array.isArray(conversation.participants)) {
+                    return null
+                  }
                   const currentUserId = user?.id
                   const recipient = conversation.participants.find(p => p.id !== currentUserId)
+                  if (!recipient) {
+                    return null
+                  }
                   return (
                 <div
                   key={conversation.id}
@@ -274,7 +306,8 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                   </div>
                 </div>
                   )
-                })}
+                })
+                .filter(Boolean)}
             </div>
           )}
         </div>
@@ -290,6 +323,9 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                   <span className="text-gray-600 font-medium text-sm">
                     {(() => {
+                      if (!selectedConversation.participants || !Array.isArray(selectedConversation.participants)) {
+                        return 'U'
+                      }
                       const currentUserId = user?.id
                       const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
                       return (recipient?.firstName?.charAt(0) || recipient?.businessName?.charAt(0) || recipient?.email?.charAt(0) || 'U').toUpperCase()
@@ -299,16 +335,22 @@ export default function MessageManager({ selectedRecipientId, onRecipientSelect 
                 <div>
                   <h4 className="font-medium text-gray-900">
                     {(() => {
+                      if (!selectedConversation.participants || !Array.isArray(selectedConversation.participants)) {
+                        return 'Unknown User'
+                      }
                       const currentUserId = user?.id
                       const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
-                      return recipient?.businessName || `${recipient?.firstName || ''} ${recipient?.lastName || ''}`.trim() || recipient?.email
+                      return recipient?.businessName || `${recipient?.firstName || ''} ${recipient?.lastName || ''}`.trim() || recipient?.email || 'Unknown User'
                     })()}
                   </h4>
                   <p className="text-sm text-gray-500">
                     {(() => {
+                      if (!selectedConversation.participants || !Array.isArray(selectedConversation.participants)) {
+                        return ''
+                      }
                       const currentUserId = user?.id
                       const recipient = selectedConversation.participants.find(p => p.id !== currentUserId)
-                      return recipient?.email
+                      return recipient?.email || ''
                     })()}
                   </p>
                 </div>

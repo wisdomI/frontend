@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react'
 
 interface FilterContextType {
   selectedCategory: string | null
@@ -8,6 +8,11 @@ interface FilterContextType {
   setSelectedCategory: (category: string | null) => void
   setSelectedSubCategory: (subCategory: string | null) => void
   clearFilters: () => void
+  // New properties for active state management
+  activeCategory: string | null
+  activeSubCategory: string | null
+  setActiveCategory: (category: string | null) => void
+  setActiveSubCategory: (subCategory: string | null) => void
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined)
@@ -27,18 +32,26 @@ interface FilterProviderProps {
 export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null)
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedCategory(null)
     setSelectedSubCategory(null)
-  }
+    setActiveCategory(null)
+    setActiveSubCategory(null)
+  }, [])
 
   const value = {
     selectedCategory,
     selectedSubCategory,
     setSelectedCategory,
     setSelectedSubCategory,
-    clearFilters
+    clearFilters,
+    activeCategory,
+    activeSubCategory,
+    setActiveCategory,
+    setActiveSubCategory
   }
 
   return (

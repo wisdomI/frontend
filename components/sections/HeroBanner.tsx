@@ -4,23 +4,81 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
-import { PlusOutlined, FileSearchOutlined, EyeFilled } from '@ant-design/icons';
+import { PlusOutlined, FileSearchOutlined, EyeFilled, ShopOutlined } from '@ant-design/icons';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
 import PostServiceModal from '@/components/ui/modal/ServiceRequestmodal';
+import { useLandingPageData } from '@/hooks/useLandingPageData';
+import { Meeting } from '@/types/api';
+import { ButtonLoader } from '@/components/ui/Loader';
 
 const HeroBanner = () => {
   const { user, isAuthenticated, loading } = useAuthContext();
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const sliderRef = useRef<any>(null);
+  
+  // Fetch landing page data
+  const { upcomingEvents, loading: dataLoading, error: dataError } = useLandingPageData();
+
+  // Helper function to get user role
+  const getUserRole = () => {
+    if (!user) return null;
+    return user.accountType || null;
+  };
+
+  const isClient = getUserRole() === 'individual' || getUserRole() === 'business';
+  const isVendor = getUserRole() === 'vendor';
 
   const handlePostServiceRequest = () => {
     if (!isAuthenticated) {
-      router.push('/auth/login?redirect=' + encodeURIComponent(window.location.pathname));
+      // For visitors, redirect to login but keep them on the main page
+      router.push('/auth/login?redirect=' + encodeURIComponent('/'));
       return;
     }
+
+    if (isVendor) {
+      router.push('/vendor/services');
+      return;
+    }
+  };
+
+  const handleManagePosts = () => {
+    if (!isAuthenticated) {
+      // For visitors, redirect to login but keep them on the main page
+      router.push('/auth/login?redirect=' + encodeURIComponent('/'));
+      return;
+    }
+
+    if (isClient) {
+      router.push('/client/dashboard');
+    } else if (isVendor) {
+      router.push('/vendor/service-requests');
+    } else {
+      router.push('/service-requests');
+    }
+  };
+
+  const handleManageBookings = () => {
+    if (!isAuthenticated) {
+      // For visitors, redirect to login but keep them on the main page
+      router.push('/auth/login?redirect=' + encodeURIComponent('/'));
+      return;
+    }
+
+    if (isClient) {
+      router.push('/client/booking');
+    } else if (isVendor) {
+      router.push('/vendor/manage-bookings');
+    } else {
+      router.push('/booking');
+    }
+  };
+
+  const handleViewFavourites = () => {
+    // For visitors, show all services instead of favorites
+    router.push('/services');
   };
 
   const handleDotClick = (index: number) => {
@@ -67,42 +125,62 @@ const HeroBanner = () => {
     ],
   };
 
-  // Array of slide data 
-  const slides = [
+  // Transform API data to slides format
+  const slides = upcomingEvents.map((event: Meeting) => ({
+    title: event.title || 'Event',
+    description: event.description || 'Join us for an exciting event!',
+    date: event.meetingDate ? new Date(event.meetingDate).toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric' 
+    }) : 'TBD',
+    time: `${event.startTime || 'TBD'} - ${event.endTime || 'TBD'}`,
+    location: event.location || 'Venue TBD',
+    address: event.location || 'Location details coming soon',
+    discount: 'Limited seats available! Book now to secure your spot.',
+    image: '/images/image.png', // Default image since events don't have images in API
+    circularImage: '/images/image.png',
+    eventId: event.id
+  }));
+
+  // Fallback slides if no events are available
+  const fallbackSlides = [
     {
       title: 'Photographer Workshop',
-      description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet.',
-      date: 'October 28',
-      time: '15:00 - 17:00',
-      location: 'Studio Name',
-      address: '123, Street Warriors, New York City, St 34567',
-      discount: 'Early Bird Discount 10% Valid until 1 October',
+      description: 'Learn professional photography techniques from industry experts.',
+      date: 'Coming Soon',
+      time: 'TBD',
+      location: 'EventHub Academy',
+      address: 'Online & In-person sessions available',
+      discount: 'Early Bird Discount 10% - Limited seats available!',
       image: '/images/image.png',
       circularImage: '/images/image.png',
     },
     {
       title: 'Event Planning Seminar',
-      description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet.',
-      date: 'November 5',
-      time: '10:00 - 12:00',
-      location: 'Event Hall',
-      address: '456 Event Lane, Los Angeles, CA 90001',
-      discount: 'Early Bird Discount 15% Valid until 1 November',
+      description: 'Master the art of event planning with our comprehensive seminar.',
+      date: 'Coming Soon',
+      time: 'TBD',
+      location: 'EventHub Academy',
+      address: 'Online & In-person sessions available',
+      discount: 'Early Bird Discount 15% - Limited seats available!',
       image: '/images/image.png',
       circularImage: '/images/image.png',
     },
     {
       title: 'Catering Masterclass',
-      description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet.',
-      date: 'December 10',
-      time: '14:00 - 16:00',
-      location: 'Culinary Institute',
-      address: '789 Chef Road, Chicago, IL 60601',
-      discount: 'Early Bird Discount 20% Valid until 1 December',
+      description: 'Discover culinary excellence with our expert catering workshop.',
+      date: 'Coming Soon',
+      time: 'TBD',
+      location: 'EventHub Academy',
+      address: 'Online & In-person sessions available',
+      discount: 'Early Bird Discount 20% - Limited seats available!',
       image: '/images/image.png',
       circularImage: '/images/image.png',
     },
   ];
+
+  // Use API data if available, otherwise use fallback
+  const displaySlides = slides.length > 0 ? slides : fallbackSlides;
 
   return (
     <>
@@ -242,7 +320,7 @@ const HeroBanner = () => {
           }}
         >
           <Slider ref={sliderRef} {...sliderSettings}>
-            {slides.map((slide, index) => (
+            {displaySlides.map((slide, index) => (
               <div key={index} className="relative">
                 <div className="relative h-72 md:h-80">
                   <Image 
@@ -261,7 +339,7 @@ const HeroBanner = () => {
         {/* Interactive dots for mobile */}
         <div className="flex justify-center mt-4 px-4">
           <div className="flex space-x-2">
-            {slides.map((_, index) => (
+            {displaySlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => handleDotClick(index)}
@@ -297,7 +375,9 @@ const HeroBanner = () => {
                 >
                   <PlusOutlined className="text-lg mb-1 text-white" />
                   <span className="text-[9px] font-medium text-center leading-tight whitespace-nowrap">
-                    {loading ? 'Loading...' : 'Login'}
+                    <ButtonLoader loading={loading} loadingText="Loading...">
+                      Login
+                    </ButtonLoader>
                   </span>
                 </Button>
               )}
@@ -361,7 +441,7 @@ const HeroBanner = () => {
           <div className="md:col-span-full lg:col-span-3">
             <div className="h-48 md:h-56 lg:h-64 xl:h-72">
               <Slider ref={sliderRef} {...sliderSettings}>
-                {slides.map((slide, index) => (
+                {displaySlides.map((slide, index) => (
                   <div key={index} className="relative">
                     <div className="relative h-48 md:h-56 lg:h-64 xl:h-72">
                       <Image 
@@ -379,7 +459,7 @@ const HeroBanner = () => {
             {/* Interactive dots outside slider container */}
             <div className="flex justify-center mt-4">
               <div className="flex space-x-2">
-                {slides.map((_, index) => (
+                {displaySlides.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => handleDotClick(index)}
@@ -403,27 +483,87 @@ const HeroBanner = () => {
                 {/* Quick Actions - Single Line */}
                 <div className="flex gap-3">
                   {/* Post Service */}
-                  <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800">
-                    <PlusOutlined className="text-lg mr-2" />
-                    <span className="text-sm font-medium">Post Request</span>
-                  </div>
+                  {isAuthenticated ? (
+                    isClient ? (
+                      <PostServiceModal 
+                        trigger={
+                          <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer">
+                            <PlusOutlined className="text-lg mr-2" />
+                            <span className="text-sm font-medium">Post Request</span>
+                          </div>
+                        }
+                      />
+                    ) : isVendor ? (
+                      <div 
+                        onClick={handlePostServiceRequest}
+                        className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer"
+                      >
+                        <ShopOutlined className="text-lg mr-2" />
+                        <span className="text-sm font-medium">Add Services</span>
+                      </div>
+                    ) : (
+                      <PostServiceModal 
+                        trigger={
+                          <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer">
+                            <PlusOutlined className="text-lg mr-2" />
+                            <span className="text-sm font-medium">Post Request</span>
+                          </div>
+                        }
+                      />
+                    )
+                  ) : (
+                    <div 
+                      onClick={handlePostServiceRequest}
+                      className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer"
+                    >
+                      <PlusOutlined className="text-lg mr-2" />
+                      <span className="text-sm font-medium">Login to Continue</span>
+                    </div>
+                  )}
 
                   {/* Manage Posts */}
-                  <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800">
+                  <div 
+                    onClick={handleManagePosts}
+                    className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer"
+                  >
                     <FileSearchOutlined className="text-lg mr-2" />
-                    <span className="text-sm font-medium">Manage Posts</span>
+                    <span className="text-sm font-medium">
+                      {isAuthenticated ? (
+                        isClient ? 'My Requests' : isVendor ? 'Service Requests' : 'Manage Posts'
+                      ) : (
+                        'Manage Posts'
+                      )}
+                    </span>
                   </div>
 
                   {/* Manage Bookings */}
-                  <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800">
+                  <div 
+                    onClick={handleManageBookings}
+                    className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer"
+                  >
                     <Image src="/images/tabler_brand-booking-inactive.svg" alt="" width={18} height={18} className="mr-2" />
-                    <span className="text-sm font-medium">Bookings</span>
+                    <span className="text-sm font-medium">
+                      {isAuthenticated ? (
+                        isClient ? 'My Bookings' : isVendor ? 'Vendor Bookings' : 'Bookings'
+                      ) : (
+                        'Bookings'
+                      )}
+                    </span>
                   </div>
 
                   {/* Favourites */}
-                  <div className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800">
+                  <div 
+                    onClick={handleViewFavourites}
+                    className="bg-blue-900 text-white p-3 rounded-lg flex items-center hover:bg-blue-800 cursor-pointer"
+                  >
                     <EyeFilled className="text-lg mr-2" />
-                    <span className="text-sm font-medium">Favourites</span>
+                    <span className="text-sm font-medium">
+                      {isAuthenticated ? (
+                        isClient ? 'Favourites' : isVendor ? 'Portfolio' : 'Favourites'
+                      ) : (
+                        'Browse Services'
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>

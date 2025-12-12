@@ -6,6 +6,8 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import ClientHeader from '@/components/client/ClientHeader'
 import ClientSidebar from '@/components/client/ClientSidebar'
 import Footer from '@/components/ui/Footer'
+import OfflineBanner from '@/components/common/OfflineBanner'
+import SecurityReminderBanner from '@/components/ui/SecurityReminderBanner'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -34,6 +36,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       } else if (user?.accountType === 'admin') {
         router.push('/dashboard/admin')
         return
+      } else if (user?.accountType && !['client', 'individual', 'business'].includes(user.accountType)) {
+        // If user has an unrecognized account type, redirect to login
+        router.push('/auth/login')
+        return
       }
     }
   }, [loading, isAuthenticated, user, router, pathname])
@@ -61,6 +67,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   if (pathname.startsWith('/client')) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
+        <OfflineBanner />
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div 
@@ -73,6 +80,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <div className="w-full">
           <ClientHeader onMenuClick={() => setSidebarOpen(true)} />
         </div>
+        
+        <SecurityReminderBanner />
         
         {/* Main content area with sidebar */}
         <div className="flex flex-1 relative">

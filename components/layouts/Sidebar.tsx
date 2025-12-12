@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 import PostServiceModal from '../ui/modal/ServiceRequestmodal'
 import FilterModal from '../ui/modals/FilterModal'
 import { useFilterContext } from '@/contexts/FilterContext'
+import { useCategories } from '@/hooks/useCategories'
+import { Category } from '@/types/api'
 import {
   CakeIcon,
   UserGroupIcon,
@@ -442,7 +444,59 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
   const pathname = usePathname()
-  const { setSelectedCategory, setSelectedSubCategory } = useFilterContext()
+  const { 
+    setSelectedCategory, 
+    setSelectedSubCategory, 
+    activeCategory, 
+    activeSubCategory,
+    setActiveCategory, 
+    setActiveSubCategory 
+  } = useFilterContext()
+  
+  // Fetch categories from API
+  const { mainCategories, hierarchy, loading: categoriesLoading } = useCategories()
+  
+  // Function to get icon for category based on name
+  const getCategoryIcon = (categoryName: string) => {
+    const name = categoryName.toLowerCase()
+    if (name.includes('catering') || name.includes('food') || name.includes('drink')) {
+      return <CakeIcon className="h-6 w-6" />
+    } else if (name.includes('entertainment') || name.includes('music') || name.includes('dj')) {
+      return <UserGroupIcon className="h-6 w-6" />
+    } else if (name.includes('rental') || name.includes('equipment')) {
+      return <HomeIcon className="h-6 w-6" />
+    } else if (name.includes('decoration') || name.includes('floral') || name.includes('balloon')) {
+      return <FlagIcon className="h-6 w-6" />
+    } else if (name.includes('media') || name.includes('photography') || name.includes('video')) {
+      return <CameraIcon className="h-6 w-6" />
+    } else if (name.includes('beauty') || name.includes('makeup') || name.includes('styling')) {
+      return <PaintBrushIcon className="h-6 w-6" />
+    } else if (name.includes('fashion') || name.includes('clothing') || name.includes('dress')) {
+      return <ShoppingBagIcon className="h-6 w-6" />
+    } else if (name.includes('transport') || name.includes('logistics') || name.includes('delivery')) {
+      return <TruckIcon className="h-6 w-6" />
+    } else if (name.includes('venue') || name.includes('location') || name.includes('hall')) {
+      return <HomeIcon className="h-6 w-6" />
+    } else if (name.includes('material') || name.includes('supply') || name.includes('equipment')) {
+      return <ArchiveBoxIcon className="h-6 w-6" />
+    } else {
+      return <PencilIcon className="h-6 w-6" />
+    }
+  }
+
+  // Transform API categories to sidebar menu format
+  const apiMenuItems = mainCategories.map((category: Category) => ({
+    label: category.name,
+    icon: getCategoryIcon(category.name),
+    categoryKey: category.id,
+    subMenu: category.subcategories?.map((sub: Category) => ({
+      label: sub.name,
+      subCategoryKey: sub.id,
+    })) || []
+  }))
+  
+  // Use API categories if available, otherwise fallback to hardcoded
+  const menuItemsToUse = apiMenuItems.length > 0 ? apiMenuItems : menuItems
   
   // Use external mobile state if provided, otherwise use internal state
   const isMobileOpen = externalMobileOpen !== undefined ? externalMobileOpen : internalMobileOpen
@@ -458,12 +512,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
   const handleCategoryClick = (categoryKey: string) => {
     setSelectedCategory(categoryKey)
     setSelectedSubCategory(null)
+    setActiveCategory(categoryKey)
+    setActiveSubCategory(null)
     setIsMobileOpen(false)
+    // No navigation - just filtering
   }
 
   const handleSubCategoryClick = (subCategoryKey: string) => {
     setSelectedSubCategory(subCategoryKey)
+    setActiveSubCategory(subCategoryKey)
     setIsMobileOpen(false)
+    // No navigation - just filtering
   }
 
   const toggleSidebar = () => {
@@ -477,12 +536,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
   // Check if a menu item or its submenu is active
   const isActive = (item: any) => {
     if (pathname === item.route) return true
+    if (activeCategory === item.categoryKey) return true
     return item.subMenu.some((sub: any) => pathname === sub.route)
   }
 
   // Check if a submenu item is active
-  const isSubMenuActive = (subRoute: string) => {
-    return pathname === subRoute
+  const isSubMenuActive = (subRoute: string, subCategoryKey: string) => {
+    if (pathname === subRoute) return true
+    if (activeSubCategory === subCategoryKey) return true
+    return false
   }
 
   return (
@@ -491,7 +553,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
       <button
         onClick={toggleSidebar}
         className={`md:hidden fixed top-20 z-[100] bg-[#0B2E6F] text-white p-2 rounded-lg shadow-lg transition-all duration-300 ${
-          isMobileOpen ? 'left-[280px]' : 'left-4'
+          isMobileOpen ? 'left-80' : 'left-4'
         }`}
       >
         {isMobileOpen ? (
@@ -518,7 +580,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
         fixed md:static top-0 left-0 z-[95] md:z-auto
         h-screen md:h-full md:max-h-full md:overflow-y-auto
         md:ml-4 lg:ml-6
-        w-64 ${isDesktopCollapsed ? 'md:w-12 lg:w-12' : 'md:w-64 lg:w-64'}
+        w-80 ${isDesktopCollapsed ? 'md:w-12 lg:w-12' : 'md:w-65 lg:w-65'}
       `}>
         {isFilterModalOpen ? (
           <FilterModal 
@@ -536,7 +598,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                 onClick={toggleSidebar}
                 className="hidden md:inline-flex mr-3 bg-[#0B2E6F] text-white p-2 rounded-lg shadow-sm hover:shadow-md transition"
               >
-                <Bars3Icon className="h-5 w-5" />
+                <Bars3Icon className="h-7 w-7" />
               </button>
               
               {/* Center - Category Title */}
@@ -559,11 +621,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
             {isDesktopCollapsed ? (
               <nav className="hidden md:block">
                 <ul className="space-y-2">
-                  {menuItems.map((item) => (
+                  {menuItemsToUse.map((item) => (
                     <li key={item.label}>
                       <div
-                        className={`flex items-center justify-center py-2 rounded-lg transition-colors cursor-pointer ${
-                          isActive(item) ? 'bg-event-blue text-yellow-400' : 'text-white hover:bg-event-blue-hover'
+                        className={`flex items-center justify-center py-2 rounded-lg transition-all duration-200 cursor-pointer group ${
+                          isActive(item) 
+                            ? 'bg-event-blue text-yellow-400 shadow-md' 
+                            : 'text-white hover:bg-event-blue-hover hover:scale-105 hover:shadow-lg'
                         }`}
                         onClick={() => {
                           handleToggle(item.label)
@@ -573,9 +637,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                         }}
                         title={item.label}
                       >
+                        <div className="group-hover:scale-110 transition-transform duration-200">
                         {React.cloneElement(item.icon as any, {
                           className: `h-6 w-6 ${isActive(item) ? 'text-yellow-400' : 'text-white'}`,
                         })}
+                        </div>
                       </div>
                     </li>
                   ))}
@@ -584,15 +650,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
             ) : (
               <nav>
                 <ul className="space-y-0.5 md:space-y-1">
-                  {menuItems.map((item) => {
+                  {menuItemsToUse.map((item) => {
                     const active = isActive(item)
                     return (
                       <li key={item.label}>
                         <div
-                          className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors cursor-pointer ${
+                          className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-200 cursor-pointer group ${
                             active
-                              ? 'text-yellow-400 bg-event-blue' 
-                              : 'text-white hover:bg-event-blue-hover'
+                              ? 'text-yellow-400 bg-event-blue shadow-md' 
+                              : 'text-white hover:bg-event-blue-hover hover:scale-105 hover:shadow-lg'
                           }`}
                           onClick={() => {
                             handleToggle(item.label)
@@ -602,12 +668,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                           }}
                         >
                           <div className="flex items-center space-x-2 md:space-x-3">
-                            <div className={`${active ? 'text-yellow-400' : 'text-white'}`}>
+                            <div className={`group-hover:scale-110 transition-transform duration-200 ${active ? 'text-yellow-400' : 'text-white'}`}>
                               {React.cloneElement(item.icon as any, {
                                 className: `h-5 w-5 md:h-6 md:w-6 ${active ? 'text-yellow-400' : 'text-white'}`,
                               })}
                             </div>
-                            <span className="font-medium text-sm md:text-base font-raleway">
+                            <span className="font-medium text-sm md:text-base font-raleway group-hover:translate-x-1 transition-transform duration-200">
                               {item.label}
                             </span>
                           </div>
@@ -623,12 +689,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                           <ul className="ml-4 md:ml-6 mt-1 md:mt-2 space-y-0.5 md:space-y-1">
                             {item.subMenu.map(sub => (
                               <li key={sub.label}>
-                                <Link
-                                  href={sub.route}
-                                  className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-colors font-raleway ${
-                                    isSubMenuActive(sub.route)
-                                      ? 'bg-event-blue text-yellow-400'
-                                      : 'text-gray-200 hover:bg-event-blue-hover hover:text-white'
+                                <div
+                                  className={`block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg transition-all duration-200 font-raleway group cursor-pointer ${
+                                    isSubMenuActive('', sub.subCategoryKey)
+                                      ? 'bg-event-blue text-yellow-400 shadow-md'
+                                      : 'text-gray-200 hover:bg-event-blue-hover hover:text-white hover:scale-105 hover:shadow-lg'
                                   }`}
                                   onClick={() => {
                                     setIsMobileOpen(false)
@@ -637,8 +702,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen: externalMobileOpen, onM
                                     }
                                   }}
                                 >
+                                  <span className="group-hover:translate-x-1 transition-transform duration-200">
                                   {sub.label}
-                                </Link>
+                                  </span>
+                                </div>
                               </li>
                             ))}
                           </ul>

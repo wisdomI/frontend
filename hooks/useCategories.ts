@@ -23,9 +23,10 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setError(null)
       const response = await categoryAPI.getAll()
       setCategories(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch categories')
+    } catch (err: any) {
       console.error('Error fetching categories:', err)
+      setError('Failed to fetch categories')
+      setCategories([])
     } finally {
       setLoading(false)
     }
@@ -37,9 +38,10 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setError(null)
       const response = await categoryAPI.getMain()
       setMainCategories(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch main categories')
+    } catch (err: any) {
       console.error('Error fetching main categories:', err)
+      setError('Failed to fetch main categories')
+      setMainCategories([])
     } finally {
       setLoading(false)
     }
@@ -50,10 +52,15 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setLoading(true)
       setError(null)
       const response = await categoryAPI.getHierarchy()
-      setHierarchy(response.data.data || [])
-    } catch (err) {
-      setError('Failed to fetch category hierarchy')
+      const hierarchyData = response.data.data || []
+      setHierarchy(hierarchyData)
+      // Also populate categories from hierarchy since CategorySidebar uses categories
+      setCategories(hierarchyData)
+    } catch (err: any) {
       console.error('Error fetching category hierarchy:', err)
+      setError('Failed to fetch category hierarchy')
+      setHierarchy([])
+      setCategories([])
     } finally {
       setLoading(false)
     }
@@ -63,8 +70,18 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     try {
       const response = await categoryAPI.getStats()
       setStats(response.data.data)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching category stats:', err)
+      
+      // If it's a 403 error, it means the API requires special permissions
+      // This is expected for some users, so we'll gracefully handle it
+      if (err.response?.status === 403) {
+        console.log('🔍 Category Stats API requires special permissions - skipping stats')
+        setStats(null) // Clear stats so fallback is used
+      } else {
+        console.log('🔍 Category Stats API error:', err.message)
+        setStats(null)
+      }
     }
   }, [])
 
@@ -155,12 +172,11 @@ export function useCategories(options: UseCategoriesOptions = {}) {
 
   useEffect(() => {
     if (autoFetch) {
-      fetchCategories()
-      fetchMainCategories()
+      // FIXED: Only fetch hierarchy once instead of 4 simultaneous API calls
+      // Hierarchy endpoint contains all data needed
       fetchHierarchy()
-      fetchStats()
     }
-  }, [autoFetch, fetchCategories, fetchMainCategories, fetchHierarchy, fetchStats])
+  }, [autoFetch]) // FIXED: Removed function dependencies to prevent re-creating effects
 
   return {
     categories,

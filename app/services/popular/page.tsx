@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import { BsHeart } from 'react-icons/bs';
 import { HiShare, HiOutlineLocationMarker } from 'react-icons/hi';
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
+import { useServiceOfferings } from '@/hooks/useLandingPageData';
+import { ServiceOffering } from '@/types/api';
+import { useFilterContext } from '@/contexts/FilterContext';
 
 const vendorImage = '/images/vendor-img1.jpg';
 const vendorImage2 = '/images/vendor-img2.jpg';
@@ -167,6 +170,76 @@ const services = [
 const PopularServicesPage: React.FC = () => {
   const router = useRouter();
   const [viewType, setViewType] = useState<'list' | 'grid'>('grid');
+  const { selectedCategory, selectedSubCategory } = useFilterContext();
+  
+  // Fetch services from API
+  const { services: apiServices, loading, error } = useServiceOfferings({ limit: 20 });
+
+  // Transform API data to match component expectations
+  const transformedServices = useMemo(() => {
+    return apiServices.map((service: ServiceOffering) => {
+      // Extract vendor name from User data
+      const vendorName = service.User?.businessName || 
+                        (service.User?.firstName && service.User?.lastName 
+                          ? `${service.User.firstName} ${service.User.lastName}`
+                          : service.User?.firstName || 
+                            service.User?.lastName || 
+                            'Vendor Name')
+      
+      // Extract location from Profile data
+      const location = service.Profile?.city && service.Profile?.country 
+                      ? `${service.Profile.city}, ${service.Profile.country}`
+                      : service.Profile?.city || 
+                        service.Profile?.country ||
+                        service.User?.businessAddress || 
+                        'Location not specified'
+      
+      // Use rating from backend or default to 0 if not available
+      const rating = (service as any)?.averageRating || 0
+      const reviews = (service as any)?.totalReviews || (service as any)?.reviewCount || 0
+      
+      // Check if vendor is verified
+      const verified = service.User?.isVerified || false
+      
+      return {
+        id: service.id,
+        title: service.serviceName,
+        vendorName,
+        rating,
+        reviews,
+        location,
+        verified,
+        status: service.isActive ? 'Active' : 'Inactive',
+        categoryIds: service.categoryIds || [], // Keep original category IDs
+        description: service.description,
+        price: service.price,
+        pricingTitle: service.pricingTitle,
+        mediaUrl: service.mediaUrl,
+        createdAt: service.createdAt,
+        userId: service.userId, // Add userId for routing
+        vendorId: service.userId // Use userId as vendorId for routing
+      };
+    });
+  }, [apiServices]);
+
+  // Filter services based on selected category and subcategory
+  const filteredServices = useMemo(() => {
+    if (!selectedCategory && !selectedSubCategory) {
+      return transformedServices;
+    }
+
+    return transformedServices.filter((service) => {
+      if (selectedSubCategory) {
+        // Check if any of the service's category IDs match the selected subcategory
+        return service.categoryIds.some((id: string) => id === selectedSubCategory);
+      }
+      if (selectedCategory) {
+        // Check if any of the service's category IDs match the selected category
+        return service.categoryIds.some((id: string) => id === selectedCategory);
+      }
+      return true;
+    });
+  }, [selectedCategory, selectedSubCategory, transformedServices]);
 
   const handleTitleClick = () => {
     router.push('/');
@@ -184,9 +257,13 @@ const PopularServicesPage: React.FC = () => {
     ));
   };
 
-  const ServiceCard = ({ service, viewType }: { service: typeof services[0], viewType: 'list' | 'grid' }) => {
+  const ServiceCard = ({ service, viewType }: { service: any, viewType: 'list' | 'grid' }) => {
     const [current, setCurrent] = useState(0);
-    const images = [vendorImage, vendorImage2, vendorImage];
+    
+    // Use API images if available, otherwise fallback to default images
+    const apiImages = service.mediaUrl && service.mediaUrl.length > 0 ? service.mediaUrl : []
+    const fallbackImages = [vendorImage, vendorImage2, vendorImage]
+    const images = apiImages.length > 0 ? apiImages : fallbackImages
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -195,10 +272,30 @@ const PopularServicesPage: React.FC = () => {
       return () => clearInterval(interval);
     }, [images.length]);
 
+    // Handle card click to navigate to service details page
+    const handleCardClick = () => {
+      // Navigate to service details page like e-commerce product cards
+      const serviceId = service.id
+      if (serviceId) {
+        router.push(`/services/${serviceId}`)
+      }
+    }
+
     return (
-      <div className={`bg-white shadow-md rounded-2xl hover:shadow-lg transition-shadow ${
-        viewType === 'grid' ? 'w-full max-w-sm mx-auto' : 'w-full'
-      }`}>
+      <div 
+        className={`bg-white shadow-md rounded-2xl hover:shadow-lg transition-shadow cursor-pointer ${
+          viewType === 'grid' ? 'w-full max-w-sm mx-auto' : 'w-full'
+        }`}
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleCardClick()
+          }
+        }}
+      >
         {/* Image Section */}
         <div className={`relative ${viewType === 'grid' ? 'w-full' : 'w-48 flex-shrink-0'}`}>
           <div className={`relative ${viewType === 'grid' ? 'h-48 w-full' : 'h-32 w-full'}`}>
@@ -210,7 +307,7 @@ const PopularServicesPage: React.FC = () => {
               priority
             />
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
-              {images.map((_, index) => (
+                  {images.map((_: any, index: number) => (
                 <span
                   key={index}
                   className={`w-2 h-2 rounded-full ${
@@ -260,13 +357,22 @@ const PopularServicesPage: React.FC = () => {
               <div className="flex justify-between items-center">
                 <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
                 <div className="flex items-center gap-2">
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                   </button>
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <BsHeart className="w-4 h-4" />
                   </button>
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <button 
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <HiShare className="w-4 h-4" />
                   </button>
                 </div>
@@ -300,13 +406,22 @@ const PopularServicesPage: React.FC = () => {
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-blue-600 font-semibold text-sm">{service.vendorName}</p>
                   <div className="flex items-center gap-2">
-                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <IoChatbubbleEllipsesOutline className="w-4 h-4" />
                     </button>
-                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <BsHeart className="w-4 h-4" />
                     </button>
-                    <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                    <button 
+                      className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <HiShare className="w-4 h-4" />
                     </button>
                   </div>
@@ -402,7 +517,7 @@ const PopularServicesPage: React.FC = () => {
             ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' 
             : 'flex flex-col gap-4'
         }`}>
-          {services.map((service) => (
+          {filteredServices.map((service) => (
             <ServiceCard key={service.id} service={service} viewType={viewType} />
           ))}
         </div>

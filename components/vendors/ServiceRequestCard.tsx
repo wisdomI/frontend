@@ -1,8 +1,7 @@
 'use client'
 
-import { FC } from 'react'
-import { FaStar, FaEye } from 'react-icons/fa'
-import client from '../../public/images/client.png'
+import { FC, memo } from 'react'
+import { FaStar } from 'react-icons/fa'
 import Image from 'next/image'
 
 interface ServiceRequestCardProps {
@@ -47,127 +46,152 @@ const ServiceRequestCard: FC<ServiceRequestCardProps> = ({
   onCounterOffer,
 }) => {
   return (
-    <div className="bg-white border rounded-xl p-3 sm:p-4 shadow-sm">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:gap-4 pb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 sm:w-10 sm:h-10">
-              <Image
-                src={client}
-                alt={clientName}
-                fill
-                sizes="(max-width: 640px) 32px, 40px"
-                className="object-cover w-full h-full rounded-full border-[2px] sm:border-[3px] border-green-600"
-              />
-            </div>
-            <h3 className="text-event-blue font-semibold underline text-sm sm:text-base">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+      {/* Header Section */}
+      <div className="flex items-start justify-between mb-4">
+        {/* Client Info */}
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12">
+            <Image
+              src={clientAvatar || '/images/avatar1.jpg'}
+              alt={clientName}
+              fill
+              sizes="48px"
+              className="object-cover rounded-full"
+            />
+          </div>
+          <div>
+            <h3 className="text-event-blue font-semibold text-lg underline">
               {clientName}
             </h3>
           </div>
-          <div className="flex items-center gap-2">
-            {status === 'rejected' && (
-              <>
-                <span className="text-xs sm:text-sm text-red-500 font-medium">Rejected 20/07/25</span>
-                <button className="bg-white border border-red-500 text-red-500 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium">
-                  ✕ Rejected
-                </button>
-              </>
-            )}
-            {status === 'accepted' && (
-              <>
-                <span className="text-xs sm:text-sm text-green-500 font-medium">Accepted 20/07/25</span>
-                <button className="bg-white border border-green-500 text-green-500 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium">
-                  ✓ Accepted
-                </button>
-              </>
-            )}
-          </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <p className="font-bold text-base sm:text-lg text-event-blue">{eventTitle}</p>
-          <div className="flex flex-col gap-1 text-right">
-            {/* Rating */}
-            <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-3">
-              <span className="hidden sm:inline">{totalBookings} Total Bookings - </span>
-              <span className="sm:hidden">{totalBookings} bookings - </span>
-              Rating:&nbsp;
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <FaStar
-                    key={i}
-                    size={12}
-                    className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
-                  />
-                ))}
-              </div>
-            </div>
+        
+        {/* Sent Time */}
+        <div className="text-sm text-gray-500">
+          {sentTime}
+        </div>
+      </div>
+
+      {/* Event Title */}
+      <div className="mb-4">
+        <h2 className="font-bold text-xl text-event-blue mb-2">
+          {eventTitle}
+        </h2>
+        
+        {/* Rating and Bookings */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>{totalBookings} Total Bookings - Rating:</span>
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <FaStar
+                key={i}
+                size={14}
+                className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
+              />
+            ))}
           </div>
         </div>
       </div>
-      <div className="h-[1.5px] bg-event-blue w-full"></div>
+
+      {/* Divider */}
+      <div className="h-px bg-gray-200 mb-4"></div>
 
       {/* Event Details */}
-      <div className="text-xs sm:text-sm text-gray-600 space-y-1 py-2 pb-4">
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">Event Type:</span> 
-          <span className="sm:text-right">{eventType}</span>
-        </p>
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">Event Date:</span> 
-          <span className="sm:text-right">{eventDate}</span>
-        </p>
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">Event Location:</span> 
-          <span className="sm:text-right">{eventLocation}</span>
-        </p>
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">No. of Guests:</span> 
-          <span className="sm:text-right">{guests}</span>
-        </p>
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">Services Needed:</span> 
-          <span className="sm:text-right">{servicesNeeded}</span>
-        </p>
-        <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-          <span className="font-medium">Budget:</span>{' '}
-          <span className="text-event-blue font-bold sm:text-right">{budget}</span>
-        </p>
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">Event Type:</span>
+          <span className="text-sm text-gray-600 text-right">{eventType}</span>
+        </div>
+        
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">Event Date:</span>
+          <span className="text-sm text-gray-600 text-right">{eventDate}</span>
+        </div>
+        
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">Event Location:</span>
+          <span className="text-sm text-gray-600 text-right">{eventLocation}</span>
+        </div>
+        
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">No. of Guests:</span>
+          <span className="text-sm text-gray-600 text-right">{guests}</span>
+        </div>
+        
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">Services Needed:</span>
+          <span className="text-sm text-gray-600 text-right">{servicesNeeded}</span>
+        </div>
+        
+        <div className="flex justify-between items-start">
+          <span className="text-sm font-medium text-gray-700">Budget:</span>
+          <span className="text-sm font-bold text-blue-600 text-right">{budget}</span>
+        </div>
+        
         {additionalInfo && (
-          <p className="flex flex-col sm:flex-row sm:justify-between gap-1">
-            <span className="font-medium">Additional Info:</span>{' '}
-            <span className="sm:text-right">{additionalInfo}</span>
-          </p>
+          <div className="flex justify-between items-start">
+            <span className="text-sm font-medium text-gray-700">Additional Info.:</span>
+            <span className="text-sm text-gray-600 text-right">{additionalInfo}</span>
+          </div>
         )}
       </div>
 
-      {/* Action Buttons - Only show for active requests */}
-      {status === 'active' && (
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+      {/* Action Buttons - Only show for pending requests */}
+      {(status === 'pending' || status === 'active') && (
+        <div className="flex gap-3">
           <button
-            onClick={onReject}
-            className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors text-sm"
+            onClick={() => {
+              console.log('🔍 Reject button clicked for request:', id)
+              onReject()
+            }}
+            className="flex-1 flex items-center justify-center gap-2 bg-white border border-red-500 text-red-500 py-3 px-4 rounded-lg font-semibold hover:bg-red-50 transition-colors"
           >
-            ✕ Reject Offer
+            <span className="text-lg">✕</span>
+            <span>Reject Offer</span>
           </button>
+          
           <button
-            onClick={onAccept}
-            className="flex-1 flex items-center gap-1 justify-center bg-event-blue text-white py-2 rounded-lg font-semibold hover:bg-event-blue-hover transition-colors text-sm"
+            onClick={() => {
+              console.log('🔍 Accept button clicked for request:', id)
+              onAccept()
+            }}
+            className="flex-1 flex items-center justify-center gap-2 bg-event-blue text-white py-3 px-4 rounded-lg font-semibold hover:bg-event-blue-hover transition-colors"
           >
-            <FaEye /> Accept Offer
+            <span className="text-lg">•</span>
+            <span>Accept Offer</span>
           </button>
+          
           {onCounterOffer && (
             <button
-              onClick={onCounterOffer}
-              className="flex-1 flex items-center gap-1 justify-center bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors text-sm"
+              onClick={() => {
+                console.log('🔍 Counter Offer button clicked for request:', id)
+                onCounterOffer()
+              }}
+              className="flex-1 flex items-center justify-center gap-2 bg-yellow-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-yellow-600 transition-colors"
             >
-              📝 Counter Offer
+              <span className="text-lg">📋</span>
+              <span>Counter Offer</span>
             </button>
           )}
+        </div>
+      )}
+
+      {/* Status indicators for non-pending requests */}
+      {status === 'rejected' && (
+        <div className="flex items-center justify-center py-3 px-4 bg-red-50 border border-red-200 rounded-lg">
+          <span className="text-red-600 font-semibold">✕ Offer Rejected</span>
+        </div>
+      )}
+
+      {status === 'accepted' && (
+        <div className="flex items-center justify-center py-3 px-4 bg-green-50 border border-green-200 rounded-lg">
+          <span className="text-green-600 font-semibold">✓ Offer Accepted</span>
         </div>
       )}
     </div>
   )
 }
 
-export default ServiceRequestCard
+// OPTIMIZED: Memoize component to prevent re-renders when parent re-renders with same props
+export default memo(ServiceRequestCard)

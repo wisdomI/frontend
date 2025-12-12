@@ -1,18 +1,46 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FiSearch } from 'react-icons/fi'
 
-export default function FilterCard() {
-  const [search, setSearch] = useState('')
-  const [date, setDate] = useState('')
-  const [location, setLocation] = useState('')
-  const [budgetRange, setBudgetRange] = useState('')
-  const [eventType, setEventType] = useState('')
+interface MarketplaceFilters {
+  search: string
+  date: string
+  location: string
+  budgetRange: string
+  eventType: string
+}
+
+interface FilterCardProps {
+  filters?: Partial<MarketplaceFilters>
+  onFiltersChange?: (filters: MarketplaceFilters) => void
+}
+
+const emptyFilters: MarketplaceFilters = {
+  search: '',
+  date: '',
+  location: '',
+  budgetRange: '',
+  eventType: '',
+}
+
+export default function FilterCard({ filters = emptyFilters, onFiltersChange }: FilterCardProps) {
+  const normalizedFilters = { ...emptyFilters, ...filters }
+
+  const [search, setSearch] = useState(normalizedFilters.search)
+  const [date, setDate] = useState(normalizedFilters.date)
+  const [location, setLocation] = useState(normalizedFilters.location)
+  const [budgetRange, setBudgetRange] = useState(normalizedFilters.budgetRange)
+  const [eventType, setEventType] = useState(normalizedFilters.eventType)
+
+  // Update parent when any filter changes
+  useEffect(() => {
+    onFiltersChange?.({ search, date, location, budgetRange, eventType })
+  }, [search, date, location, budgetRange, eventType, onFiltersChange])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log({ search, date, location, budgetRange, eventType })
+    console.log('🔍 Filter applied:', { search, date, location, budgetRange, eventType })
   }
 
   return (
@@ -117,6 +145,7 @@ export default function FilterCard() {
               setLocation('')
               setBudgetRange('')
               setEventType('')
+              onFiltersChange?.(emptyFilters)
             }}
             className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg transition-colors text-sm font-medium hover:bg-gray-50"
           >

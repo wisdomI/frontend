@@ -3,34 +3,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import primaryLogo from '../../public/images/primary-logo 3.png'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/contexts/AppContext'
 import SignUpFlow from './modals/SignUpFlow'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { FiUser, FiLogOut, FiBell, FiMessageSquare } from 'react-icons/fi'
 import LogoutConfirmationModal from '@/components/ui/modals/LogoutConfirmationModal'
+import { useNotifications } from '@/hooks/useNotifications'
+import { useMessages } from '@/hooks/useMessages'
 
 const locations = [
-  'New York, NY',
-  'Los Angeles, CA',
-  'Chicago, IL',
-  'Houston, TX',
-  'Phoenix, AZ',
-  'Philadelphia, PA',
-  'San Antonio, TX',
-  'San Diego, CA',
-  'Dallas, TX',
-  'San Jose, CA',
-  'Austin, TX',
-  'Jacksonville, FL',
-  'Fort Worth, TX',
-  'Columbus, OH',
-  'Charlotte, NC',
-  'San Francisco, CA',
-  'Indianapolis, IN',
-  'Seattle, WA',
-  'Denver, CO',
-  'Washington, DC'
+  'Lagos',
+  'Abuja (FCT)',
+  'Kano',
+  'Rivers',
+  'Oyo',
+  'Kaduna',
+  'Enugu',
+  'Delta',
+  'Ogun',
+  'Anambra'
 ]
 
 export default function Header() {
@@ -48,6 +41,10 @@ export default function Header() {
   const [profilePictureKey, setProfilePictureKey] = useState(0) // Force re-render when profile picture changes
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
   const logoutDropdownRef = useRef<HTMLDivElement>(null)
+  
+  // FIXED: Get notification and message counts from hooks instead of hardcoding
+  const { notificationCount } = useNotifications()
+  const { messageCount } = useMessages()
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -75,56 +72,58 @@ export default function Header() {
   useEffect(() => {
     const fetchProfilePicture = async () => {
       if (!user?.id || !isAuthenticated) {
-        console.log('⏸️ Main Header: Waiting for authentication...', { 
-          userId: user?.id, 
-          isAuthenticated, 
-          loading,
-          accountType: user?.accountType 
-        })
         return
       }
       
       try {
-        console.log('🔄 Main Header: Fetching profile picture for user:', user.id, 'Type:', user.accountType)
         const { profileAPI } = await import('@/lib/api')
         
         let response
         try {
           // Try the /profile/me endpoint first
           response = await profileAPI.me()
-          console.log('📥 Main Header: Profile API response (via /me):', response.data)
         } catch (meError: any) {
           if (meError.response?.status === 404) {
-            console.log('⚠️ Main Header: /profile/me not found, trying /profile/:id')
             // Fallback to using user ID
-            response = await profileAPI.getById(user.id)
-            console.log('📥 Main Header: Profile API response (via /id):', response.data)
+            try {
+              response = await profileAPI.getById(user.id)
+            } catch (getByIdError: any) {
+              if (getByIdError.response?.status === 404) {
+                throw new Error('Profile endpoints not implemented')
+              } else {
+                throw getByIdError
+              }
+            }
           } else {
             throw meError
           }
         }
         
         if (response.data.data?.displayPicture) {
-          setProfilePicture(response.data.data.displayPicture)
+          const displayPicture = response.data.data.displayPicture
+          setProfilePicture(displayPicture)
           setProfilePictureKey(prev => prev + 1)
-          console.log('✅ Main Header: Loaded display picture from API:', response.data.data.displayPicture)
+          
+          // Save to localStorage for fallback
+          if (typeof window !== 'undefined' && user?.id) {
+            localStorage.setItem(`profile_picture_${user.id}`, displayPicture)
+          }
         } else {
-          console.log('ℹ️ Main Header: No display picture in profile data')
           setProfilePicture(null)
         }
       } catch (error: any) {
-        console.error('⚠️ Main Header: Error fetching profile picture:', error)
-        console.error('Error details:', {
-          status: error.response?.status,
-          message: error.message,
-          data: error.response?.data
-        })
-        
-        // If profile endpoint doesn't work at all, show user info without picture
-        if (error.response?.status === 404) {
-          console.log('ℹ️ Main Header: Profile endpoints not implemented yet, will show initials')
+        // If profile endpoint doesn't work at all, try localStorage fallback
+        if (error.response?.status === 404 || error.message === 'Profile endpoints not implemented') {
+          const savedImage = localStorage.getItem(`profile_picture_${user.id}`)
+          if (savedImage) {
+            setProfilePicture(savedImage)
+            setProfilePictureKey(prev => prev + 1)
+          } else {
+            setProfilePicture(null)
+          }
+        } else {
+          setProfilePicture(null)
         }
-        setProfilePicture(null)
       }
     }
     
@@ -132,20 +131,19 @@ export default function Header() {
     
     // Listen for profile update events
     const handleProfileUpdate = () => {
-      console.log('🔄 Main Header: Profile updated event received, refreshing picture...')
       fetchProfilePicture()
     }
     
     window.addEventListener('profileUpdated', handleProfileUpdate)
     
-    // Refresh profile picture every 30 seconds to catch updates
-    const interval = setInterval(fetchProfilePicture, 30000)
+    // FIXED: Increase interval from 30s to 5 minutes and store reference properly
+    const intervalId = setInterval(fetchProfilePicture, 300000) // 5 minutes instead of 30 seconds
     
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate)
-      clearInterval(interval)
+      clearInterval(intervalId)
     }
-  }, [user?.id, isAuthenticated, loading])
+  }, [user?.id, isAuthenticated]) // FIXED: Removed 'loading' from dependencies to prevent re-creating interval
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location)
@@ -154,11 +152,9 @@ export default function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Searching for:', searchQuery, 'in', selectedLocation)
   }
 
   const handleSwitchToVendor = () => {
-    console.log('Switching to vendor profile...')
     setShowLogoutDropdown(false)
     
     if (typeof window !== 'undefined') {
@@ -167,7 +163,6 @@ export default function Header() {
   }
 
   const handleSwitchToClient = () => {
-    console.log('Switching to client profile...')
     setShowLogoutDropdown(false)
     
     if (typeof window !== 'undefined') {
@@ -177,18 +172,20 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2">
         {/* Desktop Header */}
         <div className="hidden lg:flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center min-w-[160px]">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/images/primary-logo 3.png" 
+                src={primaryLogo} 
                 alt="EventHub" 
                 width={120}
                 height={24}
                 className="h-6 w-30"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority
               />
             </Link>
           </div>
@@ -283,40 +280,36 @@ export default function Header() {
             {isAuthenticated && user ? (
               <>
                 {/* Notifications */}
-                <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Notifications">
-                  <FiBell className="w-6 h-6" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </button>
+                {notificationCount > 0 && (
+                  <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Notifications">
+                    <FiBell className="w-6 h-6" />
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {notificationCount}
+                    </span>
+                  </button>
+                )}
 
                 {/* Messages */}
-                <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Messages">
-                  <FiMessageSquare className="w-6 h-6" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-                    2
-                  </span>
-                </button>
+                {messageCount > 0 && (
+                  <button className="relative p-2 text-gray-600 hover:text-event-blue transition-colors" aria-label="Messages">
+                    <FiMessageSquare className="w-6 h-6" />
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {messageCount}
+                    </span>
+                  </button>
+                )}
 
                 {/* Profile Picture - Navigate to My Profile */}
                 <Link href="/client/my-profile" className="relative">
-                  <div key={profilePictureKey} className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+                  <div key={profilePictureKey} className="relative w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                     {(() => {
                       const displayName = user?.displayName || 
                         (user?.accountType === 'vendor' ? user?.businessName : 
                          `${user?.firstName || ''} ${user?.lastName || ''}`.trim());
                       
-                      console.log('🖼️ Main Header Render:', {
-                        profilePicture,
-                        profilePictureKey,
-                        hasUser: !!user,
-                        isAuthenticated,
-                        displayName
-                      });
                       
                       // Use profile picture from API state
                       if (profilePicture) {
-                        console.log('✅ Main Header: Rendering profile image:', profilePicture);
                         return (
                           <Image 
                             src={profilePicture} 
@@ -324,14 +317,13 @@ export default function Header() {
                             fill
                             className="object-cover"
                             key={profilePictureKey}
-                            onLoad={() => console.log('✅ Main Header: Image loaded successfully')}
-                            onError={() => console.error('❌ Main Header: Image failed to load')}
+                            onError={() => setProfilePicture(null)}
+                            sizes="40px"
                           />
                         );
                       }
                       
                       if (displayName) {
-                        console.log('📝 Main Header: Rendering initial for:', displayName);
                         return (
                           <span className="text-gray-600 font-medium">
                             {displayName.charAt(0).toUpperCase()}
@@ -339,7 +331,6 @@ export default function Header() {
                         );
                       }
                       
-                      console.log('👤 Main Header: Rendering default icon');
                       return <FiUser className="w-5 h-5 text-gray-400" />;
                     })()}
                   </div>
@@ -492,6 +483,7 @@ export default function Header() {
                 width={32}
                 height={32}
                 className="h-8 w-8"
+                sizes="32px"
               />
             </a>
           </div>
@@ -641,11 +633,15 @@ export default function Header() {
                   <div className="flex items-center gap-3">
                     <button className="relative flex-1 p-3 text-gray-600 hover:text-event-blue transition-colors border border-gray-200 rounded-lg" aria-label="Notifications">
                       <FiBell className="w-5 h-5 mx-auto" />
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {notificationCount}
+                      </span>
                     </button>
                     <button className="relative flex-1 p-3 text-gray-600 hover:text-event-blue transition-colors border border-gray-200 rounded-lg" aria-label="Messages">
                       <FiMessageSquare className="w-5 h-5 mx-auto" />
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {messageCount}
+                      </span>
                     </button>
                   </div>
 

@@ -5,6 +5,7 @@ import { serviceRequestAPI } from '@/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { ServiceRequest } from '@/types/api'
 import { FiPlus, FiEdit, FiTrash2, FiEye, FiCalendar, FiMapPin, FiUsers, FiDollarSign, FiSearch } from 'react-icons/fi'
+import { ButtonLoader } from '@/components/ui/Loader'
 
 interface ServiceRequestManagerProps {
   viewType?: 'all' | 'my' | 'assigned' | 'open' | 'upcoming'
@@ -70,9 +71,9 @@ export default function ServiceRequestManager({ viewType = 'all' }: ServiceReque
   }
 
   // Toggle service request status
-  const handleToggleStatus = async (requestId: string) => {
+  const handleToggleStatus = async (requestId: string, data?: any) => {
     try {
-      await serviceRequestAPI.toggleStatus(requestId)
+      await serviceRequestAPI.toggleStatus(requestId, data)
       await fetchRequests() // Refresh the list
     } catch (err) {
       setError('Failed to update service request status')
@@ -81,13 +82,45 @@ export default function ServiceRequestManager({ viewType = 'all' }: ServiceReque
   }
 
   // Update service request status
-  const handleUpdateStatus = async (requestId: string, status: string) => {
+  const handleUpdateStatus = async (requestId: string, status: string, notes?: string) => {
     try {
-      await serviceRequestAPI.updateStatus(requestId, status as any)
+      await serviceRequestAPI.updateStatus(requestId, { status, notes })
       await fetchRequests() // Refresh the list
     } catch (err) {
       setError('Failed to update service request status')
       console.error('Error updating service request:', err)
+    }
+  }
+
+  // Vendor response operations
+  const handleVendorAccept = async (requestId: string, data?: any) => {
+    try {
+      await serviceRequestAPI.vendorAccept(requestId, data)
+      await fetchRequests() // Refresh the list
+    } catch (err) {
+      setError('Failed to accept service request')
+      console.error('Error accepting service request:', err)
+    }
+  }
+
+  const handleVendorReject = async (requestId: string, data?: any) => {
+    try {
+      await serviceRequestAPI.vendorReject(requestId, data)
+      await fetchRequests() // Refresh the list
+    } catch (err) {
+      setError('Failed to reject service request')
+      console.error('Error rejecting service request:', err)
+    }
+  }
+
+  // Admin operations
+  const handleAssignPlanner = async (requestId: string, plannerId: string, notes?: string) => {
+    try {
+      await serviceRequestAPI.assignPlanner(requestId, { plannerId, notes })
+      await fetchRequests() // Refresh the list
+    } catch (err) {
+      setError('Failed to assign planner')
+      console.error('Error assigning planner:', err)
     }
   }
 
@@ -624,7 +657,9 @@ function CreateEditServiceRequestModal({ request, onClose, onSuccess }: CreateEd
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Saving...' : (request ? 'Update' : 'Create')}
+                <ButtonLoader loading={loading} loadingText="Saving...">
+                  {request ? 'Update' : 'Create'}
+                </ButtonLoader>
               </button>
             </div>
           </form>

@@ -29,10 +29,17 @@ const WhyChooseEventHub = () => {
                 width={24} 
                 height={24} 
                 className="flex-shrink-0"
+                // style={{ width: "auto", height: "auto" }}
               />
               <span className="font-medium text-sm md:text-base">Safe Payments</span>
             </div>
-
+      
+            <div>
+              <span className='text-gray-500 text-xl md:text-xl'>
+                |
+                </span>        
+            </div>
+      
             {/* Data Privacy Section */}
             <div className="flex items-center space-x-3">
               {/* Privacy Icon */}

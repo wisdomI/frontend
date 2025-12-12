@@ -147,20 +147,6 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Security Reminder Banner */}
-      <div className="bg-blue-50 border-b border-blue-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-blue-800">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <span className="text-sm font-medium">
-              Security Reminder: EventHub will never ask you to make payments outside the platform. Only complete transactions through our secure system.
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumbs */}
         <div className="mb-6">
@@ -335,7 +321,24 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {servicesData.map((service) => (
-                <div key={service.id} className="space-y-4">
+                <div 
+                  key={service.id} 
+                  className="space-y-4 cursor-pointer"
+                  onClick={() => {
+                    if (service.id) {
+                      window.location.href = `/services/${service.id}`
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (service.id) {
+                        window.location.href = `/services/${service.id}`
+                      }
+                    }
+                  }}
+                >
                   <Image 
                     src={service.image} 
                     alt={service.title}
@@ -346,12 +349,6 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                   <div>
                     <h4 className="font-bold text-gray-900 mb-2">{service.title}</h4>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">{service.description}</p>
-                    <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
-                      <span>View Pricing</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
                   </div>
                 </div>
               ))}

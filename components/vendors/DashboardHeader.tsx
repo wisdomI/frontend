@@ -56,13 +56,25 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
         
         if (profileData?.displayPicture) {
           setProfilePicture(profileData.displayPicture)
-          console.log('✅ Header: Loaded display picture from API:', profileData.displayPicture)
-        } else {
-          console.log('ℹ️ Header: No display picture in profile')
-          setProfilePicture(null)
+          // Store in localStorage for fallback
+          if (typeof window !== 'undefined' && user?.id) {
+            localStorage.setItem(`profile_picture_${user.id}`, profileData.displayPicture)
+          }
         }
-      } catch (error) {
-        console.log('⚠️ Header: Could not load profile picture from API')
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          // Try localStorage fallback
+          const savedImage = typeof window !== 'undefined' ? localStorage.getItem(`profile_picture_${user.id}`) : null
+          if (savedImage) {
+            setProfilePicture(savedImage)
+          }
+        } else if (error.response?.status === 403) {
+          // Access restricted - use localStorage fallback
+          const savedImage = typeof window !== 'undefined' ? localStorage.getItem(`profile_picture_${user.id}`) : null
+          if (savedImage) {
+            setProfilePicture(savedImage)
+          }
+        }
       }
     }
     
@@ -70,18 +82,17 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
     
     // Listen for profile update events
     const handleProfileUpdate = () => {
-      console.log('🔄 Header: Profile updated event received, refreshing picture...')
       fetchProfilePicture()
     }
     
     window.addEventListener('profileUpdated', handleProfileUpdate)
     
-    // Refresh profile picture every 30 seconds to catch updates
-    const interval = setInterval(fetchProfilePicture, 30000)
+    // OPTIMIZED: Reduced refresh interval from 30s to 5 minutes
+    const intervalId = setInterval(fetchProfilePicture, 300000)
     
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate)
-      clearInterval(interval)
+      clearInterval(intervalId)
     }
   }, [user?.id])
 
@@ -249,7 +260,7 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => v
         {/* User Profile - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-3 px-2 sm:px-3 py-1 sm:py-2">
           {/* Display Picture */}
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+          <div className="relative w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
             {(() => {
               const displayName = user?.displayName || user?.businessName || user?.firstName || 'Vendor';
               

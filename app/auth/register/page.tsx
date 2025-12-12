@@ -31,6 +31,9 @@ export default function RegisterPage() {
     accountType: 'vendor',
     firstName: '',
     lastName: '',
+    businessName: '',
+    businessAddress: '',
+    businessEmail: '',
     email: '',
     phoneNumber: '',
     password: '',
@@ -78,14 +81,35 @@ export default function RegisterPage() {
   const handleResendCode = async () => {
     try {
       const email = registrationData?.email || formData.email
+      if (!email) {
+        addNotification({
+          type: 'error',
+          message: 'Email not found. Please register again.'
+        })
+        return
+      }
+      
+      // FIXED: Ensure we're passing the correct object format
       await authAPI.resendVerificationCode({ email })
       addNotification({
         type: 'success',
-        message: 'Verification code resent successfully!'
+        message: 'Verification code resent successfully! Please check your email (including spam folder).'
       })
     } catch (error: any) {
       console.error('Resend code error:', error)
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to resend verification code'
+      
+      // FIXED: Provide more specific error messages
+      let errorMessage = 'Failed to resend verification code'
+      if (error.response?.status === 404) {
+        errorMessage = 'Email not found. Please register again.'
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Too many requests. Please wait a few minutes before requesting again.'
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       addNotification({
         type: 'error',
         message: errorMessage
@@ -173,9 +197,9 @@ export default function RegisterPage() {
       // Add fields based on account type
       if (formData.accountType === 'vendor') {
         // For vendor accounts - use business fields
-        registrationPayload.businessName = formData.firstName
-        registrationPayload.businessAddress = formData.lastName || 'Lagos, Nigeria'
-        registrationPayload.businessEmail = formData.email
+        registrationPayload.businessName = formData.businessName
+        registrationPayload.businessAddress = formData.businessAddress || 'Lagos, Nigeria'
+        registrationPayload.businessEmail = formData.businessEmail || formData.email
       } else {
         // For individual/organisation accounts - use personal fields
         registrationPayload.firstName = formData.firstName
@@ -207,17 +231,52 @@ export default function RegisterPage() {
       clearInterval(progressInterval)
       setLoadingProgress(100)
       
+      // Enhanced logging for debugging OTP issues
       console.log('Registration response:', response)
+      console.log('Registration response data:', response?.data)
+      console.log('Registration response message:', response?.data?.message)
+      console.log('Full response structure:', JSON.stringify(response?.data, null, 2))
+      
+      // Check response for OTP-related status
+      const responseMessage = (response?.data?.message || '').toLowerCase()
+      const responseData = response?.data?.data || {}
+      
+      // Check for explicit OTP sending failure indicators
+      const hasOtpError = responseMessage.includes('otp') && 
+                          (responseMessage.includes('failed') || 
+                           responseMessage.includes('error') || 
+                           responseMessage.includes('not sent') ||
+                           responseMessage.includes('unable to send'))
       
       // Wait a bit for the progress bar to complete
-      setTimeout(() => {
+      setTimeout(async () => {
         setRegistrationStep('verification')
         setIsLoading(false)
         
-        addNotification({
-          type: 'success',
-          message: 'Registration successful! Please verify your email.'
-        })
+        // If there's an explicit OTP error, try to resend automatically
+        if (hasOtpError) {
+          console.warn('OTP sending failed during registration. Attempting to resend...')
+          try {
+            await authAPI.resendVerificationCode({ email: registrationPayload.email })
+            addNotification({
+              type: 'success',
+              message: 'Registration successful! Verification code has been resent to your email. Please check your inbox (and spam folder).'
+            })
+          } catch (resendError: any) {
+            console.error('Failed to resend verification code:', resendError)
+            const resendErrorMessage = resendError.response?.data?.message || resendError.message || 'Unknown error'
+            addNotification({
+              type: 'warning',
+              message: `Registration successful, but verification code could not be sent. Error: ${resendErrorMessage}. Please use the "Resend Code" button below.`
+            })
+          }
+        } else {
+          // Normal success case - assume OTP was sent by backend
+          addNotification({
+            type: 'success',
+            message: 'Registration successful! A verification code has been sent to your email. Please check your inbox (and spam folder).'
+          })
+        }
         
         // Automatically show email verification
         setShowEmailVerification(true)
@@ -279,21 +338,58 @@ export default function RegisterPage() {
         <div className="text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-[#0B2E6F] font-asul">Verify Your Email</h2>
           <p className="mt-3 text-gray-600">
-            We&apos;ve sent a verification code to <strong>{registrationData?.email || formData.email}</strong>
+            We&apos;ve sent a 6-digit verification code to <strong>{registrationData?.email || formData.email}</strong>
           </p>
           
-          <div className="mt-6">
+          {/* Verification Code Input Instructions */}
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-700">
+              <strong>📧 Check your email</strong> for the verification code. It should arrive within 1-2 minutes.
+            </p>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 Tip: Check your <strong>spam/junk folder</strong> if you don&apos;t see it in your inbox.
+            </p>
+          </div>
+
+          {/* Main Resend Button */}
+          <div className="mt-8">
             <button
               onClick={handleResendCode}
-              className="px-6 py-2 bg-[#0B2E6F] text-white rounded-lg hover:bg-[#0A285F] transition"
+              className="w-full px-6 py-3 bg-[#0B2E6F] text-white rounded-lg hover:bg-[#0A285F] transition font-semibold text-lg"
             >
-              Resend Verification Code
+              📨 Resend Verification Code
             </button>
+            <p className="text-xs text-gray-500 mt-2">
+              Didn&apos;t receive the code? Click above to send it again.
+            </p>
           </div>
-          
-          <p className="mt-4 text-sm text-gray-500">
-            Didn&apos;t receive the email? Check your spam folder or click &quot;Resend&quot; above.
-          </p>
+
+          {/* Secondary Help Options */}
+          <div className="mt-8 space-y-3">
+            <div className="text-sm">
+              <p className="text-gray-600 mb-3">Other options:</p>
+              <button
+                onClick={() => setRegistrationStep('form')}
+                className="text-blue-600 hover:text-blue-800 underline text-sm"
+              >
+                ← Back to Registration
+              </button>
+              <span className="text-gray-400 mx-2">|</span>
+              <a
+                href="https://eventhub.com/support"
+                className="text-blue-600 hover:text-blue-800 underline text-sm"
+              >
+                Need Help?
+              </a>
+            </div>
+          </div>
+
+          {/* Final Note */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-xs text-gray-500">
+              Once you have the code, you&apos;ll be able to enter it in the verification modal that appears when you try to log in, or from the login page if you haven&apos;t verified yet.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -357,13 +453,13 @@ export default function RegisterPage() {
             // Vendor Fields
             <>
               <div>
-                <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">Business Name</label>
+                <label htmlFor="businessName" className="block text-sm font-semibold text-gray-700 mb-2">Business Name</label>
                 <input
-                  id="firstName"
-                  name="firstName"
+                  id="businessName"
+                  name="businessName"
                   type="text"
                   required
-                  value={formData.firstName}
+                  value={formData.businessName}
                   onChange={handleInputChange}
                   className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
                   placeholder="Enter Company Name"
@@ -371,7 +467,33 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Business Email</label>
+                <label htmlFor="businessAddress" className="block text-sm font-semibold text-gray-700 mb-2">Business Address</label>
+                <input
+                  id="businessAddress"
+                  name="businessAddress"
+                  type="text"
+                  value={formData.businessAddress}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Company Address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="businessEmail" className="block text-sm font-semibold text-gray-700 mb-2">Business Email</label>
+                <input
+                  id="businessEmail"
+                  name="businessEmail"
+                  type="email"
+                  value={formData.businessEmail}
+                  onChange={handleInputChange}
+                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
+                  placeholder="Enter Business Email"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Personal Email</label>
                 <input
                   id="email"
                   name="email"
@@ -380,20 +502,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
-                  placeholder="Enter Company Email"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">Business Address</label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className="block w-full h-12 rounded-lg border border-gray-200 bg-white px-3 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B2E6F] focus:border-[#0B2E6F]"
-                  placeholder="Enter Company Address"
+                  placeholder="Enter Personal Email"
                 />
               </div>
 
