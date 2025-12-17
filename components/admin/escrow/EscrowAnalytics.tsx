@@ -160,11 +160,11 @@ export default function EscrowAnalytics() {
 
       {/* Report Generator */}
       <div className="pt-4">
-         <h2 className="text-lg font-semibold text-gray-800 mb-4">Report Generator</h2>
-         <div className="bg-gray-50 p-6 rounded-xl flex flex-col md:flex-row gap-6 items-end">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Report Generator</h2>
+         <div className="bg-white p-6 rounded-xl flex flex-col md:flex-row gap-6 items-end shadow-sm">
             <div className="flex-1 w-full">
+               <label className="block text-sm font-medium text-gray-700 mb-2">Choose report type</label>
                <CustomDropdown 
-                 label="Report Type"
                  options={[
                    { label: 'Weekly Summary', value: 'Weekly Summary' },
                    { label: 'Monthly Revenue', value: 'Monthly Revenue' },
@@ -173,24 +173,27 @@ export default function EscrowAnalytics() {
                  ]}
                  selected={reportType}
                  onChange={setReportType}
+                 buttonClassName="w-full justify-between"
                />
             </div>
             
             <div className="flex-1 w-full">
+               <label className="block text-sm font-medium text-gray-700 mb-2">Choose who to send to</label>
                <CustomDropdown 
-                 label="Send to"
                  options={[
                    { label: 'Super Admin', value: 'Super Admin' },
                    { label: 'All Admins', value: 'All Admins' },
                    { label: 'Escrow Admin', value: 'Escrow Admin' },
+                   { label: 'Dispute Admin', value: 'Dispute Admin' },
+                   { label: 'Marketplace Admin', value: 'Marketplace Admin' },
                  ]}
                  selected={sendTo}
                  onChange={setSendTo}
+                 buttonClassName="w-full justify-between"
                />
             </div>
 
-            <button className="bg-[#0B2E6F] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#09255a] flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center h-[46px]">
-               <Download className="w-5 h-5" />
+            <button className="bg-[#0B2E6F] text-white py-2.5 px-6 rounded-lg font-medium hover:bg-[#09255a] flex items-center justify-center gap-2 whitespace-nowrap w-full md:w-auto h-[42px]">
                Generate & Send Report
             </button>
          </div>

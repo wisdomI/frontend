@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import {
   Users,
   Trash2,
   Plus,
 } from 'lucide-react'
-import CustomDropdown from '@/components/ui/CustomDropdown'
 
 // Mock Data
 const stats = [
@@ -49,7 +48,6 @@ const escalations = [
     description: '₦2.5M - Awaiting approval',
     color: 'bg-[#FFE8C8]', // Light Orange/Yellow
     border: 'border-l-4 border-[#FFA500]',
-    type: 'Escrow'
   },
   {
     id: 2,
@@ -57,7 +55,6 @@ const escalations = [
     description: 'Verification Admin flagged account',
     color: 'bg-[#FAD2E1]', // Light Pink
     border: 'border-l-4 border-[#E91E63]',
-    type: 'Verification'
   },
   {
     id: 3,
@@ -65,7 +62,6 @@ const escalations = [
     description: 'Case #1234 needs final decision',
     color: 'bg-[#FFFAC8]', // Pale Yellow
     border: 'border-l-4 border-[#FFD700]',
-    type: 'Dispute'
   },
   {
     id: 4,
@@ -73,24 +69,17 @@ const escalations = [
     description: 'Escrow Admin flagged Client',
     color: 'bg-[#D0D3FC]', // Light Blue/Purple
     border: 'border-l-4 border-[#4B0082]',
-    type: 'Escrow'
   },
 ]
 
 export default function AdminDashboard() {
-  const [escalationFilter, setEscalationFilter] = useState('All Types')
-
-  const filteredEscalations = escalationFilter === 'All Types'
-    ? escalations
-    : escalations.filter(e => e.type === escalationFilter)
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Welcome Section */}
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold font-asul text-gray-900">Welcome Back, Ms.Fola (Super Admin)</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome Back, Ms.Fola (Super Admin)</h1>
           <span className="text-2xl">👋🏽</span>
         </div>
 
@@ -98,7 +87,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <div key={index} className="bg-white rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center">
-              <p className="text-2xl font-bold font-asul text-[#0B2E6F] mb-2">{stat.value}</p>
+              <p className="text-2xl font-bold text-[#0B2E6F] mb-2">{stat.value}</p>
               <p className="text-sm text-gray-600 font-medium">{stat.label}</p>
             </div>
           ))}
@@ -148,25 +137,10 @@ export default function AdminDashboard() {
 
           {/* Right Column (1/3 width) - Recent Escalations */}
           <div className="lg:col-span-1">
-             <div className="bg-white rounded-xl p-6 shadow-sm h-full flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Escalations</h2>
-                <div className="w-32">
-                  <CustomDropdown 
-                    options={[
-                      { label: 'All Types', value: 'All Types' },
-                      { label: 'Escrow', value: 'Escrow' },
-                      { label: 'Verification', value: 'Verification' },
-                      { label: 'Dispute', value: 'Dispute' },
-                    ]}
-                    selected={escalationFilter}
-                    onChange={setEscalationFilter}
-                    buttonClassName="py-1 px-2 text-xs"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4 flex-1">
-                {filteredEscalations.map((item) => (
+             <div className="bg-white rounded-xl p-6 shadow-sm h-full">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Recent Escalations</h2>
+              <div className="space-y-4">
+                {escalations.map((item) => (
                   <Link 
                     key={item.id}
                     href={`/super-admin/escalations/${item.id}`}
@@ -176,9 +150,6 @@ export default function AdminDashboard() {
                     <p className="text-xs text-gray-600 mt-1">{item.description}</p>
                   </Link>
                 ))}
-                {filteredEscalations.length === 0 && (
-                  <p className="text-sm text-gray-500 text-center py-4">No escalations found.</p>
-                )}
               </div>
             </div>
           </div>

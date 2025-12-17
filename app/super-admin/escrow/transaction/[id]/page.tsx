@@ -47,7 +47,7 @@ export default function EscrowTransactionDetailsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-           <Link href="/escrow-admin" className="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium mb-2">
+           <Link href="/super-admin/escrow" className="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium mb-2">
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Dashboard
           </Link>
@@ -257,3 +257,4 @@ export default function EscrowTransactionDetailsPage() {
     </div>
   )
 }
+

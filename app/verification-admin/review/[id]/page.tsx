@@ -68,7 +68,7 @@ export default function VerificationReviewPage() {
         Back to queue
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900">{vendor.name}</h1>
+      <h1 className="text-2xl font-bold font-asul text-gray-900">{vendor.name}</h1>
 
       {/* Documents Section */}
       <div className="space-y-4">

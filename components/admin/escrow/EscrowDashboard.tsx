@@ -89,13 +89,15 @@ export default function EscrowDashboard({ basePath = '/escrow-admin' }: EscrowDa
       </div>
 
       {/* Vendor Progress Tracker Link */}
-      <div className="bg-white rounded-xl p-6 shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors">
-        <div>
-          <h3 className="text-gray-900 font-semibold">Vendor Progress Tracker</h3>
-          <p className="text-sm text-gray-500">10 active projects</p>
+      <Link href={`${basePath}/vendor-progress`}>
+        <div className="bg-white rounded-xl p-6 shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors">
+          <div>
+            <h3 className="text-gray-900 font-semibold">Vendor Progress Tracker</h3>
+            <p className="text-sm text-gray-500">10 active projects</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
         </div>
-        <ChevronRight className="w-5 h-5 text-gray-400" />
-      </div>
+      </Link>
 
       <div className="bg-transparent space-y-4">
         <div className="flex items-center justify-between">
@@ -104,14 +106,17 @@ export default function EscrowDashboard({ basePath = '/escrow-admin' }: EscrowDa
              <CustomDropdown 
                options={[
                  { label: 'All Status', value: 'All Status' },
-                 { label: 'Pending', value: 'Pending' },
-                 { label: 'Funded', value: 'Funded' },
-                 { label: 'Released', value: 'Released' },
-                 { label: 'Disputed', value: 'Disputed' },
+                 { label: 'Pending only', value: 'Pending' },
+                 { label: 'Funded only', value: 'Funded' },
+                 { label: 'Released only', value: 'Released' },
+                 { label: 'Approved only', value: 'Approved' },
+                 { label: 'Refunded only', value: 'Refunded' },
+                 { label: 'In Escrow only', value: 'In Escrow' },
                ]}
                selected={statusFilter}
                onChange={setStatusFilter}
-               buttonClassName="py-1.5 px-3 text-sm"
+               placeholder="Choose status"
+               buttonClassName="py-1.5 px-3 text-sm w-full justify-between"
              />
           </div>
         </div>
@@ -120,17 +125,17 @@ export default function EscrowDashboard({ basePath = '/escrow-admin' }: EscrowDa
           {filteredTransactions.map((tx) => (
             <div key={tx.id} className="bg-white p-6 rounded-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-lg font-bold text-gray-800">{tx.event}</h3>
                 </div>
-                <p className="text-sm text-gray-600 mb-1">
+                <p className="text-sm text-gray-600 mb-2">
                   Client: {tx.client} → Vendor: {tx.vendor}
                 </p>
-                <p className="text-lg font-bold text-[#0B2E6F]">{tx.amount}</p>
+                <p className="text-xl font-bold text-[#0B2E6F] font-asul">{tx.amount}</p>
               </div>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                 <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${tx.statusColor} w-full sm:w-auto text-center min-w-[100px]`}>
+                 <span className={`px-6 py-2 rounded-lg text-sm font-medium ${tx.statusColor} w-full sm:w-auto text-center min-w-[100px]`}>
                    {tx.status}
                  </span>
                  <Link 
