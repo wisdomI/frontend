@@ -1,10 +1,31 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import LoginForm from '@/components/auth/LoginForm'
 
 export default function LoginPage() {
   const [selectedAccountType, setSelectedAccountType] = useState<'client' | 'vendor'>('client')
+  const router = useRouter()
+  
+  // SECURITY: Remove any sensitive data (email/password) from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      const hasSensitiveData = url.searchParams.has('email') || url.searchParams.has('password')
+      
+      if (hasSensitiveData) {
+        // Remove sensitive parameters from URL
+        url.searchParams.delete('email')
+        url.searchParams.delete('password')
+        
+        // Replace current URL without sensitive data (without page reload)
+        window.history.replaceState({}, '', url.toString())
+        
+        console.warn('SECURITY: Removed sensitive credentials from URL parameters')
+      }
+    }
+  }, [])
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-md p-6 sm:p-8 relative">

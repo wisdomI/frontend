@@ -25,7 +25,26 @@ export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
   const [showEmailVerification, setShowEmailVerification] = useState(false)
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('')
   
-  // Get redirect URL from query parameters
+  // SECURITY: Remove any sensitive data (email/password) from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      const hasSensitiveData = url.searchParams.has('email') || url.searchParams.has('password')
+      
+      if (hasSensitiveData) {
+        // Remove sensitive parameters from URL
+        url.searchParams.delete('email')
+        url.searchParams.delete('password')
+        
+        // Replace current URL without sensitive data (without page reload)
+        window.history.replaceState({}, '', url.toString())
+        
+        console.warn('SECURITY: Removed sensitive credentials from URL parameters')
+      }
+    }
+  }, [])
+  
+  // Get redirect URL from query parameters (only safe redirect param)
   const redirectUrl = searchParams.get('redirect')
   
   const [formData, setFormData] = useState({
@@ -66,15 +85,18 @@ export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
       
       // Use multiple redirect methods to ensure it works
       setTimeout(() => {
-        console.log('LoginForm: Executing redirect to:', redirectPath)
+        // SECURITY: Ensure redirect path doesn't contain any sensitive data
+        const cleanRedirectPath = redirectPath.split('?')[0] // Remove any query params
+        
+        console.log('LoginForm: Executing redirect to:', cleanRedirectPath)
         
         // Try router.push first
-        router.push(redirectPath)
+        router.push(cleanRedirectPath)
         
         // Fallback to window.location if router.push doesn't work
         setTimeout(() => {
           console.log('LoginForm: Fallback redirect using window.location')
-          window.location.href = redirectPath
+          window.location.href = cleanRedirectPath
         }, 500)
       }, 100)
     }
@@ -299,15 +321,18 @@ export default function LoginForm({ accountType = 'client' }: LoginFormProps) {
       setTimeout(() => {
         console.log('LoginForm: Attempting redirect after cookie setup')
         
+        // SECURITY: Ensure redirect path doesn't contain any sensitive data
+        const cleanRedirectPath = redirectPath.split('?')[0] // Remove any query params
+        
         // Try immediate redirect first
         try {
-          router.push(redirectPath)
+          router.push(cleanRedirectPath)
           console.log('LoginForm: router.push called successfully')
         } catch (routerError) {
           console.error('LoginForm: router.push failed:', routerError)
           // Fallback to window.location
           console.log('LoginForm: Using window.location fallback')
-          window.location.href = redirectPath
+          window.location.href = cleanRedirectPath
         }
       }, 200)
       

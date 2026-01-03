@@ -204,7 +204,7 @@ export default function MyProfilePage() {
       
       // Check if it's a 404 error (endpoint not implemented)
       if (error.response?.status === 404) {
-        alert('Profile picture upload is not available yet. The backend endpoint is not implemented on Azure backend.')
+        alert('Profile picture upload is not available yet. The backend endpoint is not implemented on Render backend.')
       } else if (error.response?.status === 401) {
         alert('Your session has expired. Please log in again.')
       } else if (error.response?.status === 403) {
@@ -246,7 +246,7 @@ export default function MyProfilePage() {
       
       // Check if it's a 404 error (endpoint not implemented)
       if (error.response?.status === 404) {
-        alert('Profile update feature is not available yet. The backend endpoint is not implemented on Azure backend.')
+        alert('Profile update feature is not available yet. The backend endpoint is not implemented on Render backend.')
       } else if (error.response?.status === 401) {
         alert('Your session has expired. Please log in again.')
       } else if (error.response?.status === 403) {
