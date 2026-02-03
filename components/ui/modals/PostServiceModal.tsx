@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { XMarkIcon, CalendarIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef } from 'react';
+import { CloudArrowUpIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 interface PostServiceModalProps {
   isOpen: boolean;
@@ -11,17 +11,24 @@ interface PostServiceModalProps {
 
 const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, vendorName }) => {
   const [formData, setFormData] = useState({
-    serviceType: '',
-    eventDate: '',
-    eventTime: '',
-    duration: '',
-    location: '',
-    budget: '',
-    description: '',
-    specialRequirements: ''
+    eventTitle: '',
+    eventType: '',
+    startDate: '12/05/2023',
+    endDate: '23/05/2023',
+    eventLocation: '',
+    eventCity: '',
+    servicesNeeded: '',
+    numberOfGuests: '',
+    budgetRange: '',
+    additionalInformation: '',
+    eventPlanner: 'Yes',
+    aiSuggestion: 'No',
   });
 
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -31,8 +38,62 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
     }));
   };
 
+  const handleFileUpload = (files: FileList | null) => {
+    if (!files) return;
+    
+    const newFiles = Array.from(files).filter(file => {
+      const isValidType = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'].includes(file.type);
+      const isValidSize = file.size <= 50 * 1024 * 1024; // 50MB
+      return isValidType && isValidSize;
+    });
+    
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    handleFileUpload(e.dataTransfer.files);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const isFormValid = () => {
+    return formData.eventTitle.trim() !== '' &&
+           formData.eventType !== '' &&
+           formData.startDate !== '' &&
+           formData.endDate !== '' &&
+           formData.eventLocation !== '' &&
+           formData.eventCity !== '' &&
+           formData.servicesNeeded !== '' &&
+           formData.numberOfGuests !== '' &&
+           formData.budgetRange !== '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid()) return;
+    
     setIsSubmitting(true);
     
     // Simulate API call
@@ -43,230 +104,359 @@ const PostServiceModal: React.FC<PostServiceModalProps> = ({ isOpen, onClose, ve
     
     // Reset form
     setFormData({
-      serviceType: '',
-      eventDate: '',
-      eventTime: '',
-      duration: '',
-      location: '',
-      budget: '',
-      description: '',
-      specialRequirements: ''
+      eventTitle: '',
+      eventType: '',
+      startDate: '12/05/2023',
+      endDate: '23/05/2023',
+      eventLocation: '',
+      eventCity: '',
+      servicesNeeded: '',
+      numberOfGuests: '',
+      budgetRange: '',
+      additionalInformation: '',
+      eventPlanner: 'Yes',
+      aiSuggestion: 'No',
     });
+    setUploadedFiles([]);
     
-    // Show success message (you can implement a toast notification here)
-    alert('Service request submitted successfully!');
+    // Show success message
+    alert('Direct service request submitted successfully!');
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto relative">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Post a Service Request</h2>
+        <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex-1 pr-2">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Request a Direct Service
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Kindly fill in your Event details
+            </p>
             {vendorName && (
-              <p className="text-gray-600 mt-1">Requesting service from {vendorName}</p>
+              <p className="text-sm text-event-blue mt-1 font-medium">
+                Requesting service from {vendorName}
+              </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="bg-event-blue h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold hover:opacity-90 flex-shrink-0"
           >
-            <XMarkIcon className="h-6 w-6 text-gray-500" />
+            ✕
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Service Type */}
-          <div>
-            <label htmlFor="serviceType" className="block text-sm font-medium text-gray-700 mb-2">
-              Service Type *
-            </label>
-            <select
-              id="serviceType"
-              name="serviceType"
-              value={formData.serviceType}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select service type</option>
-              <option value="bridal-makeup">Bridal Makeup</option>
-              <option value="photography">Photography</option>
-              <option value="catering">Catering</option>
-              <option value="wedding-planning">Wedding Planning</option>
-              <option value="floral-design">Floral Design</option>
-              <option value="music-entertainment">Music & Entertainment</option>
-              <option value="bridal-fashion">Bridal Fashion</option>
-              <option value="venue-decoration">Venue Decoration</option>
-              <option value="transportation">Transportation</option>
-              <option value="videography">Videography</option>
-              <option value="cake-design">Cake Design</option>
-              <option value="dj-services">DJ Services</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Event Details */}
+            <div className="space-y-6">
+              {/* Event Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Title
+                </label>
+                <input
+                  type="text"
+                  name="eventTitle"
+                  value={formData.eventTitle}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  placeholder="Enter Event Title"
+                  required
+                />
+              </div>
 
-          {/* Event Date and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="eventDate" className="block text-sm font-medium text-gray-700 mb-2">
-                <CalendarIcon className="h-4 w-4 inline mr-1" />
-                Event Date *
-              </label>
-              <input
-                type="date"
-                id="eventDate"
-                name="eventDate"
-                value={formData.eventDate}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              {/* Event Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Type
+                </label>
+                <select
+                  name="eventType"
+                  value={formData.eventType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="wedding">Wedding</option>
+                  <option value="corporate">Corporate Event</option>
+                  <option value="birthday">Birthday Party</option>
+                  <option value="anniversary">Anniversary</option>
+                  <option value="graduation">Graduation</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              {/* Event Date */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                      required
+                    />
+                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                      required
+                    />
+                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Location */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Location
+                </label>
+                <select
+                  name="eventLocation"
+                  value={formData.eventLocation}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  required
+                >
+                  <option value="">Select State</option>
+                  <option value="lagos">Lagos</option>
+                  <option value="abuja">Abuja</option>
+                  <option value="kano">Kano</option>
+                  <option value="rivers">Rivers</option>
+                  <option value="oyo">Oyo</option>
+                </select>
+              </div>
+
+              {/* Event City */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event City
+                </label>
+                <p className="text-xs text-gray-500 mb-2">(Select the City you will like to Host your event)</p>
+                <select
+                  name="eventCity"
+                  value={formData.eventCity}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  required
+                >
+                  <option value="">Select City</option>
+                  <option value="victoria-island">Victoria Island</option>
+                  <option value="ikoyi">Ikoyi</option>
+                  <option value="lekki">Lekki</option>
+                  <option value="maitama">Maitama</option>
+                  <option value="asokoro">Asokoro</option>
+                </select>
+              </div>
+
+              {/* Services Needed */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Services Needed
+                </label>
+                <select
+                  name="servicesNeeded"
+                  value={formData.servicesNeeded}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Services</option>
+                  <option value="catering">Catering</option>
+                  <option value="photography">Photography</option>
+                  <option value="decoration">Decoration</option>
+                  <option value="music">Music & Entertainment</option>
+                  <option value="makeup">Makeup & Beauty</option>
+                  <option value="transportation">Transportation</option>
+                </select>
+              </div>
+
+              {/* Number of Guests */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Guests
+                </label>
+                <input
+                  type="number"
+                  name="numberOfGuests"
+                  value={formData.numberOfGuests}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  placeholder="Enter no. of Guests"
+                  min="1"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="eventTime" className="block text-sm font-medium text-gray-700 mb-2">
-                <ClockIcon className="h-4 w-4 inline mr-1" />
-                Event Time *
-              </label>
-              <input
-                type="time"
-                id="eventTime"
-                name="eventTime"
-                value={formData.eventTime}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+
+            {/* Right Column - Budget, File Upload & Additional Information */}
+            <div className="space-y-6">
+              {/* Budget Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Budget Range
+                </label>
+                <input
+                  type="text"
+                  name="budgetRange"
+                  value={formData.budgetRange}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                  placeholder="e.g N100,000 - N200,000"
+                  required
+                />
+              </div>
+
+              {/* File Upload Section */}
+              <div>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    isDragOver ? 'border-event-blue bg-blue-50' : 'border-gray-300'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-sm text-gray-600 mb-2">Choose a file or drag & drop it here</p>
+                  <p className="text-xs text-gray-500 mb-4">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-event-blue text-white px-6 py-2 rounded-lg hover:bg-event-blue-hover transition-colors"
+                  >
+                    Browse File
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".jpeg,.jpg,.png,.pdf,.mp4"
+                    onChange={(e) => handleFileUpload(e.target.files)}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Uploaded Files */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm font-medium text-gray-700">{file.name}</span>
+                          <span className="text-xs text-gray-500">Size: {formatFileSize(file.size)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Information */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Information
+                </label>
+                <textarea
+                  name="additionalInformation"
+                  value={formData.additionalInformation}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent resize-none"
+                  placeholder="Enter here"
+                />
+              </div>
+
+              {/* Event Planner Question */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Would you like an Event planner to organize your event?
+                </label>
+                <select
+                  name="eventPlanner"
+                  value={formData.eventPlanner}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              {/* AI Suggestion Question */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Would you like AI to suggest Best profile for your event?
+                </label>
+                <select
+                  name="aiSuggestion"
+                  value={formData.aiSuggestion}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032D71] focus:border-transparent"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Duration and Location */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                Duration *
-              </label>
-              <select
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select duration</option>
-                <option value="1-hour">1 Hour</option>
-                <option value="2-hours">2 Hours</option>
-                <option value="3-hours">3 Hours</option>
-                <option value="4-hours">4 Hours</option>
-                <option value="5-hours">5 Hours</option>
-                <option value="6-hours">6 Hours</option>
-                <option value="full-day">Full Day</option>
-                <option value="multi-day">Multi-Day</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-                Event Location *
-              </label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="e.g., Abuja, Nigeria"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Budget */}
-          <div>
-            <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
-              <CurrencyDollarIcon className="h-4 w-4 inline mr-1" />
-              Budget Range *
-            </label>
-            <select
-              id="budget"
-              name="budget"
-              value={formData.budget}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select budget range</option>
-              <option value="under-50k">Under ₦50,000</option>
-              <option value="50k-100k">₦50,000 - ₦100,000</option>
-              <option value="100k-250k">₦100,000 - ₦250,000</option>
-              <option value="250k-500k">₦250,000 - ₦500,000</option>
-              <option value="500k-1m">₦500,000 - ₦1,000,000</option>
-              <option value="over-1m">Over ₦1,000,000</option>
-            </select>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Service Description *
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Describe your service requirements in detail..."
-              required
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-            />
-          </div>
-
-          {/* Special Requirements */}
-          <div>
-            <label htmlFor="specialRequirements" className="block text-sm font-medium text-gray-700 mb-2">
-              Special Requirements
-            </label>
-            <textarea
-              id="specialRequirements"
-              name="specialRequirements"
-              value={formData.specialRequirements}
-              onChange={handleInputChange}
-              placeholder="Any special requirements, preferences, or additional notes..."
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-            />
-          </div>
-
-          {/* Submit Buttons */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
+          {/* Submit Button */}
+          <div className="mt-8 flex justify-center">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              disabled={!isFormValid() || isSubmitting}
+              className={`w-full max-w-md py-4 rounded-lg font-medium transition-colors ${
+                isFormValid() && !isSubmitting
+                  ? 'bg-event-blue text-white hover:bg-event-blue-hover'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               {isSubmitting ? (
-                <>
+                <div className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Submitting...
-                </>
+                  Sending Request...
+                </div>
               ) : (
-                'Submit Request'
+                'Send Request'
               )}
             </button>
           </div>

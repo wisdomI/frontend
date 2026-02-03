@@ -4,7 +4,6 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react'
 
 // App State Interface
 interface AppState {
-  theme: 'light' | 'dark'
   sidebarOpen: boolean
   notifications: Notification[]
   loading: boolean
@@ -19,17 +18,17 @@ interface Notification {
 
 // Actions
 type AppAction =
-  | { type: 'SET_THEME'; payload: 'light' | 'dark' }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SIDEBAR'; payload: boolean }
-  | { type: 'ADD_NOTIFICATION'; payload: Omit<Notification, 'id' | 'timestamp'> }
+  | { type: 'ADD_NOTIFICATION'; payload: Notification }
   | { type: 'REMOVE_NOTIFICATION'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'CLEAR_NOTIFICATIONS' }
 
-// Initial State
+// Initial State (lazy initializer reads localStorage or prefers-color-scheme)
+// removed theme logic
+
 const initialState: AppState = {
-  theme: 'light',
   sidebarOpen: false,
   notifications: [],
   loading: false,
@@ -38,8 +37,6 @@ const initialState: AppState = {
 // Reducer
 const appReducer = (state: AppState, action: AppAction): AppState => {
   switch (action.type) {
-    case 'SET_THEME':
-      return { ...state, theme: action.payload }
     case 'TOGGLE_SIDEBAR':
       return { ...state, sidebarOpen: !state.sidebarOpen }
     case 'SET_SIDEBAR':
@@ -49,11 +46,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         notifications: [
           ...state.notifications,
-          {
-            ...action.payload,
-            id: Date.now().toString(),
-            timestamp: new Date(),
-          },
+          action.payload,
         ],
       }
     case 'REMOVE_NOTIFICATION':
@@ -75,7 +68,6 @@ interface AppContextType {
   state: AppState
   dispatch: React.Dispatch<AppAction>
   // Helper functions
-  toggleTheme: () => void
   toggleSidebar: () => void
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void
   removeNotification: (id: string) => void
@@ -93,20 +85,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
   // Helper functions
-  const toggleTheme = () => {
-    dispatch({ type: 'SET_THEME', payload: state.theme === 'light' ? 'dark' : 'light' })
-  }
+  // remove theme side effects
 
   const toggleSidebar = () => {
     dispatch({ type: 'TOGGLE_SIDEBAR' })
   }
 
   const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
-    dispatch({ type: 'ADD_NOTIFICATION', payload: notification })
+    const id = Date.now().toString()
+    dispatch({ type: 'ADD_NOTIFICATION', payload: { ...notification, id, timestamp: new Date() } })
     
     // Auto-remove notification after 5 seconds
     setTimeout(() => {
-      dispatch({ type: 'REMOVE_NOTIFICATION', payload: Date.now().toString() })
+      dispatch({ type: 'REMOVE_NOTIFICATION', payload: id })
     }, 5000)
   }
 
@@ -121,7 +112,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const value: AppContextType = {
     state,
     dispatch,
-    toggleTheme,
     toggleSidebar,
     addNotification,
     removeNotification,

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function PortfolioGallery() {
   const portfolioImages = [
     'portfolio1.jpg',
@@ -14,12 +16,13 @@ export default function PortfolioGallery() {
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {portfolioImages.map((image, index) => (
-          <div key={index} className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-            <img
+          <div key={index} className="aspect-square bg-gray-200 rounded-lg overflow-hidden relative">
+            <Image
               src={`/images/${image}`}
               alt={`Portfolio ${index + 1}`}
-              className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-              onError={(e) => {
+              fill
+              className="object-cover hover:scale-105 transition-transform cursor-pointer"
+              onError={(e: any) => {
                 e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlPC90ZXh0Pjwvc3ZnPg=='
               }}
             />

@@ -16,6 +16,7 @@ type CardView = 'grid' | 'list'
 export default function VendorsPage() {
   const { showNotification } = useNotificationBreadcrumb()
   const [view, setView] = useState<CardView>('grid')
+  
 
   useEffect(() => {
     showNotification({
@@ -27,6 +28,8 @@ export default function VendorsPage() {
       autoHide: false,
     })
   }, [showNotification])
+
+  
   return (
     <div className="flex min-h-screen flex-1">
       <div className="flex-1 container mx-auto px-4 py-8">
@@ -34,7 +37,7 @@ export default function VendorsPage() {
         <WhyChooseEventHub />
         <div className="mx-auto py-8">
           <div className="flex items-center gap-5 py-4">
-            <h1 className="text-xl text-light-gray font-bold">
+            <h1 className="text-xl text-light-gray font-bold font-asul">
               Popular Services
             </h1>
             <CardViewToggle view={view} onChange={setView} />
@@ -46,7 +49,7 @@ export default function VendorsPage() {
                 : 'flex flex-col gap-4 py-4'
             }
           >
-            {vendorsData.map((vendor, index) => (
+            {vendorsData.map((vendor) => (
               <VendorCard 
                 id={vendor.id}
                 verified={vendor.verified}

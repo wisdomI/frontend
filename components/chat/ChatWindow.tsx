@@ -1,6 +1,12 @@
 import OnlineStatusIndicator from './OnlineStatusIndicator'
+import { Conversation, Message } from '@/types/api'
 
-export default function ChatWindow() {
+interface ChatWindowProps {
+  conversation: Conversation
+  onSendMessage: (recipientId: string, message: string, messageType?: 'text' | 'image' | 'file') => Promise<Message>
+}
+
+export default function ChatWindow({ conversation, onSendMessage }: ChatWindowProps) {
   return (
     <div className="bg-white rounded-lg shadow border h-96 flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
@@ -17,21 +23,21 @@ export default function ChatWindow() {
         <div className="space-y-4">
           <div className="flex">
             <div className="bg-gray-100 rounded-lg p-3 max-w-xs">
-              <p className="text-sm">Hi! I'm interested in your photography services for my wedding.</p>
+              <p className="text-sm">Hi! I&apos;m interested in your photography services for my wedding.</p>
               <span className="text-xs text-gray-500">10:30 AM</span>
             </div>
           </div>
           
           <div className="flex justify-end">
             <div className="bg-blue-600 text-white rounded-lg p-3 max-w-xs">
-              <p className="text-sm">Thank you for your inquiry! I'd love to help capture your special day. When is your wedding date?</p>
+              <p className="text-sm">Thank you for your inquiry! I&apos;d love to help capture your special day. When is your wedding date?</p>
               <span className="text-xs text-blue-200">10:32 AM</span>
             </div>
           </div>
           
           <div className="flex">
             <div className="bg-gray-100 rounded-lg p-3 max-w-xs">
-              <p className="text-sm">It's on March 15th, 2024. We're expecting about 150 guests.</p>
+              <p className="text-sm">It&apos;s on March 15th, 2024. We&apos;re expecting about 150 guests.</p>
               <span className="text-xs text-gray-500">10:35 AM</span>
             </div>
           </div>

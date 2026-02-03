@@ -21,7 +21,7 @@ export const useCustomers = (options: UseCustomersOptions = {}) => {
     try {
       setLoading(true)
       const response = await customerAPI.getAll(options)
-      setCustomers(response.data)
+      setCustomers(response.data.data || [])
       setError(null)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch service providers')
@@ -59,7 +59,7 @@ export const useCustomer = (customerId: string) => {
       try {
         setLoading(true)
         const response = await customerAPI.getById(customerId)
-        setCustomer(response.data)
+        setCustomer(response.data.data)
         setError(null)
       } catch (err: any) {
         setError(err.message || 'Failed to fetch service provider')

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 interface ServiceCardProps {
     image: string;
     title: string;
@@ -8,9 +10,11 @@ interface ServiceCardProps {
     return (
       <div className="border p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center space-x-3">
-          <img 
+          <Image 
             src={image} 
             alt={title}
+            width={64}
+            height={64}
             className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg flex-shrink-0"
           />
           <div className="flex-1 min-w-0">

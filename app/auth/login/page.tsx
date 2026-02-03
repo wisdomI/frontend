@@ -1,35 +1,68 @@
+'use client'
+
+import { useState, Suspense, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import LoginForm from '@/components/auth/LoginForm'
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
 
 export default function LoginPage() {
+  const [selectedAccountType, setSelectedAccountType] = useState<'client' | 'vendor'>('client')
+  const router = useRouter()
+  
+  // SECURITY: Remove any sensitive data (email/password) from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      const hasSensitiveData = url.searchParams.has('email') || url.searchParams.has('password')
+      
+      if (hasSensitiveData) {
+        // Remove sensitive parameters from URL
+        url.searchParams.delete('email')
+        url.searchParams.delete('password')
+        
+        // Replace current URL without sensitive data (without page reload)
+        window.history.replaceState({}, '', url.toString())
+        
+        console.warn('SECURITY: Removed sensitive credentials from URL parameters')
+      }
+    }
+  }, [])
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-md p-6 sm:p-8 relative">
+
+        {/* Toggle */}
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-md bg-gray-100 rounded-full p-1 flex">
+            <button
+              onClick={() => setSelectedAccountType('client')}
+              className={`flex-1 rounded-full py-2 text-sm font-medium transition ${
+                selectedAccountType === 'client' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+              }`}
+            >
+              Individual/Org
+            </button>
+            <button
+              onClick={() => setSelectedAccountType('vendor')}
+              className={`flex-1 rounded-full py-2 text-sm font-medium transition ${
+                selectedAccountType === 'vendor' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+              }`}
+            >
+              Event Vendor
+            </button>
+          </div>
         </div>
-        
-        <div className="mt-8 space-y-6">
-          <GoogleSignInButton />
-          
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
-            </div>
-          </div>
-          
-          <LoginForm />
-          
-          <div className="text-center">
-            <a href="/auth/register" className="text-event-blue hover:opacity-80 transition-all">
-              Don't have an account? Sign up
-            </a>
-          </div>
+
+        {/* Header */}
+        <div className="mt-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#032D71] font-asul text-left">Login to EventHub</h2>
+          <p className="mt-3 text-gray-600 text-left">Kindly fill in your details to Login</p>
+        </div>
+
+        {/* Form */}
+        <div className="mt-6">
+          <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm accountType={selectedAccountType} />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -98,7 +98,12 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         {/* Register Link */}
         <p className="text-center mt-4 text-sm">
           Don&apos;t have an account?{' '}
-          <button className="text-event-blue font-medium hover:underline">
+          <button 
+            className="text-event-blue font-medium hover:underline"
+            onClick={() => {
+              window.location.href = '/auth/register'
+            }}
+          >
             Register
           </button>
         </p>

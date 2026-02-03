@@ -80,11 +80,11 @@ export default function NotificationBreadcrumb({
 
   return (
     <div className={`border-b ${typeStyles[type]} ${className}`}>
-      <div className="container mx-auto px-4">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-3">
-          <div className="flex items-center">
+          <div className="flex items-center w-full">
             {renderIcon()}
-            <span className="text-sm font-medium">
+            <span className="font-medium w-full" style={{ fontSize: '16px' }}>
               {message}
             </span>
           </div>
