@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { 
   ChevronDownIcon,
   HeartIcon,
@@ -25,7 +26,6 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Vendor Not Found</h1>
-          <p className="text-gray-600 mb-6">The vendor you're looking for doesn't exist.</p>
           <a href="/vendors" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
             Browse All Vendors
           </a>
@@ -147,20 +147,6 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Security Reminder Banner */}
-      <div className="bg-blue-50 border-b border-blue-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-blue-800">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <span className="text-sm font-medium">
-              Security Reminder: EventHub will never ask you to make payments outside the platform. Only complete transactions through our secure system.
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumbs */}
         <div className="mb-6">
@@ -198,10 +184,7 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                 <StarIcon className="h-4 w-4" />
                 <span>Top Rated</span>
               </button>
-              <div className="bg-white border border-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2">
-                <CheckIcon className="h-4 w-4 text-green-600" />
-                <span className="text-gray-700">Total Request {vendorData.totalRequests}</span>
-              </div>
+              {/* Could display stats if available */}
             </div>
           </div>
         </div>
@@ -215,10 +198,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                 <div className="flex gap-4">
                   {/* Main Image */}
                   <div className="flex-1 relative">
-                    <img 
-                      src={vendorData.mainImage} 
-                      alt={vendorData.vendorName}
-                      className="w-full h-96 object-cover rounded-xl"
+                  <Image 
+                    src={vendorData.mainImage} 
+                    alt={vendorData.vendorName}
+                      fill
+                      className="object-cover rounded-xl"
                     />
                     {vendorData.verified && (
                       <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full flex items-center space-x-1">
@@ -227,33 +211,18 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
                       </div>
                     )}
                     
-                    {/* Social Media Icons */}
-                    <div className="absolute bottom-4 left-4 flex items-center space-x-3">
-                      <a href={vendorData.socialMedia.instagram} className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm">
-                        <svg className="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987s11.987-5.367 11.987-11.987C24.014 5.367 18.647.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281c-.49 0-.928-.175-1.297-.49-.368-.315-.49-.753-.49-1.243s.122-.928.49-1.243c.369-.315.807-.49 1.297-.49s.928.175 1.297.49c.368.315.49.753.49 1.243s-.122.928-.49 1.243c-.369.315-.807.49-1.297.49z"/>
-                        </svg>
-                      </a>
-                      <a href={vendorData.socialMedia.facebook} className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm">
-                        <svg className="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                      </a>
-                      <a href={vendorData.socialMedia.twitter} className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm">
-                        <svg className="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
-                      </a>
-                    </div>
+                    {/* Social links not available from service API */}
                   </div>
 
                   {/* Thumbnail Images */}
                   <div className="flex flex-col space-y-2">
                     {vendorData.portfolioImages.map((image, index) => (
-                      <img 
+                      <Image 
                         key={index}
                         src={image} 
                         alt={`Portfolio ${index + 1}`}
+                        width={96}
+                        height={96}
                         className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -327,10 +296,12 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             {/* Portfolio Grid */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               {portfolioData.images.map((image, index) => (
-                <img 
+                <Image 
                   key={index}
                   src={image} 
                   alt={`Portfolio ${index + 1}`}
+                  width={200}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg"
                 />
               ))}
@@ -350,21 +321,34 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {servicesData.map((service) => (
-                <div key={service.id} className="space-y-4">
-                  <img 
+                <div 
+                  key={service.id} 
+                  className="space-y-4 cursor-pointer"
+                  onClick={() => {
+                    if (service.id) {
+                      window.location.href = `/services/${service.id}`
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (service.id) {
+                        window.location.href = `/services/${service.id}`
+                      }
+                    }
+                  }}
+                >
+                  <Image 
                     src={service.image} 
                     alt={service.title}
+                    width={300}
+                    height={160}
                     className="w-full h-40 object-cover rounded-lg"
                   />
                   <div>
                     <h4 className="font-bold text-gray-900 mb-2">{service.title}</h4>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">{service.description}</p>
-                    <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
-                      <span>View Pricing</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
                   </div>
                 </div>
               ))}
@@ -381,9 +365,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
               {reviewsData.map((review) => (
                 <div key={review.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center space-x-3 mb-3">
-                    <img 
+                    <Image 
                       src={review.avatar} 
                       alt={review.reviewer}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
@@ -413,9 +399,11 @@ const VendorProfilePage = ({ params }: { params: { vendorId: string } }) => {
               {recommendationsData.map((item) => (
                 <div key={item.id} className="space-y-4">
                   <div className="relative">
-                    <img 
+                    <Image 
                       src={item.image} 
                       alt={item.title}
+                      width={300}
+                      height={160}
                       className="w-full h-40 object-cover rounded-lg"
                     />
                     {item.verified && (

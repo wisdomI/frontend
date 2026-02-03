@@ -1,3 +1,5 @@
+'use client'
+
 interface Meeting {
   time: string
   title: string
@@ -22,15 +24,17 @@ const UpcomingMeetings = () => {
   ]
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
-      <h3 className="font-bold mb-4">Upcoming Meetings</h3>
-      {meetings.map((m, i) => (
-        <div key={i} className={`p-3 rounded mb-2 ${m.color}`}>
-          <p className="text-sm">{m.time}</p>
-          <p className="font-medium">{m.title}</p>
-          <p className="text-xs">By: {m.host}</p>
-        </div>
-      ))}
+    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+      <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Upcoming Meetings</h3>
+      <div className="space-y-2 sm:space-y-2">
+        {meetings.map((m, i) => (
+          <div key={i} className={`p-2 sm:p-3 rounded mb-2 ${m.color}`}>
+            <p className="text-xs sm:text-sm">{m.time}</p>
+            <p className="font-medium text-sm sm:text-base">{m.title}</p>
+            <p className="text-xs">By: {m.host}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

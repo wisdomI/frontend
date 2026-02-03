@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 import { Customer } from '@/types/customer'
 import { formatCurrency } from '@/lib/utils'
 
@@ -21,12 +22,14 @@ export default function CustomerCard({ customer }: CustomerCardProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="h-48 bg-gray-200">
-        <img
+      <div className="h-48 bg-gray-200 relative">
+        <Image
           src={customerData.portfolio?.images?.[0] || "/images/placeholder-customer.jpg"}
           alt={customerData.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover"
+          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
             e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='
           }}
         />

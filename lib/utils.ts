@@ -105,3 +105,34 @@ export const formatFileSize = (bytes: number): string => {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
+
+// Debug logging utility - only logs in development
+export const debugLog = (label: string, data?: any): void => {
+  if (process.env.NODE_ENV === 'development') {
+    if (data !== undefined) {
+      console.log(`🔍 ${label}:`, data)
+    } else {
+      console.log(`🔍 ${label}`)
+    }
+  }
+}
+
+export const debugError = (label: string, error?: any): void => {
+  if (process.env.NODE_ENV === 'development') {
+    if (error !== undefined) {
+      console.error(`❌ ${label}:`, error)
+    } else {
+      console.error(`❌ ${label}`)
+    }
+  }
+}
+
+export const debugWarn = (label: string, message?: any): void => {
+  if (process.env.NODE_ENV === 'development') {
+    if (message !== undefined) {
+      console.warn(`⚠️ ${label}:`, message)
+    } else {
+      console.warn(`⚠️ ${label}`)
+    }
+  }
+}

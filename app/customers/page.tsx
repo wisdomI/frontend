@@ -1,153 +1,189 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CustomerCard from '@/components/customer/CustomerCard'
-
-// Mock customer data
-const mockCustomers = [
-  {
-    id: '1',
-    name: 'Elite Photography',
-    email: 'contact@elitephoto.com',
-    phone: '(555) 123-4567',
-    description: 'Professional wedding and event photography with 10+ years of experience',
-    services: ['Wedding Photography', 'Event Photography', 'Portrait Photography'],
-    location: {
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001'
-    },
-    pricing: {
-      startingPrice: 1500,
-      currency: 'USD'
-    },
-    portfolio: {
-      images: ['/images/portfolio1.jpg', '/images/portfolio2.jpg'],
-      videos: []
-    },
-    rating: {
-      average: 4.8,
-      count: 24
-    },
-    availability: {
-      calendar: [],
-      timeSlots: ['9:00 AM', '2:00 PM', '6:00 PM']
-    },
-    verified: true,
-    createdAt: new Date('2023-01-15'),
-    updatedAt: new Date('2024-01-15')
-  },
-  {
-    id: '2',
-    name: 'Delicious Catering Co.',
-    email: 'info@deliciouscatering.com',
-    phone: '(555) 234-5678',
-    description: 'Full-service catering for weddings, corporate events, and special occasions',
-    services: ['Wedding Catering', 'Corporate Catering', 'Party Catering'],
-    location: {
-      city: 'Los Angeles',
-      state: 'CA',
-      zipCode: '90210'
-    },
-    pricing: {
-      startingPrice: 50,
-      currency: 'USD'
-    },
-    portfolio: {
-      images: ['/images/catering1.jpg', '/images/catering2.jpg'],
-      videos: []
-    },
-    rating: {
-      average: 4.6,
-      count: 18
-    },
-    availability: {
-      calendar: [],
-      timeSlots: ['10:00 AM', '3:00 PM', '7:00 PM']
-    },
-    verified: true,
-    createdAt: new Date('2023-03-20'),
-    updatedAt: new Date('2024-02-10')
-  },
-  {
-    id: '3',
-    name: 'Sound & Lights Pro',
-    email: 'booking@soundlightspro.com',
-    phone: '(555) 345-6789',
-    description: 'Professional audio and lighting services for all types of events',
-    services: ['Audio Equipment', 'Lighting Setup', 'DJ Services'],
-    location: {
-      city: 'Chicago',
-      state: 'IL',
-      zipCode: '60601'
-    },
-    pricing: {
-      startingPrice: 800,
-      currency: 'USD'
-    },
-    portfolio: {
-      images: ['/images/audio1.jpg', '/images/lighting1.jpg'],
-      videos: []
-    },
-    rating: {
-      average: 4.9,
-      count: 32
-    },
-    availability: {
-      calendar: [],
-      timeSlots: ['8:00 AM', '1:00 PM', '5:00 PM']
-    },
-    verified: true,
-    createdAt: new Date('2023-02-10'),
-    updatedAt: new Date('2024-01-25')
-  }
-]
+import { profileAPI } from '@/lib/api'
+import { User } from '@/types/api'
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState(mockCustomers)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [vendors, setVendors] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedLocation, setSelectedLocation] = useState<string>('all')
+  const [priceRange, setPriceRange] = useState<string>('all')
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    
-    // Filter customers based on search term
-    if (value.trim() === '') {
-      setCustomers(mockCustomers)
-    } else {
-      const filtered = mockCustomers.filter(customer =>
-        customer.name.toLowerCase().includes(value.toLowerCase()) ||
-        customer.description.toLowerCase().includes(value.toLowerCase()) ||
-        customer.services.some(service => 
-          service.toLowerCase().includes(value.toLowerCase())
+  // Fetch vendors from API
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setLoading(true)
+        const response = await profileAPI.getAll()
+        // Filter for vendor accounts only
+        const vendorAccounts = response.data.data.filter((profile: any) => 
+          profile.accountType === 'vendor' || profile.accountType === 'business'
         )
-      )
-      setCustomers(filtered)
+        setVendors(vendorAccounts)
+      } catch (err) {
+        setError('Failed to fetch vendors')
+        console.error('Error fetching vendors:', err)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchVendors()
+  }, [])
+
+  // Filter vendors based on search and filters
+  const filteredVendors = vendors.filter(vendor => {
+    const matchesSearch = vendor.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         vendor.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         vendor.businessAddress?.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    return matchesSearch
+  })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Event Service Providers</h1>
-      
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search service providers..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-event-blue"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {customers.length > 0 ? (
-          customers.map((customer) => (
-            <CustomerCard key={customer.id} customer={customer} />
-          ))
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Vendors</h1>
+          <p className="text-gray-600">Discover professional vendors for your events</p>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search vendors
+              </label>
+              <input
+                type="text"
+                placeholder="Search by name, email, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Categories</option>
+                <option value="photography">Photography</option>
+                <option value="catering">Catering</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="decoration">Decoration</option>
+              </select>
+            </div>
+
+            {/* Location Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Locations</option>
+                <option value="lagos">Lagos</option>
+                <option value="abuja">Abuja</option>
+                <option value="kano">Kano</option>
+                <option value="port-harcourt">Port Harcourt</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="mb-4">
+          <p className="text-gray-600">
+            {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+
+        {/* Vendor Grid */}
+        {filteredVendors.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No vendors found matching your criteria</p>
+          </div>
         ) : (
-          <div className="col-span-full text-center py-8">
-            <p className="text-gray-500">No service providers found matching your criteria.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVendors.map((vendor) => (
+              <CustomerCard
+                key={vendor.id}
+                customer={{
+                  id: vendor.id,
+                  name: vendor.businessName || `${vendor.firstName} ${vendor.lastName}`,
+                  email: vendor.email,
+                  phone: vendor.phoneNumber || '',
+                  description: `Professional ${vendor.accountType} services`,
+                  services: [], // This would need to be fetched from services API
+                  location: {
+                    city: vendor.businessAddress || 'Location not specified',
+                    state: '',
+                    zipCode: ''
+                  },
+                  pricing: {
+                    startingPrice: 0,
+                    currency: 'USD'
+                  },
+                  portfolio: {
+                    images: [],
+                    videos: []
+                  },
+                  rating: {
+                    average: 0,
+                    count: 0
+                  },
+                  availability: {
+                    calendar: [],
+                    timeSlots: []
+                  },
+                  verified: vendor.isEmailVerified,
+                  createdAt: new Date(vendor.createdAt),
+                  updatedAt: new Date(vendor.updatedAt)
+                }}
+              />
+            ))}
           </div>
         )}
       </div>

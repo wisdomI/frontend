@@ -51,6 +51,7 @@ const ManageClientCard: FC<ManageClientCardProps> = ({
                 src={client}
                 alt={clientName}
                 fill
+                sizes="40px"
                 className="object-cover w-full h-full rounded-full border-[3px] border-green-600"
               />
             </div>
