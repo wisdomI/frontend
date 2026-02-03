@@ -1,8 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import CustomDropdown from '@/components/ui/CustomDropdown'
+import { escrowAnalyticsAdminAPI } from '@/lib/api'
+import { toast } from 'react-hot-toast'
 
 // Mock chart component
 const MockChart = ({ timeframe }: { timeframe: string }) => (
@@ -40,22 +42,59 @@ const MockChart = ({ timeframe }: { timeframe: string }) => (
 )
 
 export default function EscrowAnalytics() {
-  const stats = [
-    { label: 'Total Revenue', value: '₦45.2M', color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
-    { label: 'Active Users', value: '2,345', color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
-    { label: 'Events this month', value: '678', color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
-    { label: 'Dispute Rate', value: '2.3%', color: 'text-[#0B2E6F]', border: 'border-[#EF4444]' },
-  ]
+  const [stats, setStats] = useState([
+    { label: 'Total Revenue', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
+    { label: 'Active Users', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
+    { label: 'Events this month', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
+    { label: 'Dispute Rate', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#EF4444]' },
+  ])
+  const [topVendors, setTopVendors] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const [timeframe, setTimeframe] = useState('Last 6 months')
   const [category, setCategory] = useState('All Categories')
   const [reportType, setReportType] = useState('Weekly Summary')
   const [sendTo, setSendTo] = useState('Super Admin')
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        const dashboardRes = await escrowAnalyticsAdminAPI.getDashboard().catch(() => ({ data: { data: {} } }))
+        const data = dashboardRes.data?.data || {}
+
+        setStats([
+          { label: 'Total Revenue', value: data.totalRevenue ? `₦${data.totalRevenue.toLocaleString()}` : '₦0', color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
+          { label: 'Active Users', value: data.activeUsers?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
+          { label: 'Events this month', value: data.eventsThisMonth?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
+          { label: 'Dispute Rate', value: data.disputeRate ? `${data.disputeRate}%` : '0%', color: 'text-[#0B2E6F]', border: 'border-[#EF4444]' },
+        ])
+
+        if (data.topVendors) {
+            setTopVendors(data.topVendors)
+        } else {
+            // Mock if not present
+             setTopVendors([
+                 { name: 'Royal Events', events: '68 events', amount: '₦3.2M' },
+                 { name: 'UK Cakes & Cream', events: '45 events', amount: '₦2.5M' },
+                 { name: 'Elite Catering', events: '35 events', amount: '₦1.7M' },
+             ])
+        }
+
+      } catch (error) {
+        console.error('Error fetching escrow analytics:', error)
+        toast.error('Failed to load analytics data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-asul text-gray-800 flex items-center gap-2">
+        <h1 className="text-2xl font-bold font-raleway text-gray-800 flex items-center gap-2">
           Welcome Back, Escrow & Analytics Admin <span className="text-2xl">👋🏽</span>
         </h1>
       </div>
@@ -63,7 +102,11 @@ export default function EscrowAnalytics() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div key={index} className={`bg-white p-6 rounded-2xl border ${stat.border} shadow-sm flex flex-col items-center justify-center text-center h-40`}>
-            <span className={`text-4xl font-bold font-asul ${stat.color} mb-2`}>{stat.value}</span>
+            {isLoading ? (
+                <div className="h-10 w-24 bg-gray-200 animate-pulse rounded mb-2"></div>
+            ) : (
+                <span className={`text-4xl font-bold font-raleway ${stat.color} mb-2`}>{stat.value}</span>
+            )}
             <span className={`text-sm font-medium text-gray-600`}>{stat.label}</span>
           </div>
         ))}
@@ -126,19 +169,21 @@ export default function EscrowAnalytics() {
          <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Top Performing Vendors</h2>
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-               {[
-                 { name: 'Royal Events', events: '68 events', amount: '₦3.2M' },
-                 { name: 'UK Cakes & Cream', events: '45 events', amount: '₦2.5M' },
-                 { name: 'Elite Catering', events: '35 events', amount: '₦1.7M' },
-               ].map((vendor, i) => (
-                 <div key={i} className="flex items-center justify-between p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{vendor.name}</h3>
-                      <p className="text-xs text-gray-500">{vendor.events}</p>
-                    </div>
-                    <span className="font-bold text-green-600">{vendor.amount}</span>
-                 </div>
-               ))}
+               {isLoading ? (
+                   <div className="p-4 space-y-4">
+                       {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 animate-pulse rounded"></div>)}
+                   </div>
+               ) : (
+                   topVendors.length > 0 ? topVendors.map((vendor, i) => (
+                     <div key={i} className="flex items-center justify-between p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{vendor.name || vendor.businessName}</h3>
+                          <p className="text-xs text-gray-500">{vendor.events || '0 events'}</p>
+                        </div>
+                        <span className="font-bold text-green-600">{vendor.amount || '₦0'}</span>
+                     </div>
+                   )) : <p className="p-4 text-center text-gray-500">No top vendors found</p>
+               )}
             </div>
          </div>
 

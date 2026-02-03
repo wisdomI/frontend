@@ -49,7 +49,7 @@ export default function VendorProgressPage() {
         Back to transactions
       </Link>
 
-      <h1 className="text-2xl font-bold font-asul text-gray-800">Progress Tracker</h1>
+      <h1 className="text-2xl font-bold font-raleway text-gray-800">Progress Tracker</h1>
 
       <div className="space-y-4">
         {transactions.map((transaction) => (

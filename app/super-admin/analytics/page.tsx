@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import EscrowAnalytics from '@/components/admin/escrow/EscrowAnalytics'
+import SuperAdminAnalytics from '@/components/admin/analytics/SuperAdminAnalytics'
 
 export default function SuperAdminAnalyticsPage() {
-  return <EscrowAnalytics />
+  return <SuperAdminAnalytics />
 }

@@ -63,16 +63,33 @@ export function useLandingPageData(): LandingPageData {
 
     console.log('🔍 useLandingPageData: Starting to fetch data...')
 
-    // Fetch popular services with proper sorting
+    // Fetch popular services
     try {
       console.log('🔍 useLandingPageData: Fetching popular services...')
+      // Removing sortBy as backend throws "column ServiceOffering.sortBy does not exist"
       const popularResponse = await serviceAPI.getAll({
-        limit: 8,
-        sortBy: 'popularity', // Sort by popularity if backend supports it
-        sortOrder: 'desc'
+        limit: 8
       })
-      let popularServicesData = popularResponse.data.data || []
+      
+      // Handle different possible response structures
+      let popularServicesData: ServiceOffering[] = []
+      if (popularResponse?.data?.data) {
+        popularServicesData = Array.isArray(popularResponse.data.data) 
+          ? popularResponse.data.data 
+          : []
+      } else if (popularResponse?.data && Array.isArray(popularResponse.data)) {
+        popularServicesData = popularResponse.data
+      }
+      
       console.log('🔍 useLandingPageData: Popular services fetched:', popularServicesData.length)
+      if (popularServicesData.length === 0) {
+        console.log('🔍 useLandingPageData: Response structure:', {
+          hasData: !!popularResponse?.data,
+          dataType: typeof popularResponse?.data,
+          isArray: Array.isArray(popularResponse?.data),
+          responseKeys: popularResponse?.data ? Object.keys(popularResponse.data) : []
+        })
+      }
       
       // OPTIMIZED: Show immediately without ratings, enrich in background
       setPopularServices(popularServicesData)
@@ -88,11 +105,21 @@ export function useLandingPageData(): LandingPageData {
     } catch (err: any) {
       console.error('Error fetching popular services:', err)
       
+      // Don't set error immediately - try fallback first
       // Fallback: try to fetch services without sorting
       try {
         console.log('🔍 useLandingPageData: Fallback - fetching services without sorting...')
         const fallbackResponse = await serviceAPI.getAll({ limit: 8 })
-        let fallbackData = fallbackResponse.data.data || []
+        
+        // Handle different possible response structures
+        let fallbackData: ServiceOffering[] = []
+        if (fallbackResponse?.data?.data) {
+          fallbackData = Array.isArray(fallbackResponse.data.data) 
+            ? fallbackResponse.data.data 
+            : []
+        } else if (fallbackResponse?.data && Array.isArray(fallbackResponse.data)) {
+          fallbackData = fallbackResponse.data
+        }
         
         // Show fallback data immediately
         setPopularServices(fallbackData)
@@ -103,18 +130,23 @@ export function useLandingPageData(): LandingPageData {
             setPopularServices(enriched)
           }).catch(err => {
             console.log('Rating enrichment failed:', err)
+            // Don't fail the whole request if ratings fail
           })
         }
       } catch (fallbackErr: any) {
         console.error('Error in fallback service fetch:', fallbackErr)
         
+        // Only set error if it's a critical failure, but don't prevent rendering
         if (fallbackErr.response?.status === 401 || fallbackErr.response?.status === 403) {
           console.log('🔍 Services API requires authentication - this should be public')
-          setError('Services are currently unavailable. Please try again later.')
+          // Don't set error state - just log it and continue with empty array
+          // The component will handle empty state gracefully
         } else {
-          setError(fallbackErr.message || 'Failed to fetch services')
+          // Log error but don't block rendering
+          console.error('Failed to fetch services:', fallbackErr.message)
         }
         
+        // Set empty array but don't block the rest of the page
         setPopularServices([])
       }
     }
@@ -122,12 +154,20 @@ export function useLandingPageData(): LandingPageData {
     // Fetch recently viewed services
     try {
       console.log('🔍 useLandingPageData: Fetching recently viewed services...')
-      const recentResponse = await serviceAPI.getAll({ 
-        limit: 4,
-        sortBy: 'createdAt', // Sort by creation date for recent services
-        sortOrder: 'desc'
-      })
-      let recentServicesData = recentResponse.data.data || []
+        // Removing sortBy as backend doesn't support it
+        const recentResponse = await serviceAPI.getAll({ 
+          limit: 4
+        })
+        
+        // Handle different possible response structures
+        let recentServicesData: ServiceOffering[] = []
+        if (recentResponse?.data?.data) {
+          recentServicesData = Array.isArray(recentResponse.data.data) 
+            ? recentResponse.data.data 
+            : []
+        } else if (recentResponse?.data && Array.isArray(recentResponse.data)) {
+          recentServicesData = recentResponse.data
+        }
       console.log('🔍 useLandingPageData: Recent services fetched:', recentServicesData.length)
       
       // OPTIMIZED: Show immediately without ratings
@@ -148,10 +188,17 @@ export function useLandingPageData(): LandingPageData {
 
     // Fetch meetings independently (optional - don't fail if this doesn't work)
     try {
-      console.log('🔍 useLandingPageData: Fetching meetings...')
-      const eventsResponse = await meetingAPI.getAll({ limit: 3 })
-      setUpcomingEvents(eventsResponse.data.data || [])
-      console.log('🔍 useLandingPageData: Meetings fetched:', eventsResponse.data.data?.length || 0)
+      // Only fetch meetings if authenticated to avoid 401 errors
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      if (token) {
+        console.log('🔍 useLandingPageData: Fetching meetings...')
+        const eventsResponse = await meetingAPI.getAll({ limit: 3 })
+        setUpcomingEvents(eventsResponse.data.data || [])
+        console.log('🔍 useLandingPageData: Meetings fetched:', eventsResponse.data.data?.length || 0)
+      } else {
+        console.log('🔍 useLandingPageData: Skipping meetings fetch (not authenticated)')
+        setUpcomingEvents([])
+      }
     } catch (err: any) {
       console.log('🔍 Meetings API not available (this is optional):', err.message)
       // Don't set error for meetings - this is optional for the landing page
@@ -233,59 +280,108 @@ export function useRecentlyViewed() {
       setLoading(true)
       setError(null)
 
+      // Check if user is authenticated
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      
       // Get recently viewed service IDs from localStorage
       const recentlyViewedIds = getRecentlyViewedServiceIds()
       
-      if (recentlyViewedIds.length === 0) {
-        // If no recently viewed services, fetch recently created services as fallback
-        console.log('🔍 No recently viewed services found, fetching recent services...')
+      // If not authenticated OR no recently viewed services, fetch from public list endpoint
+      if (!token || recentlyViewedIds.length === 0) {
+        // Fetch recently created services as fallback (public endpoint)
+        console.log('🔍 No recently viewed services or not authenticated, fetching recent services from public endpoint...')
         const response = await serviceAPI.getAll({ 
-          limit: 4,
-          sortBy: 'createdAt',
-          sortOrder: 'desc'
+          limit: 4
         })
-        let recentServicesData = response.data.data || []
         
-        // Fetch ratings for each service
-        if (recentServicesData.length > 0) {
-          console.log('🔍 useRecentlyViewed: Fetching ratings for recent services...')
-          recentServicesData = await enrichServicesWithRatings(recentServicesData)
+        // Handle different possible response structures
+        let recentServicesData: ServiceOffering[] = []
+        if (response?.data?.data) {
+          recentServicesData = Array.isArray(response.data.data) 
+            ? response.data.data 
+            : []
+        } else if (response?.data && Array.isArray(response.data)) {
+          recentServicesData = response.data
+        }
+        
+        // Fetch ratings for each service (only if authenticated, ratings might need auth)
+        if (recentServicesData.length > 0 && token) {
+          try {
+            console.log('🔍 useRecentlyViewed: Fetching ratings for recent services...')
+            recentServicesData = await enrichServicesWithRatings(recentServicesData)
+          } catch (ratingErr) {
+            console.log('🔍 Rating enrichment failed, using services without ratings:', ratingErr)
+            // Continue with services without ratings
+          }
         }
         
         setRecentServices(recentServicesData)
       } else {
-        // Fetch details for recently viewed services
+        // User is authenticated and has recently viewed services
+        // Try to fetch individual services, but fallback to list if it fails
         console.log('🔍 Fetching details for recently viewed services:', recentlyViewedIds)
-        const servicePromises = recentlyViewedIds.map(id => 
-          serviceAPI.getById(id).catch(() => null) // Don't fail if one service is not found
-        )
-        const serviceResponses = await Promise.all(servicePromises)
-        let validServices = serviceResponses
-          .filter(response => response !== null)
-          .map(response => response!.data.data)
-          .filter(service => service !== null)
-        
-        // Fetch ratings for each service
-        if (validServices.length > 0) {
-          console.log('🔍 useRecentlyViewed: Fetching ratings for viewed services...')
-          validServices = await enrichServicesWithRatings(validServices)
+        try {
+          const servicePromises = recentlyViewedIds.map(id => 
+            serviceAPI.getById(id).catch(() => null) // Don't fail if one service is not found
+          )
+          const serviceResponses = await Promise.all(servicePromises)
+          let validServices = serviceResponses
+            .filter(response => response !== null)
+            .map(response => response!.data.data)
+            .filter(service => service !== null)
+          
+          // If we got some services, use them
+          if (validServices.length > 0) {
+            // Fetch ratings for each service
+            try {
+              console.log('🔍 useRecentlyViewed: Fetching ratings for viewed services...')
+              validServices = await enrichServicesWithRatings(validServices)
+            } catch (ratingErr) {
+              console.log('🔍 Rating enrichment failed, using services without ratings:', ratingErr)
+            }
+            
+            setRecentServices(validServices)
+          } else {
+            // Fallback to list endpoint if individual fetches failed
+            console.log('🔍 Individual service fetches failed, falling back to list endpoint...')
+            const response = await serviceAPI.getAll({ limit: 4 })
+            
+            // Handle different possible response structures
+            let recentServicesData: ServiceOffering[] = []
+            if (response?.data?.data) {
+              recentServicesData = Array.isArray(response.data.data) 
+                ? response.data.data 
+                : []
+            } else if (response?.data && Array.isArray(response.data)) {
+              recentServicesData = response.data
+            }
+            
+            setRecentServices(recentServicesData)
+          }
+        } catch (individualErr: any) {
+          // If individual fetches fail, fallback to list endpoint
+          console.log('🔍 Individual service fetch failed, using list endpoint:', individualErr.message)
+          const response = await serviceAPI.getAll({ limit: 4 })
+          
+          // Handle different possible response structures
+          let recentServicesData: ServiceOffering[] = []
+          if (response?.data?.data) {
+            recentServicesData = Array.isArray(response.data.data) 
+              ? response.data.data 
+              : []
+          } else if (response?.data && Array.isArray(response.data)) {
+            recentServicesData = response.data
+          }
+          
+          setRecentServices(recentServicesData)
         }
-        
-        setRecentServices(validServices)
       }
 
     } catch (err: any) {
       console.error('Error fetching recently viewed services:', err)
       
-      // If it's a 401/403 error, it means the API requires authentication
-      // Services should be publicly accessible, so this is unexpected
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        console.log('🔍 RecentlyViewed API requires authentication - this should be public')
-        setError('Services are currently unavailable. Please try again later.')
-      } else {
-        setError(err.message || 'Failed to fetch recently viewed services')
-      }
-      
+      // Don't set error state - just log it and show empty state
+      // The component will handle empty state gracefully
       setRecentServices([])
     } finally {
       setLoading(false)

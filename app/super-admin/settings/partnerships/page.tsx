@@ -16,7 +16,7 @@ export default function PartnershipsSettingsPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 font-serif">Payment Service Providers (PSPs) & Insurance</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-raleway">Payment Service Providers (PSPs) & Insurance</h1>
         </div>
 
         <div className="space-y-12">

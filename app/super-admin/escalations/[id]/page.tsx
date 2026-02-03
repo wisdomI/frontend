@@ -33,7 +33,7 @@ export default function EscalationReviewPage({ params }: { params: { id: string 
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 font-serif">Escalation Review</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-raleway">Escalation Review</h1>
         </div>
 
         <div className="space-y-8">
@@ -46,7 +46,7 @@ export default function EscalationReviewPage({ params }: { params: { id: string 
           <div className="space-y-6">
             <div>
               <label className="text-sm text-gray-500 mb-1 block">Vendor</label>
-              <p className="text-xl font-bold text-[#0B2E6F] font-serif">Elite Events</p>
+              <p className="text-xl font-bold text-[#0B2E6F] font-raleway">Elite Events</p>
             </div>
 
             <div>

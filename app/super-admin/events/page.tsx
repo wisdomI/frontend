@@ -90,7 +90,7 @@ export default function SuperAdminEventsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-asul text-gray-800">Event Management</h1>
+        <h1 className="text-2xl font-bold font-raleway text-gray-800">Event Management</h1>
         <p className="text-gray-600 mt-1">View and manage all events on the platform</p>
       </div>
 
@@ -98,19 +98,19 @@ export default function SuperAdminEventsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Total Events</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">5,234</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">5,234</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Upcoming</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">156</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">156</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Completed</h3>
-          <p className="text-3xl font-bold text-green-600 font-asul mt-2">4,890</p>
+          <p className="text-3xl font-bold text-green-600 font-raleway mt-2">4,890</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Total Revenue</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">₦1.2B</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">₦1.2B</p>
         </div>
       </div>
 

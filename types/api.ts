@@ -50,7 +50,7 @@ export interface RegisterRequest {
   phoneNumber: string
   password: string
   confirmPassword: string
-  accountType: 'individual' | 'business' | 'vendor'
+  accountType: 'individual' | 'business' | 'vendor' | 'admin'
 }
 
 export interface LoginRequest {

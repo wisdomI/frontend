@@ -89,7 +89,7 @@ export default function SuperAdminVendorsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-asul text-gray-800">Vendor Management</h1>
+        <h1 className="text-2xl font-bold font-raleway text-gray-800">Vendor Management</h1>
         <p className="text-gray-600 mt-1">Oversee vendor verification, performance, and details</p>
       </div>
 
@@ -97,19 +97,19 @@ export default function SuperAdminVendorsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Total Vendors</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">1,240</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">1,240</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Verified Vendors</h3>
-          <p className="text-3xl font-bold text-green-600 font-asul mt-2">985</p>
+          <p className="text-3xl font-bold text-green-600 font-raleway mt-2">985</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Pending Verification</h3>
-          <p className="text-3xl font-bold text-amber-500 font-asul mt-2">45</p>
+          <p className="text-3xl font-bold text-amber-500 font-raleway mt-2">45</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium">Top Rated (>4.5)</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">320</p>
+          <h3 className="text-gray-500 text-sm font-medium">Top Rated (&gt;4.5)</h3>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">320</p>
         </div>
       </div>
 

@@ -9,9 +9,12 @@ interface NewAdminMailModalProps {
   onClose: () => void
   onConfirm: () => void
   email: string
+  phoneNumber?: string
+  name?: string
+  password?: string
 }
 
-export default function NewAdminMailModal({ isOpen, onClose, onConfirm, email }: NewAdminMailModalProps) {
+export default function NewAdminMailModal({ isOpen, onClose, onConfirm, email, phoneNumber, name, password }: NewAdminMailModalProps) {
   if (!isOpen) return null
 
   return (
@@ -30,21 +33,21 @@ export default function NewAdminMailModal({ isOpen, onClose, onConfirm, email }:
             <div className="text-center">
               <div className="inline-block relative h-10 w-32 mb-2">
                  {/* Using text fallback if image fails, but logic is same as header */}
-                 <span className="text-2xl font-bold text-[#0B2E6F] font-serif">EventHub</span>
+                 <span className="text-2xl font-bold text-[#0B2E6F] font-raleway">EventHub</span>
               </div>
             </div>
 
             <div className="space-y-4 text-gray-600 text-sm">
-              <p>Hello Chisom,</p>
-              <p>Welcome to Event Hub! You have been added as Verification Admin.</p>
+              <p>Hello {name || 'Admin'},</p>
+              <p>Welcome to Event Hub! You have been added as an Admin.</p>
             </div>
 
             <div className="bg-blue-50/50 p-6 rounded-lg space-y-3">
               <p className="font-medium text-gray-900">Your Login Credentials:</p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>• Email: {email}</li>
-                <li>• Temporary Password: 6949FDWD</li>
-                <li>• Phone number: 0812345678</li>
+                <li>• Default Password: {password || process.env.NEXT_PUBLIC_DEFAULT_ADMIN_PASSWORD || 'EventHub@2024!'}</li>
+                <li>• Phone number: {phoneNumber || 'Not provided'}</li>
               </ul>
             </div>
 

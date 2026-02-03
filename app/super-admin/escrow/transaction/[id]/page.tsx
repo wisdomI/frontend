@@ -52,7 +52,7 @@ export default function EscrowTransactionDetailsPage() {
             Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold font-asul text-gray-900">Transaction #{transaction.id}</h1>
+            <h1 className="text-2xl font-bold font-raleway text-gray-900">Transaction #{transaction.id}</h1>
             <span className="bg-blue-100 text-[#0B2E6F] px-3 py-1 rounded-full text-xs font-bold border border-blue-200">
               {transaction.status}
             </span>

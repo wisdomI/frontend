@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Users, 
@@ -15,71 +15,71 @@ import {
   Eye
 } from 'lucide-react'
 import CustomDropdown from '@/components/ui/CustomDropdown'
-
-// Mock Data
-const users = [
-  { 
-    id: 1, 
-    name: 'John Doe', 
-    email: 'johndoe@gmail.com', 
-    role: 'Client', 
-    status: 'Active', 
-    dateJoined: '2025-01-15',
-    eventsCreated: 5,
-    lastActive: '2 mins ago'
-  },
-  { 
-    id: 2, 
-    name: 'Sarah Smith', 
-    email: 'sarah.smith@yahoo.com', 
-    role: 'Client', 
-    status: 'Active', 
-    dateJoined: '2025-02-10',
-    eventsCreated: 12,
-    lastActive: '1 day ago'
-  },
-  { 
-    id: 3, 
-    name: 'Michael Johnson', 
-    email: 'mj.events@gmail.com', 
-    role: 'Vendor', 
-    status: 'Suspended', 
-    dateJoined: '2024-11-05',
-    eventsCreated: 0,
-    lastActive: '2 weeks ago'
-  },
-  { 
-    id: 4, 
-    name: 'Emily Davis', 
-    email: 'emily.d@outlook.com', 
-    role: 'Client', 
-    status: 'Active', 
-    dateJoined: '2025-03-20',
-    eventsCreated: 2,
-    lastActive: '5 hours ago'
-  },
-  { 
-    id: 5, 
-    name: 'David Wilson', 
-    email: 'david.w@gmail.com', 
-    role: 'Client', 
-    status: 'Inactive', 
-    dateJoined: '2024-12-01',
-    eventsCreated: 0,
-    lastActive: '3 months ago'
-  },
-]
+import { authAPI } from '@/lib/api'
+import { toast } from 'react-hot-toast'
 
 export default function SuperAdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('All Roles')
   const [statusFilter, setStatusFilter] = useState('All Status')
+  const [users, setUsers] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeClients: 0,
+    newThisMonth: 0,
+    suspended: 0
+  })
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true)
+        const response = await authAPI.getAll({ limit: 100 }).catch(() => ({ data: { data: [] } }))
+        
+        if (response.data?.data) {
+          const userList = Array.isArray(response.data.data) ? response.data.data : []
+          setUsers(userList)
+          
+          // Calculate stats locally if backend doesn't provide them yet
+          // Or we could use a specific stats endpoint if available
+          setStats({
+            totalUsers: userList.length,
+            activeClients: userList.filter((u: any) => u.accountType === 'client' || u.accountType === 'individual').length,
+            newThisMonth: userList.filter((u: any) => {
+              const date = new Date(u.createdAt)
+              const now = new Date()
+              return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+            }).length,
+            suspended: userList.filter((u: any) => u.status === 'suspended').length // Assuming status field exists
+          })
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', (error as any).message)
+        toast.error('Failed to load users')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter
-    const matchesStatus = statusFilter === 'All Status' || user.status === statusFilter
+    const name = `${user.firstName || ''} ${user.lastName || ''} ${user.businessName || ''}`.trim()
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (user.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+    
+    // Map backend roles to filter options if needed
+    const userRole = user.accountType === 'individual' || user.accountType === 'business' ? 'Client' : 
+                     user.accountType === 'vendor' ? 'Vendor' : user.accountType
+                     
+    const matchesRole = roleFilter === 'All Roles' || 
+                        (roleFilter === 'Client' && (user.accountType === 'individual' || user.accountType === 'business' || user.accountType === 'client')) ||
+                        (roleFilter === 'Vendor' && user.accountType === 'vendor')
+                        
+    // Status handling might vary based on backend response
+    const matchesStatus = statusFilter === 'All Status' || (user.status || 'Active') === statusFilter
     
     return matchesSearch && matchesRole && matchesStatus
   })
@@ -87,7 +87,7 @@ export default function SuperAdminUsersPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-asul text-gray-800">User Management</h1>
+        <h1 className="text-2xl font-bold font-raleway text-gray-800">User Management</h1>
         <p className="text-gray-600 mt-1">Manage and monitor all platform users</p>
       </div>
 
@@ -95,19 +95,19 @@ export default function SuperAdminUsersPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Total Users</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">12,450</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">{stats.totalUsers}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Active Clients</h3>
-          <p className="text-3xl font-bold text-[#0B2E6F] font-asul mt-2">8,234</p>
+          <p className="text-3xl font-bold text-[#0B2E6F] font-raleway mt-2">{stats.activeClients}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">New This Month</h3>
-          <p className="text-3xl font-bold text-green-600 font-asul mt-2">+450</p>
+          <p className="text-3xl font-bold text-green-600 font-raleway mt-2">+{stats.newThisMonth}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">Suspended</h3>
-          <p className="text-3xl font-bold text-red-500 font-asul mt-2">23</p>
+          <p className="text-3xl font-bold text-red-500 font-raleway mt-2">{stats.suspended}</p>
         </div>
       </div>
 
@@ -129,7 +129,7 @@ export default function SuperAdminUsersPage() {
               options={[
                 { label: 'All Roles', value: 'All Roles' },
                 { label: 'Client', value: 'Client' },
-                { label: 'Vendor', value: 'Vendor' }, // Though vendors might be in a separate tab, sometimes mixed
+                { label: 'Vendor', value: 'Vendor' },
               ]}
               selected={roleFilter}
               onChange={setRoleFilter}
@@ -171,31 +171,40 @@ export default function SuperAdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredUsers.map((user) => (
+              {isLoading ? (
+                  <tr>
+                      <td colSpan={6} className="px-6 py-8">
+                          <div className="space-y-4">
+                              {[1, 2, 3].map(i => <div key={i} className="h-12 bg-gray-100 animate-pulse rounded"></div>)}
+                          </div>
+                      </td>
+                  </tr>
+              ) : (
+                filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-[#0B2E6F] font-bold text-sm">
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {(user.firstName || user.businessName || user.email || 'U').charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{user.name}</p>
+                        <p className="font-medium text-gray-900">{user.firstName ? `${user.firstName} ${user.lastName}` : (user.businessName || 'Unknown')}</p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.role}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 capitalize">{user.accountType}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      user.status === 'Active' ? 'bg-green-100 text-green-700' : 
-                      user.status === 'Suspended' ? 'bg-red-100 text-red-700' :
+                      (user.status || 'Active') === 'Active' ? 'bg-green-100 text-green-700' : 
+                      (user.status || 'Active') === 'Suspended' ? 'bg-red-100 text-red-700' :
                       'bg-gray-100 text-gray-700'
                     }`}>
-                      {user.status}
+                      {user.status || 'Active'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.dateJoined}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.lastActive}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{user.lastActive || '-'}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button className="p-2 text-gray-400 hover:text-[#0B2E6F] hover:bg-blue-50 rounded-lg transition-colors" title="View Profile">
@@ -207,6 +216,10 @@ export default function SuperAdminUsersPage() {
                     </div>
                   </td>
                 </tr>
+              )) : (
+                  <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No users found</td>
+                  </tr>
               ))}
             </tbody>
           </table>
@@ -214,14 +227,8 @@ export default function SuperAdminUsersPage() {
         
         {/* Pagination */}
         <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">Showing {filteredUsers.length} of {users.length} users</p>
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1 border border-gray-200 rounded text-sm disabled:opacity-50" disabled>Previous</button>
-            <button className="px-3 py-1 bg-[#0B2E6F] text-white rounded text-sm">1</button>
-            <button className="px-3 py-1 border border-gray-200 rounded text-sm">2</button>
-            <button className="px-3 py-1 border border-gray-200 rounded text-sm">3</button>
-            <button className="px-3 py-1 border border-gray-200 rounded text-sm">Next</button>
-          </div>
+          <p className="text-sm text-gray-500">Showing {filteredUsers.length} users</p>
+          {/* Pagination controls */}
         </div>
       </div>
     </div>

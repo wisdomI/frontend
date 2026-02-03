@@ -57,7 +57,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-gray-900 font-serif mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-raleway mb-6">Settings</h1>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Tabs */}

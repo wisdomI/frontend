@@ -47,7 +47,7 @@ export default function AdminHeader({ onMenuClick }: { onMenuClick?: () => void 
       await logout()
       window.location.href = '/'
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error('Logout error:', (error as any).message)
     } finally {
       setIsLoggingOut(false)
       setShowLogoutModal(false)

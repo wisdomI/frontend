@@ -131,12 +131,15 @@ const setAuthHeader = async (config: any) => {
   // Check if this is a GET request to public service endpoints
   // IMPORTANT: Only GET requests to /service/ are public, POST/PUT/DELETE require auth
   // Also, /service/me requires auth (user's own services)
+  // Note: Individual service endpoints (/service/{id}) may require auth on backend,
+  // but we'll try to make them public on frontend - components should handle 401 gracefully
   const isPublicGetRequest = config.method?.toLowerCase() === 'get' && 
     !config.url?.includes('/service/me') && // /service/me needs auth
     (config.url?.includes('/service/') || 
      config.url?.includes('/service?') || 
      config.url?.includes('/ratings/stats/') ||
      config.url?.includes('/ratings/reviewee/'))
+
   
   // Check if this is a POST/PUT/DELETE to /service/ - these need auth
   const isServiceMutation = (config.method?.toLowerCase() === 'post' || 
@@ -158,14 +161,17 @@ const setAuthHeader = async (config: any) => {
   const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint))
   
   // Only skip auth for truly public endpoints (not mutations to /service/ or /categories/, not /service/me)
-  if ((isPublicEndpoint || isPublicGetRequest) && !isServiceMutation && !isCategoryMutation && !isServiceMe) {
-    console.log('API: Skipping auth header for public endpoint:', config.url, 'method:', config.method)
+  // Also ensure admin routes ALWAYS get the token
+  const isAdminRoute = config.url?.includes('/admin/')
+  
+  if (!isAdminRoute && (isPublicEndpoint || isPublicGetRequest) && !isServiceMutation && !isCategoryMutation && !isServiceMe) {
+    // console.log('API: Skipping auth header for public endpoint:', config.url, 'method:', config.method)
     return config
   }
   
   // Log when we're adding auth to service mutations or /service/me
   if (isServiceMutation || isServiceMe) {
-    console.log('API: Adding auth header for service endpoint:', config.url, 'method:', config.method)
+    // console.log('API: Adding auth header for service endpoint:', config.url, 'method:', config.method)
   }
   
   const token = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
@@ -177,7 +183,7 @@ const setAuthHeader = async (config: any) => {
       const expiresIn = payload.exp - now
       
       if (payload.exp && payload.exp < now) {
-        console.log('⚠️ Token is EXPIRED, attempting refresh before request...')
+        // console.log('⚠️ Token is EXPIRED, attempting refresh before request...')
         
         // Try to refresh before making the request
         const newToken = await refreshAccessToken()
@@ -191,7 +197,7 @@ const setAuthHeader = async (config: any) => {
         }
       } else if (expiresIn < 60) {
         // Token expires in less than 60 seconds, refresh proactively
-        console.log(`⏰ Token expires in ${expiresIn}s, refreshing proactively...`)
+        // console.log(`⏰ Token expires in ${expiresIn}s, refreshing proactively...`)
         
         // Don't wait for refresh, just trigger it (guarded internally)
         refreshAccessToken().then(() => {
@@ -199,23 +205,23 @@ const setAuthHeader = async (config: any) => {
         })
       }
     } catch (e) {
-      console.log('⚠️ Could not decode token for expiry check')
+      // console.log('⚠️ Could not decode token for expiry check')
     }
     
     config.headers.Authorization = `Bearer ${token}`
-    console.log('API: Setting Authorization header for', config.url)
-    console.log('API: Authorization header value:', config.headers.Authorization?.substring(0, 80) + '...')
+    // console.log('API: Setting Authorization header for', config.url)
+    // console.log('API: Authorization header value:', config.headers.Authorization?.substring(0, 80) + '...')
   } else {
-    console.log('API: No token found for request to:', config.url)
+    // console.log('API: No token found for request to:', config.url)
   }
   
   // DEBUG: Log all headers being sent (for service endpoint debugging)
   if (config.url?.includes('/service')) {
-    console.log('🔍 SERVICE REQUEST HEADERS:', {
-      'Authorization': config.headers.Authorization ? '✅ Present (Bearer ...)' : '❌ Missing',
-      'Content-Type': config.headers['Content-Type'],
-      'All headers': Object.keys(config.headers)
-    })
+    // console.log('🔍 SERVICE REQUEST HEADERS:', {
+    //   'Authorization': config.headers.Authorization ? '✅ Present (Bearer ...)' : '❌ Missing',
+    //   'Content-Type': config.headers['Content-Type'],
+    //   'All headers': Object.keys(config.headers)
+    // })
   }
   
   return config
@@ -225,7 +231,7 @@ const setAuthHeader = async (config: any) => {
 api.interceptors.request.use(
   (config) => setAuthHeader(config),
   (error) => {
-    console.error('❌ Request interceptor error:', error)
+    // console.error('❌ Request interceptor error:', error)
     return Promise.reject(error)
   }
 )
@@ -233,17 +239,17 @@ api.interceptors.request.use(
 // Attempt token refresh
 async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) {
-    console.log('🔄 Token Refresh: Existing refresh in progress, reusing promise')
+    // console.log('🔄 Token Refresh: Existing refresh in progress, reusing promise')
     return refreshPromise
   }
 
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null
   if (!refreshToken) {
-    console.log('🔄 Token Refresh: No refresh token found')
+    // console.log('🔄 Token Refresh: No refresh token found')
     return null
   }
 
-  console.log('🔄 Token Refresh: Attempting to refresh access token...')
+  // console.log('🔄 Token Refresh: Attempting to refresh access token...')
 
   refreshPromise = (async () => {
     isRefreshing = true
@@ -252,55 +258,13 @@ async function refreshAccessToken(): Promise<string | null> {
         headers: { Authorization: `Bearer ${refreshToken}` },
       })
     
-      // Log the full response structure properly
-      console.log('🔄 Token Refresh: Full response object:', res)
-      console.log('🔄 Token Refresh: Response data:', res.data)
-      console.log('🔄 Token Refresh: Response data (stringified):', JSON.stringify(res.data, null, 2))
-      console.log('🔄 Token Refresh: Response type:', typeof res.data)
-      console.log('🔄 Token Refresh: Response keys:', Object.keys(res.data || {}))
+      // Logs removed for security
     
       // Try multiple possible response structures
       const responseData = res?.data
     
-      // Log nested structure if it exists - check ALL possible nested paths
-      if (responseData?.data) {
-        console.log('🔄 Token Refresh: Found nested data object')
-        console.log('🔄 Token Refresh: Nested data type:', typeof responseData.data)
-        console.log('🔄 Token Refresh: Nested data keys:', Object.keys(responseData.data || {}))
-        console.log('🔄 Token Refresh: Nested data (stringified):', JSON.stringify(responseData.data, null, 2))
-        
-        // Check if nested data is an object with more nesting
-        if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
-          console.log('🔄 Token Refresh: Checking deeply nested paths...')
-          console.log('🔄 Token Refresh: data.data?.accessToken:', responseData.data.data?.accessToken)
-          console.log('🔄 Token Refresh: data.data?.token:', responseData.data.data?.token)
-        }
-      }
-      
       // Try to extract token from multiple possible locations
-      // Check direct properties first
-      console.log('🔄 Token Refresh: Checking token locations...')
-      console.log('  - responseData?.accessToken:', responseData?.accessToken ? 'FOUND' : 'not found')
-      console.log('  - responseData?.token:', responseData?.token ? 'FOUND' : 'not found')
-      console.log('  - responseData?.access_token:', responseData?.access_token ? 'FOUND' : 'not found')
-      
-      // Check nested properties
-      if (responseData?.data) {
-        console.log('  - responseData?.data?.accessToken:', responseData?.data?.accessToken ? 'FOUND' : 'not found')
-        console.log('  - responseData?.data?.token:', responseData?.data?.token ? 'FOUND' : 'not found')
-        console.log('  - responseData?.data?.access_token:', responseData?.data?.access_token ? 'FOUND' : 'not found')
-        
-        // Check if data itself is the token string
-        if (typeof responseData.data === 'string') {
-          console.log('  - responseData.data (as string):', 'FOUND (data is token string)')
-        }
-        
-        // Check deeply nested
-        if (responseData.data?.data) {
-          console.log('  - responseData?.data?.data?.accessToken:', responseData?.data?.data?.accessToken ? 'FOUND' : 'not found')
-          console.log('  - responseData?.data?.data?.token:', responseData?.data?.data?.token ? 'FOUND' : 'not found')
-        }
-      }
+      // Logs removed for security
       
       // Helper function to find JWT token in any object (recursive search)
       const findJWTInObject = (obj: any, depth = 0): string | undefined => {
@@ -347,21 +311,11 @@ async function refreshAccessToken(): Promise<string | null> {
         (responseData?.data?.data && typeof responseData.data.data === 'string' ? responseData.data.data : undefined) || // If data.data is the token
         findJWTInObject(responseData) // Fallback: search entire response for JWT-like strings
       
-      console.log('🔄 Token Refresh: Extracted token:', {
-        hasToken: !!newAccessToken,
-        tokenLength: newAccessToken?.length,
-        tokenPreview: newAccessToken ? `${newAccessToken.substring(0, 20)}...` : 'none',
-        responseStructure: {
-          hasData: !!responseData?.data,
-          dataType: typeof responseData?.data,
-          dataKeys: responseData?.data && typeof responseData.data === 'object' ? Object.keys(responseData.data) : 'not an object',
-          topLevelKeys: Object.keys(responseData || {})
-        }
-      })
+      // Logs removed for security
       
       if (newAccessToken && typeof window !== 'undefined') {
         localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken)
-        console.log('✅ Token Refresh: Successfully stored new access token')
+        // console.log('✅ Token Refresh: Successfully stored new access token')
         
         // Also update the refresh token if provided
         const newRefreshToken = responseData?.refreshToken || 
@@ -370,25 +324,18 @@ async function refreshAccessToken(): Promise<string | null> {
                                responseData?.refresh_token
         if (newRefreshToken) {
           localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
-          console.log('✅ Token Refresh: Also updated refresh token')
+          // console.log('✅ Token Refresh: Also updated refresh token')
         }
       } else {
-        console.error('❌ Token Refresh: No access token in response:', res.data)
-        console.error('❌ Token Refresh: Full response structure:', JSON.stringify(res.data, null, 2))
+        console.error('Token Refresh: No access token in response')
       }
       return newAccessToken || null
     } catch (e: any) {
-      console.error('❌ Token Refresh: Failed with error:', e)
-      console.error('❌ Token Refresh: Error details:', {
-        message: e.message,
-        status: e.response?.status,
-        data: e.response?.data,
-        code: e.code
-      })
+      console.error('Token Refresh: Failed')
       
       // If refresh token is invalid or expired, clear tokens
       if (e.response?.status === 401 || e.response?.status === 403) {
-        console.log('🔄 Token Refresh: Refresh token is invalid, clearing all tokens')
+        // console.log('🔄 Token Refresh: Refresh token is invalid, clearing all tokens')
         if (typeof window !== 'undefined') {
           localStorage.removeItem(ACCESS_TOKEN_KEY)
           localStorage.removeItem(REFRESH_TOKEN_KEY)
@@ -448,7 +395,7 @@ api.interceptors.response.use(
               // Ensure we use the fresh token from localStorage
               const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : newToken
               originalRequest.headers.Authorization = `Bearer ${freshToken || newToken}`
-              console.log('✅ Token Refresh (403): Retrying request with new token:', originalRequest.url)
+              // console.log('✅ Token Refresh (403): Retrying request with new token:', originalRequest.url)
               return api(originalRequest)
             } else {
               // Token refresh failed for 403, but don't redirect for public endpoints
@@ -461,7 +408,22 @@ api.interceptors.response.use(
               if (!isPublicEndpoint && typeof window !== 'undefined') {
                 localStorage.removeItem(ACCESS_TOKEN_KEY)
                 localStorage.removeItem(REFRESH_TOKEN_KEY)
-                window.location.href = '/auth/login'
+                
+                // Check if we are in an admin route to redirect to admin login
+                const path = window.location.pathname
+                const isAdminRoute = path.startsWith('/admin') || 
+                                     path.startsWith('/super-admin') || 
+                                     path.startsWith('/escrow-admin') ||
+                                     path.startsWith('/dispute-admin') ||
+                                     path.startsWith('/verification-admin') ||
+                                     path.startsWith('/marketplace-admin') ||
+                                     path.startsWith('/communication-admin')
+                
+                if (isAdminRoute) {
+                  window.location.href = '/admin/auth/login'
+                } else {
+                  window.location.href = '/auth/login'
+                }
               } else {
               }
             }
@@ -479,26 +441,26 @@ api.interceptors.response.use(
         publicGetEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
       
       if (isPublicGetEndpoint) {
-        console.log('🌐 401 on public endpoint - backend requires auth but frontend allows anonymous access:', originalRequest.url)
+        // console.log('🌐 401 on public endpoint - backend requires auth but frontend allows anonymous access:', originalRequest.url)
         // Return the error without attempting refresh or redirect
         // This allows the frontend to handle it gracefully (e.g., show "No services available")
         return Promise.reject(error)
       }
       
-      console.log('🔒 401 Unauthorized: Attempting token refresh for', originalRequest.url)
+      // console.log('🔒 401 Unauthorized: Attempting token refresh for', originalRequest.url)
       
       if (isRefreshing || refreshPromise) {
-        console.log('🔄 Token refresh already in progress, queueing request...')
+        // console.log('🔄 Token refresh already in progress, queueing request...')
         return new Promise((resolve, reject) => {
           pendingRequests.push((token) => {
             if (token) {
               // Ensure we use the fresh token from localStorage
               const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : token
               originalRequest.headers.Authorization = `Bearer ${freshToken || token}`
-              console.log('✅ Token Refresh (queued): Retrying request with new token:', originalRequest.url)
+              // console.log('✅ Token Refresh (queued): Retrying request with new token:', originalRequest.url)
               resolve(api(originalRequest))
             } else {
-              console.error('❌ Token Refresh (queued): No token available, rejecting request')
+              // console.error('❌ Token Refresh (queued): No token available, rejecting request')
               reject(error)
             }
           })
@@ -515,10 +477,10 @@ api.interceptors.response.use(
         // Ensure we use the fresh token from localStorage (in case it was updated)
         const freshToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : newToken
         originalRequest.headers.Authorization = `Bearer ${freshToken || newToken}`
-        console.log('✅ Token Refresh: Retrying request with new token:', originalRequest.url)
+        // console.log('✅ Token Refresh: Retrying request with new token:', originalRequest.url)
         return api(originalRequest)
       } else {
-        console.error('❌ Token Refresh: Failed to get new token, cannot retry request')
+        // console.error('❌ Token Refresh: Failed to get new token, cannot retry request')
         
         // Don't redirect for public endpoints that should be accessible without authentication
         const publicEndpoints = ['/service/', '/services', '/meetings', '/categories/']
@@ -529,7 +491,22 @@ api.interceptors.response.use(
         if (!isPublicEndpoint && typeof window !== 'undefined') {
           localStorage.removeItem(ACCESS_TOKEN_KEY)
           localStorage.removeItem(REFRESH_TOKEN_KEY)
-          window.location.href = '/auth/login'
+          
+          // Check if we are in an admin route to redirect to admin login
+          const path = window.location.pathname
+          const isAdminRoute = path.startsWith('/admin') || 
+                               path.startsWith('/super-admin') || 
+                               path.startsWith('/escrow-admin') ||
+                               path.startsWith('/dispute-admin') ||
+                               path.startsWith('/verification-admin') ||
+                               path.startsWith('/marketplace-admin') ||
+                               path.startsWith('/communication-admin')
+          
+          if (isAdminRoute) {
+            window.location.href = '/admin/auth/login'
+          } else {
+            window.location.href = '/auth/login'
+          }
         }
       }
     }
@@ -537,7 +514,7 @@ api.interceptors.response.use(
     // Handle network errors (backend down)
     if (!status && error.code === 'ERR_NETWORK') {
       console.error('🚨 Backend server appears to be down or unreachable:', API_BASE_URL)
-      console.error('🚨 Network error details:', error.message)
+      // console.error('🚨 Network error details:', error.message)
       
       // Show user-friendly error for critical endpoints
       const criticalEndpoints = ['/auth/login', '/auth/register', '/auth/me']
@@ -547,12 +524,7 @@ api.interceptors.response.use(
       
       if (isCriticalEndpoint && typeof window !== 'undefined') {
         // Enhanced error message for better user understanding
-        console.error('🚨 Critical API endpoint failed - backend may be down')
-        console.error('🚨 This could be due to:')
-        console.error('   • Server maintenance')
-        console.error('   • CORS policy restrictions')
-        console.error('   • Network connectivity issues')
-        console.error('   • Backend service unavailable')
+        console.error('Critical API endpoint failed - backend may be down')
       }
       
       return Promise.reject(error)
@@ -565,7 +537,7 @@ api.interceptors.response.use(
     )
     
     if (status && !isSuppressedEndpoint) {
-      console.log(`⚠️ API Error ${status}:`, originalRequest.url, error.message)
+      // console.log(`⚠️ API Error ${status}:`, originalRequest.url, error.message)
     } else if (status && isSuppressedEndpoint) {
       // Suppress these errors completely - they're expected to fail or require special permissions
       return Promise.reject(error)
@@ -883,7 +855,7 @@ export const ratingAPI = {
 
 // Messaging System API
 const messagingDisabledWarning = (operation: string) => {
-  if (typeof console !== 'undefined') {
+  if (typeof console !== 'undefined' && process.env.NODE_ENV === 'development') {
     console.warn(`Messaging API call skipped (${operation}) — messaging endpoints are temporarily on hold.`)
   }
 }
@@ -1192,6 +1164,158 @@ export const withdrawalAPI = {
   updateWithdrawalStatus: (id: string, data: { status: string }) => api.patch<ApiResponse<Withdrawal>>(`/withdrawal/admin/withdrawals/${id}/status`, data),
 }
 
+// --- Admin APIs ---
+
+// 1. Super Admin API
+export const adminAPI = {
+  // Auth
+  register: (data: any) => api.post<ApiResponse<any>>('/admin/signup', data),
+  login: (data: any) => api.post<ApiResponse<any>>('/admin/login', data),
+
+  // Dashboard & Admins
+  getDashboard: () => api.get<ApiResponse<any>>('/admin/superadmin/dashboard'),
+  getAllAdmins: () => api.get<ApiResponse<any[]>>('/admin/superadmin/admins'),
+  getAdminOverview: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/admins/${id}/overview`),
+  getActivityLogs: () => api.get<ApiResponse<any[]>>('/admin/superadmin/activity-logs'),
+  getAccessHistory: () => api.get<ApiResponse<any[]>>('/admin/superadmin/access-history'),
+  createAdmin: (data: any) => api.post<ApiResponse<any>>('/admin/superadmin/admins', data),
+  updateAdmin: (id: string, data: any) => api.patch<ApiResponse<any>>(`/admin/superadmin/admins/${id}`, data),
+
+  // Commission Tiers
+  createCommissionTier: (data: any) => api.post<ApiResponse<any>>('/admin/superadmin/commission-tiers', data),
+  getCommissionTiers: () => api.get<ApiResponse<any[]>>('/admin/superadmin/commission-tiers'),
+  getCommissionTierById: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/commission-tiers/${id}`),
+  updateCommissionTier: (id: string, data: any) => api.patch<ApiResponse<any>>(`/admin/superadmin/commission-tiers/${id}`, data),
+  deleteCommissionTier: (id: string) => api.delete<ApiResponse<any>>(`/admin/superadmin/commission-tiers/${id}`),
+
+  // Escrow Rules
+  createEscrowRule: (data: any) => api.post<ApiResponse<any>>('/admin/superadmin/escrow-rules', data),
+  getEscrowRules: () => api.get<ApiResponse<any[]>>('/admin/superadmin/escrow-rules'),
+  getEscrowRuleById: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/escrow-rules/${id}`),
+  updateEscrowRule: (id: string, data: any) => api.patch<ApiResponse<any>>(`/admin/superadmin/escrow-rules/${id}`, data),
+  deleteEscrowRule: (id: string) => api.delete<ApiResponse<any>>(`/admin/superadmin/escrow-rules/${id}`),
+  processEscrowReleases: () => api.post<ApiResponse<any>>('/admin/superadmin/escrow/process-releases'),
+  releaseEscrowByInvoice: (invoiceId: string) => api.post<ApiResponse<any>>(`/admin/superadmin/escrow/release/${invoiceId}`),
+
+  // Settings
+  getSettings: () => api.get<ApiResponse<any>>('/admin/superadmin/settings'),
+  updateGeneralSettings: (data: any) => api.patch<ApiResponse<any>>('/admin/superadmin/settings/general', data),
+  updateSecuritySettings: (data: any) => api.patch<ApiResponse<any>>('/admin/superadmin/settings/security', data),
+  updateNotificationSettings: (data: any) => api.patch<ApiResponse<any>>('/admin/superadmin/settings/notifications', data),
+
+  // Escalations
+  getEscalations: () => api.get<ApiResponse<any[]>>('/admin/superadmin/escalations'),
+  getEscalationById: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/escalations/${id}`),
+  approveEscalation: (id: string, data: any) => api.post<ApiResponse<any>>(`/admin/superadmin/escalations/${id}/approve`, data),
+  cancelEscalation: (id: string, data: any) => api.post<ApiResponse<any>>(`/admin/superadmin/escalations/${id}/cancel`, data),
+
+  // Invoices & Users
+  getInvoices: () => api.get<ApiResponse<any[]>>('/admin/superadmin/invoices'),
+  getAllUsers: () => api.get<ApiResponse<any[]>>('/admin/superadmin/users'),
+  getUserEvents: (userId: string, params?: any) => api.get<ApiResponse<any[]>>(`/admin/superadmin/users/${userId}/events`, { params }),
+
+  // Events & Vendor Events
+  getEventById: (eventId: string) => api.get<ApiResponse<any>>(`/admin/superadmin/events/${eventId}`),
+  approveEvent: (eventId: string, data: any) => api.post<ApiResponse<any>>(`/admin/superadmin/events/${eventId}/approve`, data),
+  cancelEvent: (eventId: string, data: any) => api.post<ApiResponse<any>>(`/admin/superadmin/events/${eventId}/cancel`, data),
+  getVendorEvents: (vendorId: string, params?: any) => api.get<ApiResponse<any[]>>(`/admin/superadmin/vendors/${vendorId}/events`, { params }),
+  getVendorEventById: (eventId: string) => api.get<ApiResponse<any>>(`/admin/superadmin/vendor-events/${eventId}`),
+  approveVendorEvent: (eventId: string) => api.post<ApiResponse<any>>(`/admin/superadmin/vendor-events/${eventId}/approve`),
+  cancelVendorEvent: (eventId: string, data: any) => api.post<ApiResponse<any>>(`/admin/superadmin/vendor-events/${eventId}/cancel`, data),
+
+  // Insurance Plans
+  createInsurancePlan: (data: any) => api.post<ApiResponse<any>>('/admin/superadmin/insurance-plans', data),
+  getInsurancePlans: () => api.get<ApiResponse<any[]>>('/admin/superadmin/insurance-plans'),
+  getInsurancePlanById: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/insurance-plans/${id}`),
+  updateInsurancePlan: (id: string, data: any) => api.put<ApiResponse<any>>(`/admin/superadmin/insurance-plans/${id}`, data),
+  deleteInsurancePlan: (id: string) => api.delete<ApiResponse<any>>(`/admin/superadmin/insurance-plans/${id}`),
+  getInsuranceStatistics: () => api.get<ApiResponse<any>>('/admin/superadmin/insurance/statistics'),
+
+  // PSPs
+  createPSP: (data: any) => api.post<ApiResponse<any>>('/admin/superadmin/payment-service-providers', data),
+  getPSPs: () => api.get<ApiResponse<any[]>>('/admin/superadmin/payment-service-providers'),
+  getPSPById: (id: string) => api.get<ApiResponse<any>>(`/admin/superadmin/payment-service-providers/${id}`),
+  updatePSP: (id: string, data: any) => api.put<ApiResponse<any>>(`/admin/superadmin/payment-service-providers/${id}`, data),
+  togglePSPStatus: (id: string) => api.patch<ApiResponse<any>>(`/admin/superadmin/payment-service-providers/${id}/toggle-status`),
+}
+
+// 2. Verification Admin API
+export const verificationAdminAPI = {
+  getQueue: () => api.get<ApiResponse<any[]>>('/admin/verification/queue'),
+  getStatistics: () => api.get<ApiResponse<any>>('/admin/verification/statistics'),
+  getVendorVerification: (vendorId: string) => api.get<ApiResponse<any>>(`/admin/verification/vendors/${vendorId}`),
+  approveVendor: (vendorId: string, data: any) => api.post<ApiResponse<any>>(`/admin/verification/vendors/${vendorId}/approve`, data),
+  rejectVendor: (vendorId: string, data: any) => api.post<ApiResponse<any>>(`/admin/verification/vendors/${vendorId}/reject`, data),
+  flagVendor: (vendorId: string, data: any) => api.post<ApiResponse<any>>(`/admin/verification/vendors/${vendorId}/flag`, data),
+}
+
+// 3. Escrow & Analytics Admin API
+export const escrowAnalyticsAdminAPI = {
+  getDashboard: () => api.get<ApiResponse<any>>('/admin/escrow-analytics/dashboard'),
+  getTopPerformingVendors: () => api.get<ApiResponse<any[]>>('/admin/escrow-analytics/vendors/top-performing'),
+  getAnomalies: () => api.get<ApiResponse<any[]>>('/admin/escrow-analytics/anomalies'),
+  generateReport: (data: any) => api.post<ApiResponse<any>>('/admin/escrow-analytics/reports/generate', data),
+  sendReport: (reportId: string) => api.post<ApiResponse<any>>(`/admin/escrow-analytics/reports/${reportId}/send`),
+  getReports: () => api.get<ApiResponse<any[]>>('/admin/escrow-analytics/reports'),
+  getProgressTrackers: () => api.get<ApiResponse<any[]>>('/admin/escrow-analytics/progress-trackers'),
+  getEscrowTransactions: () => api.get<ApiResponse<any[]>>('/admin/escrow-analytics/escrow-transactions'),
+  approveEscrowTransaction: (data: any) => api.post<ApiResponse<any>>('/admin/escrow-analytics/escrow-transactions/approve', data),
+  freezeEscrowTransaction: (data: any) => api.post<ApiResponse<any>>('/admin/escrow-analytics/escrow-transactions/freeze', data),
+  refundEscrowTransaction: (data: any) => api.post<ApiResponse<any>>('/admin/escrow-analytics/escrow-transactions/refund', data),
+}
+
+// 4. Dispute Admin API
+export const disputeAdminAPI = {
+  getDisputes: () => api.get<ApiResponse<any[]>>('/admin/dispute/disputes'),
+  getDisputeById: (disputeId: string) => api.get<ApiResponse<any>>(`/admin/dispute/disputes/${disputeId}`),
+  releaseFunds: (data: any) => api.post<ApiResponse<any>>('/admin/dispute/disputes/release-funds', data),
+  refundFunds: (data: any) => api.post<ApiResponse<any>>('/admin/dispute/disputes/refund', data),
+  splitPayment: (data: any) => api.post<ApiResponse<any>>('/admin/dispute/disputes/split-payment', data),
+  escalateDispute: (data: any) => api.post<ApiResponse<any>>('/admin/dispute/disputes/escalate', data),
+  getDashboard: () => api.get<ApiResponse<any>>('/admin/dispute/dashboard'),
+}
+
+// 5. Marketplace Admin API
+export const marketplaceAdminAPI = {
+  getActiveListings: () => api.get<ApiResponse<any[]>>('/admin/marketplace/listings'),
+  getDashboard: () => api.get<ApiResponse<any>>('/admin/marketplace/dashboard'),
+  createCategory: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/categories', data),
+  addSubcategory: (categoryId: string, data: any) => api.post<ApiResponse<any>>(`/admin/marketplace/categories/${categoryId}/subcategories`, data),
+  updateCategory: (categoryId: string, data: any) => api.put<ApiResponse<any>>(`/admin/marketplace/categories/${categoryId}`, data),
+  deleteSubcategory: (categoryId: string, subcategoryId: string) => api.delete<ApiResponse<any>>(`/admin/marketplace/categories/${categoryId}/subcategory/${subcategoryId}`),
+  deleteCategory: (categoryId: string) => api.delete<ApiResponse<any>>(`/admin/marketplace/categories/${categoryId}`),
+  getAllCategories: () => api.get<ApiResponse<any[]>>('/admin/marketplace/categories/'),
+  getCategoryById: (categoryId: string) => api.get<ApiResponse<any>>(`/admin/marketplace/categories/${categoryId}`),
+  getVendorsByCategory: (categoryId: string) => api.get<ApiResponse<any[]>>(`/admin/marketplace/categories/${categoryId}/vendors`),
+  getVendorBadgeInfo: (vendorId: string) => api.get<ApiResponse<any>>(`/admin/marketplace/vendors/${vendorId}/badge-info`),
+  addVendorBadge: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/vendors/badges', data),
+  deleteVendorBadge: (vendorId: string, badgeType: string) => api.delete<ApiResponse<any>>(`/admin/marketplace/vendors/${vendorId}/badges/${badgeType}`),
+  featureVendor: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/vendors/feature', data),
+  removeVendorFeature: (vendorId: string, featuredPosition: string) => api.delete<ApiResponse<any>>(`/admin/marketplace/vendors/${vendorId}/feature`, { data: { featuredPosition } }),
+  getFeaturedVendors: () => api.get<ApiResponse<any[]>>('/admin/marketplace/vendors/featured'),
+  getReviews: () => api.get<ApiResponse<any[]>>('/admin/marketplace/reviews'),
+  flagReview: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/reviews/flag', data),
+  removeReview: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/reviews/remove', data),
+  approveReview: (data: any) => api.post<ApiResponse<any>>('/admin/marketplace/reviews/approve', data),
+}
+
+// 6. Communication Admin API
+export const communicationAdminAPI = {
+  getDashboard: () => api.get<ApiResponse<any>>('/admin/communication/dashboard'),
+  createAnnouncement: (data: any) => api.post<ApiResponse<any>>('/admin/communication/announcements', data),
+  getAnnouncements: () => api.get<ApiResponse<any[]>>('/admin/communication/announcements'),
+  getScheduledAnnouncements: () => api.get<ApiResponse<any[]>>('/admin/communication/announcements/scheduled'),
+  getAnnouncementById: (announcementId: string) => api.get<ApiResponse<any>>(`/admin/communication/announcements/${announcementId}`),
+  markAnnouncementOpened: (announcementId: string) => api.get<ApiResponse<any>>(`/admin/communication/announcements/${announcementId}/mark-opened`),
+  getCampaigns: () => api.get<ApiResponse<any[]>>('/admin/communication/campaigns'),
+  getActiveCampaigns: () => api.get<ApiResponse<any[]>>('/admin/communication/campaigns/active'),
+  handoffChat: (data: any) => api.post<ApiResponse<any>>('/admin/communication/chat/handoff', data),
+  acceptHandoff: (data: any) => api.post<ApiResponse<any>>('/admin/communication/chat/handoff/accept', data),
+  getHandoffs: () => api.get<ApiResponse<any[]>>('/admin/communication/chat/handoffs'),
+  getMessageStats: () => api.get<ApiResponse<any>>('/admin/communication/messages/chats'),
+  getConversations: () => api.get<ApiResponse<any[]>>('/admin/communication/conversations'),
+}
+
 // Enhanced Earnings API (from documentation)
 export const enhancedEarningsAPI = {
   getSummary: () => api.get<ApiResponse<EarningsOverview>>('/earnings/summary'),
@@ -1280,13 +1404,13 @@ export const checkTokenStatus = () => {
     
     return status
   } catch (e) {
-    console.error('❌ Token Status: Could not decode token')
+    console.error('Token Status: Could not decode token')
     return { hasToken: true, error: 'Invalid token format' }
   }
 }
 
-// Make checkTokenStatus available globally for debugging
-if (typeof window !== 'undefined') {
+// Make checkTokenStatus available globally for debugging in development only
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   (window as any).checkTokenStatus = checkTokenStatus
 }
 

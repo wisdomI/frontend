@@ -15,12 +15,20 @@ export function middleware(request: NextRequest) {
   const clientRoutes = ['/client']
 
   // Admin-only routes
-  const adminRoutes: string[] = []
+  const adminRoutes = [
+    '/dashboard/admin', 
+    '/super-admin',
+    '/marketplace-admin',
+    '/communication-admin',
+    '/dispute-admin',
+    '/escrow-admin',
+    '/verification-admin'
+  ]
 
   // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
+  const isProtectedRoute = 
+    protectedRoutes.some(route => pathname.startsWith(route)) ||
+    adminRoutes.some(route => pathname.startsWith(route))
 
   // Get auth token from cookies or headers
   const authToken = request.cookies.get('authToken')?.value || 
@@ -29,6 +37,14 @@ export function middleware(request: NextRequest) {
 
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !authToken) {
+    const isGenericAdminRoute = pathname.startsWith('/admin') || adminRoutes.some(route => pathname.startsWith(route));
+    // If it's an admin route, redirect to admin login
+    if (isGenericAdminRoute) {
+       const loginUrl = new URL('/admin/auth/login', request.url)
+       loginUrl.searchParams.set('redirect', pathname)
+       return NextResponse.redirect(loginUrl)
+    }
+
     const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
@@ -40,35 +56,34 @@ export function middleware(request: NextRequest) {
     // For now, we'll assume the role is stored in a cookie
     const userRole = request.cookies.get('userRole')?.value
 
-    console.log('Middleware role check:', {
-      pathname,
-      userRole,
-      isVendorRoute: vendorRoutes.some(route => pathname.startsWith(route)),
-      isClientRoute: clientRoutes.some(route => pathname.startsWith(route)),
-      allCookies: request.cookies.getAll().map(c => `${c.name}=${c.value}`)
-    })
+    // console.log('Middleware role check performed')
 
     // Skip role-based redirects if user role is not set (during login process)
     if (!userRole) {
-      console.log('Middleware: No user role set, allowing access during login process')
+      // console.log('Middleware: No user role set')
       // Don't do any role-based redirects, allow the request to proceed
     } else {
       // Check vendor routes
       if (vendorRoutes.some(route => pathname.startsWith(route)) && userRole !== 'vendor') {
-        console.log('Middleware: Redirecting non-vendor from vendor route to client dashboard')
+        // console.log('Middleware: Redirecting non-vendor')
         return NextResponse.redirect(new URL('/client/dashboard', request.url))
       }
 
       // Check client routes
       if (clientRoutes.some(route => pathname.startsWith(route)) && userRole !== 'client') {
-        console.log('Middleware: Redirecting non-client from client route to vendor dashboard')
+        // console.log('Middleware: Redirecting non-client')
         return NextResponse.redirect(new URL('/vendor', request.url))
       }
 
       // Check admin routes
       if (adminRoutes.some(route => pathname.startsWith(route)) && userRole !== 'admin') {
-        console.log('Middleware: Redirecting non-admin from admin route')
-        return NextResponse.redirect(new URL('/client/dashboard', request.url))
+        // console.log('Middleware: Redirecting non-admin')
+        // Determine where to redirect based on their actual role
+        if (userRole === 'vendor') {
+            return NextResponse.redirect(new URL('/vendor', request.url))
+        } else {
+            return NextResponse.redirect(new URL('/client/dashboard', request.url))
+        }
       }
     }
   }

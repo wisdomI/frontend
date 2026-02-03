@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FiCalendar } from 'react-icons/fi'
+import { disputeAdminAPI } from '@/lib/api'
+import { toast } from 'react-hot-toast'
 
 interface DisputeDashboardProps {
   basePath?: string
@@ -10,101 +12,50 @@ interface DisputeDashboardProps {
 }
 
 export default function DisputeDashboard({ basePath = '/dispute-admin', userRole = 'Dispute Admin' }: DisputeDashboardProps) {
-  const stats = [
-    { label: 'Active Disputes', value: 23, color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
-    { label: 'Resolved', value: 145, color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
-    { label: 'Escalated', value: 5, color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
-    { label: 'Refunds Processed', value: 23, color: 'text-[#0B2E6F]', border: 'border-[#EC4899]' },
-  ]
-
-  const disputes = [
-    {
-      id: '1234',
-      client: 'John Doe',
-      vendor: 'ABC Caterers',
-      type: 'Services',
-      status: 'Pending',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1235',
-      client: 'Mary Jane',
-      vendor: 'XYZ Decor',
-      type: 'Payment',
-      status: 'In Review',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1236',
-      client: 'John Doe',
-      vendor: 'UK Cakes',
-      type: 'Others',
-      status: 'Pending',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1237',
-      client: 'John Doe',
-      vendor: 'DJ Lekzy',
-      type: 'Services',
-      status: 'Pending',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1238',
-      client: 'John Doe',
-      vendor: 'Ruthie Rentals',
-      type: 'Services',
-      status: 'In Review',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1239',
-      client: 'John Doe',
-      vendor: 'Elite Catering',
-      type: 'Payment',
-      status: 'Pending',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1240',
-      client: 'John Doe',
-      vendor: 'Ruthie Rentals',
-      type: 'Others',
-      status: 'Pending',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1241',
-      client: 'John Doe',
-      vendor: 'Ile Iyan Foods',
-      type: 'Payment',
-      status: 'In Review',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-    {
-      id: '1242',
-      client: 'John Doe',
-      vendor: 'Ruthie Rentals',
-      type: 'Others',
-      status: 'In Review',
-      dateCreated: '2025-10-15',
-      dateOpened: '2025-10-16 09:30 AM',
-    },
-  ]
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState([
+    { label: 'Active Disputes', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
+    { label: 'Resolved', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
+    { label: 'Escalated', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
+    { label: 'Refunds Processed', value: '-', color: 'text-[#0B2E6F]', border: 'border-[#EC4899]' },
+  ])
+  const [disputes, setDisputes] = useState<any[]>([])
 
   const [statusFilter, setStatusFilter] = useState('All Status')
   const [typeFilter, setTypeFilter] = useState('All Disputes')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            setIsLoading(true)
+            const [dashboardRes, disputesRes] = await Promise.all([
+                disputeAdminAPI.getDashboard().catch(() => ({ data: { data: {} } })),
+                disputeAdminAPI.getDisputes().catch(() => ({ data: { data: [] } }))
+            ])
+
+            const dashboardData = dashboardRes.data?.data || {}
+            setStats([
+                { label: 'Active Disputes', value: dashboardData.activeDisputes?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#0B2E6F]' },
+                { label: 'Resolved', value: dashboardData.resolvedDisputes?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#22C55E]' },
+                { label: 'Escalated', value: dashboardData.escalatedDisputes?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#EAB308]' },
+                { label: 'Refunds Processed', value: dashboardData.refundsProcessed?.toLocaleString() || '0', color: 'text-[#0B2E6F]', border: 'border-[#EC4899]' },
+            ])
+
+            if (disputesRes.data?.data) {
+                setDisputes(Array.isArray(disputesRes.data.data) ? disputesRes.data.data : [])
+            }
+
+        } catch (error: any) {
+            console.error('Error fetching dispute data:', error.message || 'Unknown error')
+            toast.error('Failed to load dispute data')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+    fetchData()
+  }, [])
 
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
@@ -125,8 +76,8 @@ export default function DisputeDashboard({ basePath = '/dispute-admin', userRole
   }
 
   const filteredDisputes = disputes.filter(item => {
-    if (statusFilter !== 'All Status' && item.status !== statusFilter) return false
-    if (typeFilter !== 'All Disputes' && typeFilter !== 'All Types' && item.type !== typeFilter) return false
+    if (statusFilter !== 'All Status' && (item.status || 'Pending') !== statusFilter) return false
+    if (typeFilter !== 'All Disputes' && typeFilter !== 'All Types' && (item.type || 'Others') !== typeFilter) return false
     // Add date filtering if needed
     return true
   })
@@ -134,7 +85,7 @@ export default function DisputeDashboard({ basePath = '/dispute-admin', userRole
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-asul text-gray-800 flex items-center gap-2">
+        <h1 className="text-2xl font-bold font-raleway text-gray-800 flex items-center gap-2">
           Welcome Back, {userRole} <span className="text-2xl">👋🏽</span>
         </h1>
       </div>
@@ -142,7 +93,11 @@ export default function DisputeDashboard({ basePath = '/dispute-admin', userRole
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div key={index} className={`bg-white p-6 rounded-2xl border ${stat.border} shadow-sm flex flex-col items-center justify-center text-center h-40`}>
-            <span className={`text-3xl font-bold font-asul ${stat.color} mb-2`}>{stat.value}</span>
+            {isLoading ? (
+                <div className="h-10 w-24 bg-gray-200 animate-pulse rounded mb-2"></div>
+            ) : (
+                <span className={`text-3xl font-bold font-raleway ${stat.color} mb-2`}>{stat.value}</span>
+            )}
             <span className={`text-sm font-medium text-gray-600`}>{stat.label}</span>
           </div>
         ))}
@@ -225,24 +180,31 @@ export default function DisputeDashboard({ basePath = '/dispute-admin', userRole
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredDisputes.length > 0 ? (
+              {isLoading ? (
+                  <tr>
+                      <td colSpan={8} className="py-8">
+                          <div className="flex justify-center"><div className="h-8 w-full max-w-md bg-gray-100 animate-pulse rounded"></div></div>
+                      </td>
+                  </tr>
+              ) : (
+               filteredDisputes.length > 0 ? (
                 filteredDisputes.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 text-sm font-medium text-gray-900">Case #{item.id}</td>
-                    <td className="px-4 py-4 text-sm text-gray-500">{item.client}</td>
-                    <td className="px-4 py-4 text-sm text-gray-500">{item.vendor}</td>
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900">Case #{item.id.substring(0, 8)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{item.clientName || item.client}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{item.vendorName || item.vendor}</td>
                     <td className="px-4 py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeBadgeStyle(item.type)}`}>
-                        {item.type}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeBadgeStyle(item.type || 'Others')}`}>
+                        {item.type || 'Others'}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(item.status)}`}>
-                        {item.status}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(item.status || 'Pending')}`}>
+                        {item.status || 'Pending'}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">{item.dateCreated}</td>
-                    <td className="px-4 py-4 text-sm text-gray-500">{item.dateOpened}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{item.openedAt ? new Date(item.openedAt).toLocaleDateString() : '-'}</td>
                     <td className="px-4 py-4 text-sm text-right">
                       <Link
                         href={`${basePath}/case/${item.id}`}
@@ -265,39 +227,16 @@ export default function DisputeDashboard({ basePath = '/dispute-admin', userRole
                     </div>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6">
-          <p className="text-sm text-gray-500">
-            Showing <span className="font-medium">1</span>- <span className="font-medium">{filteredDisputes.length}</span> of <span className="font-medium">20</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50" disabled>
-              <span className="sr-only">Previous</span>
-              <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button className="px-3 py-1 bg-[#0B2E6F] text-white rounded-md text-sm font-medium">1</button>
-            <button className="px-3 py-1 text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium">2</button>
-            <button className="px-3 py-1 text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium">3</button>
-            <span className="text-gray-500">...</span>
-            <button className="px-3 py-1 text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium">7</button>
-            <button className="px-3 py-1 text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium">10</button>
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
-              <span className="sr-only">Next</span>
-              <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          {/* Pagination controls */}
         </div>
       </div>
     </div>
   )
 }
-

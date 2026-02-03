@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
            <div className="absolute bottom-2 left-0 h-1.5 w-1.5 bg-yellow-400 rounded-full"></div>
            <div className="absolute top-4 right-0 h-1.5 w-1.5 bg-yellow-400 rounded-full"></div>
         </div>
-        <h2 className="text-2xl font-bold font-asul text-gray-900 mb-2">Password Reset Successfully</h2>
+        <h2 className="text-2xl font-bold font-raleway text-gray-900 mb-2">Password Reset Successfully</h2>
         <p className="text-gray-600 mb-8">You have successfully reset your password</p>
         <Link 
           href="/admin/auth/login"
@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
       </div>
       
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold font-asul text-[#0B2E6F]">Reset Admin Password</h2>
+        <h2 className="text-2xl font-bold font-raleway text-[#0B2E6F]">Reset Admin Password</h2>
         <p className="text-sm text-gray-600">Kindly fill in your details to Login</p>
       </div>
 

@@ -45,7 +45,7 @@ export default function EventDetailsPage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900 font-asul">Product Launch</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-raleway">Product Launch</h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600">
             <span>2025-12-15 • Public</span>
             <div className="flex items-center gap-1.5">
@@ -68,7 +68,7 @@ export default function EventDetailsPage() {
         {eventStats.map((stat, index) => (
           <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col items-center justify-center text-center shadow-sm">
             <h3 className="text-sm font-medium text-[#0B2E6F] mb-2">{stat.label}</h3>
-            <p className="text-3xl font-bold text-[#0B2E6F] font-asul">{stat.value}</p>
+            <p className="text-3xl font-bold text-[#0B2E6F] font-raleway">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -76,7 +76,7 @@ export default function EventDetailsPage() {
       {/* Attendees Section */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-gray-900 font-asul">Attendees</h2>
+          <h2 className="text-xl font-semibold text-gray-900 font-raleway">Attendees</h2>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 bg-white transition-colors">
               <Filter className="h-4 w-4" />

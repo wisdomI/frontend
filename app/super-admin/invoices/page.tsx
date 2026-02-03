@@ -23,7 +23,7 @@ export default function InvoicesPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 font-serif">All Invoices</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-raleway">All Invoices</h1>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">

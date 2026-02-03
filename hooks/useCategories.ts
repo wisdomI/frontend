@@ -24,7 +24,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       const response = await categoryAPI.getAll()
       setCategories(response.data.data || [])
     } catch (err: any) {
-      console.error('Error fetching categories:', err)
+      console.error('Error fetching categories:', err.message || 'Unknown error')
       setError('Failed to fetch categories')
       setCategories([])
     } finally {
@@ -39,7 +39,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       const response = await categoryAPI.getMain()
       setMainCategories(response.data.data || [])
     } catch (err: any) {
-      console.error('Error fetching main categories:', err)
+      console.error('Error fetching main categories:', err.message || 'Unknown error')
       setError('Failed to fetch main categories')
       setMainCategories([])
     } finally {
@@ -57,7 +57,10 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       // Also populate categories from hierarchy since CategorySidebar uses categories
       setCategories(hierarchyData)
     } catch (err: any) {
-      console.error('Error fetching category hierarchy:', err)
+      // Suppress 401 errors for public pages where auth is optional
+      if (err.response?.status !== 401) {
+        console.error('Error fetching category hierarchy:', err.message || 'Unknown error')
+      }
       setError('Failed to fetch category hierarchy')
       setHierarchy([])
       setCategories([])
@@ -71,15 +74,15 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       const response = await categoryAPI.getStats()
       setStats(response.data.data)
     } catch (err: any) {
-      console.error('Error fetching category stats:', err)
+      // console.error('Error fetching category stats:', err.message)
       
       // If it's a 403 error, it means the API requires special permissions
       // This is expected for some users, so we'll gracefully handle it
       if (err.response?.status === 403) {
-        console.log('🔍 Category Stats API requires special permissions - skipping stats')
+        // console.log('Category Stats API requires special permissions - skipping stats')
         setStats(null) // Clear stats so fallback is used
       } else {
-        console.log('🔍 Category Stats API error:', err.message)
+        // console.log('Category Stats API error:', err.message)
         setStats(null)
       }
     }
@@ -91,9 +94,9 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setError(null)
       const response = await categoryAPI.getSubcategories(parentId)
       return response.data.data || []
-    } catch (err) {
+    } catch (err: any) {
       setError('Failed to fetch subcategories')
-      console.error('Error fetching subcategories:', err)
+      console.error('Error fetching subcategories:', err.message || 'Unknown error')
       throw err
     } finally {
       setLoading(false)
@@ -109,9 +112,9 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       await fetchMainCategories() // Refresh main categories
       await fetchHierarchy() // Refresh hierarchy
       return response.data.data
-    } catch (err) {
+    } catch (err: any) {
       setError('Failed to create category')
-      console.error('Error creating category:', err)
+      console.error('Error creating category:', err.message || 'Unknown error')
       throw err
     } finally {
       setLoading(false)
@@ -127,9 +130,9 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       await fetchMainCategories() // Refresh main categories
       await fetchHierarchy() // Refresh hierarchy
       return response.data.data
-    } catch (err) {
+    } catch (err: any) {
       setError('Failed to update category')
-      console.error('Error updating category:', err)
+      console.error('Error updating category:', err.message || 'Unknown error')
       throw err
     } finally {
       setLoading(false)
@@ -144,9 +147,9 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setCategories(categories.filter(c => c.id !== id))
       await fetchMainCategories() // Refresh main categories
       await fetchHierarchy() // Refresh hierarchy
-    } catch (err) {
+    } catch (err: any) {
       setError('Failed to delete category')
-      console.error('Error deleting category:', err)
+      console.error('Error deleting category:', err.message || 'Unknown error')
       throw err
     } finally {
       setLoading(false)
@@ -161,9 +164,9 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       await fetchCategories() // Refresh the list
       await fetchMainCategories() // Refresh main categories
       await fetchHierarchy() // Refresh hierarchy
-    } catch (err) {
+    } catch (err: any) {
       setError('Failed to toggle category status')
-      console.error('Error toggling category status:', err)
+      console.error('Error toggling category status:', err.message || 'Unknown error')
       throw err
     } finally {
       setLoading(false)

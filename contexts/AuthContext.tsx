@@ -58,15 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const storedAccountType = typeof window !== 'undefined' ? localStorage.getItem('userAccountType') : null
           const accountType = payload.accountType || payload.role || payload.userType || payload.type || storedAccountType || 'client'
           
-          console.log('🔍 AuthContext: JWT payload accountType:', {
-            accountType: payload.accountType,
-            role: payload.role,
-            userType: payload.userType,
-            type: payload.type,
-            storedAccountType,
-            finalAccountType: accountType,
-            allPayload: payload
-          })
+          // console.log('AuthContext: JWT payload accountType check')
           
           const userFromToken = {
             id: payload.id,
@@ -80,45 +72,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             updatedAt: new Date(payload.iat * 1000).toISOString(),
           }
           
-          console.log('🔍 AuthContext: Created user from token:', userFromToken)
+          // console.log('AuthContext: Created user from token')
           
           // Set user immediately to unblock rendering
           setUser(userFromToken)
           setLoading(false)
           
           // Fetch full user data in background without blocking
-          try {
-            const apiUrl = 'https://backend-a3nd.onrender.com/api/v1'
-            const resp = await fetch(`${apiUrl}/auth/me`, {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            })
+          // Skip for admins as /auth/me is for regular users
+          if (!['admin', 'super_admin', 'marketplace_admin', 'escrow_admin', 'dispute_admin', 'verification_admin', 'communication_admin'].includes(String(accountType))) {
+            try {
+              const apiUrl = 'https://backend-a3nd.onrender.com/api/v1'
+              const resp = await fetch(`${apiUrl}/auth/me`, {
+                method: 'GET',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              })
 
-            if (resp.status === 403) {
-              // Already set user from JWT above, just ensure token is stored
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('accessToken', token)
+              if (resp.status === 403 || resp.status === 401) {
+                // Already set user from JWT above, just ensure token is stored
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('accessToken', token)
+                }
+                return
               }
-              return
-            }
 
-            if (resp.ok) {
-              const data = await resp.json()
-              const userData = data.data || data
-              
-              // Update with full user data
-              setUser(userData)
-              
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('accessToken', token)
+              if (resp.ok) {
+                const data = await resp.json()
+                const userData = data.data || data
+                
+                // Update with full user data
+                setUser(userData)
+                
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('accessToken', token)
+                }
               }
+            } catch (backgroundError) {
+              console.log('Background auth fetch failed, using JWT data:', backgroundError)
+              // Already have user from JWT, so this is OK
             }
-          } catch (backgroundError) {
-            console.log('Background auth fetch failed, using JWT data:', backgroundError)
-            // Already have user from JWT, so this is OK
           }
         } catch (tokenError) {
           console.error('AuthContext: Failed to decode token:', tokenError)
@@ -167,13 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Check multiple possible fields for accountType
           const accountType = payload.accountType || payload.role || payload.userType || payload.type || 'client'
           
-          console.log('🔍 AuthContext refreshUser: JWT payload accountType:', {
-            accountType: payload.accountType,
-            role: payload.role,
-            userType: payload.userType,
-            type: payload.type,
-            finalAccountType: accountType
-          })
+          // console.log('AuthContext refreshUser: JWT payload accountType check')
           
           // Create minimal user data from token
           const userData = {
@@ -188,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             updatedAt: new Date(payload.iat * 1000).toISOString()
           }
           
-          console.log('🔍 AuthContext refreshUser: Created user data:', userData)
+          // console.log('AuthContext refreshUser: Created user data')
           setUser(userData)
           return
         } catch (tokenError) {
@@ -215,13 +204,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (user?.id) {
+      // Only call API logout if NOT admin (as /auth/logout is for regular users)
+      const isUserAdmin = ['admin', 'super_admin', 'marketplace_admin', 'escrow_admin', 'dispute_admin', 'verification_admin', 'communication_admin'].includes(String(user?.accountType))
+      
+      if (user?.id && !isUserAdmin) {
         await authAPI.logout({ userId: user.id })
       }
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
       // Clear localStorage
+      const wasAdmin = localStorage.getItem('userAccountType') === 'admin' || 
+                       ['admin', 'super_admin', 'marketplace_admin', 'escrow_admin', 'dispute_admin', 'verification_admin', 'communication_admin'].includes(String(user?.accountType))
+
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userAccountType')
@@ -234,7 +229,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       setUser(null)
-      router.push('/auth/login')
+      
+      if (wasAdmin) {
+        router.push('/admin/auth/login')
+      } else {
+        router.push('/auth/login')
+      }
     }
   }
 

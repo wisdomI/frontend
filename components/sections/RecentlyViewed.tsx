@@ -280,11 +280,44 @@ const RecentlyViewed: React.FC = () => {
       </div>
 
       {/* Services Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl h-64 animate-pulse">
+              <div className="h-48 bg-gray-200 rounded-t-xl"></div>
+              <div className="p-4 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredRecentServices.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRecentServices.map((service) => (
-          <ServiceCard key={service.id} service={service} viewType="grid" />
-        ))}
-      </div>
+            <ServiceCard key={service.id} service={service} viewType="grid" />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="mb-4">
+            <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          {error ? (
+            <>
+              <h3 className="text-lg font-medium text-gray-900 mb-2 font-asul">Services Temporarily Unavailable</h3>
+              <p className="text-gray-500 mb-4">We&apos;re working to make our services available to everyone. Please check back later.</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-medium text-gray-900 mb-2 font-asul">No Recently Viewed Services</h3>
+              <p className="text-gray-500 mb-4">Start browsing services to see them here.</p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

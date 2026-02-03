@@ -34,7 +34,7 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 font-serif">Edit Admin</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-raleway">Edit Admin</h1>
         </div>
 
         {/* Form */}

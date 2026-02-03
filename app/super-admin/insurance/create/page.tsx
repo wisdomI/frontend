@@ -2,9 +2,14 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Save, Plus, Trash2, Loader2 } from 'lucide-react'
+import { adminAPI } from '@/lib/api'
+import { toast } from 'react-hot-toast'
 
 export default function CreateInsurancePlanPage() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     provider: '',
@@ -34,10 +39,38 @@ export default function CreateInsurancePlanPage() {
     setFormData(prev => ({ ...prev, features: newFeatures }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle submission logic here
-    console.log('Submitting insurance plan:', formData)
+    
+    try {
+      setIsLoading(true)
+      const payload = {
+          planName: formData.name,
+          planProvider: formData.provider,
+          description: formData.description,
+          coverageAmount: Number(formData.coverageAmount.replace(/[^0-9.]/g, '')),
+          monthlyPremium: Number(formData.price.replace(/[^0-9.]/g, '')),
+          features: formData.features.filter(f => f.trim() !== ''),
+          // Default values for fields not in form
+          exclusions: [],
+          waitPeriod: 0,
+          claimPeriod: 30,
+          maxClaimsPerYear: 1,
+          renewalMode: 'monthly',
+          isEnabled: true,
+          isFeatured: false,
+          requireVerification: false
+      }
+
+      await adminAPI.createInsurancePlan(payload)
+      toast.success('Insurance plan created successfully')
+      router.push('/super-admin') // Redirect to dashboard or list if available
+    } catch (error: any) {
+      console.error('Failed to create insurance plan:', error)
+      toast.error(error?.response?.data?.message || 'Failed to create insurance plan')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -47,7 +80,7 @@ export default function CreateInsurancePlanPage() {
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Dashboard
         </Link>
-        <h1 className="text-2xl font-bold font-asul text-gray-800">Create New Insurance Plan</h1>
+        <h1 className="text-2xl font-bold font-raleway text-gray-800">Create New Insurance Plan</h1>
         <p className="text-gray-600 mt-1">Add a new insurance coverage option for events</p>
       </div>
 
@@ -86,7 +119,7 @@ export default function CreateInsurancePlanPage() {
             <div className="space-y-2">
               <label htmlFor="price" className="block text-sm font-medium text-gray-700">Premium Price (₦)</label>
               <input
-                type="text"
+                type="number"
                 id="price"
                 name="price"
                 value={formData.price}
@@ -100,7 +133,7 @@ export default function CreateInsurancePlanPage() {
             <div className="space-y-2">
               <label htmlFor="coverageAmount" className="block text-sm font-medium text-gray-700">Coverage Limit (₦)</label>
               <input
-                type="text"
+                type="number"
                 id="coverageAmount"
                 name="coverageAmount"
                 value={formData.coverageAmount}
@@ -173,9 +206,10 @@ export default function CreateInsurancePlanPage() {
             </Link>
             <button 
               type="submit"
-              className="px-6 py-2.5 bg-[#0B2E6F] text-white font-medium rounded-lg hover:bg-[#09255a] transition-colors flex items-center gap-2"
+              disabled={isLoading}
+              className="px-6 py-2.5 bg-[#0B2E6F] text-white font-medium rounded-lg hover:bg-[#09255a] transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Save Plan
             </button>
           </div>
